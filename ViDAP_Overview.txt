@@ -1,0 +1,1071 @@
+# Visual Data Science Playground
+
+## Project Overview, Specification, and Delivery Requirements
+
+### 1. Purpose
+
+Build an open-source, MIT-licensed visual data-science and machine-learning experimentation environment that allows a user to take a real dataset, load it into an interactive node graph, explore and transform the data, train real industry-standard machine-learning models, compare experiments, understand the results in practical language, and export the resulting work into conventional data-science artifacts such as Jupyter notebooks.
+
+The project is intended to remove the large amount of mechanical and setup friction traditionally associated with exploratory data science without hiding the underlying process.
+
+The system should make data science feel closer to working with ComfyUI, Unreal Engine Blueprints, or a visual shader graph than to beginning with an empty Jupyter notebook.
+
+The core principle is:
+
+**Nothing important should happen invisibly.**
+
+Automation is encouraged, including AutoML and eventually agent assistance, but automated decisions must remain inspectable, editable, reproducible, and understandable.
+
+---
+
+# 2. Product Goal
+
+A concise product goal is:
+
+> **Create an open-source visual data-science playground where a user can drop in real data and immediately begin exploring, transforming, modeling, evaluating, and experimenting through an inspectable executable graph rather than beginning with boilerplate code.**
+
+The system must use real data-science libraries and algorithms rather than educational approximations.
+
+A graph using Random Forest must execute a real Random Forest implementation.
+
+A graph using XGBoost must execute real XGBoost.
+
+A neural-network graph must compile into and train a real neural-network implementation.
+
+The visual interface is a representation of genuine computation, not a simulation of it.
+
+---
+
+# 3. Product Philosophy
+
+The product should optimize for five properties.
+
+### 3.1 Visual-first, not visual-only
+
+A user should be able to perform meaningful work without writing code, but the visual environment must not become a proprietary abstraction that prevents access to the underlying implementation.
+
+Where practical, the system should expose generated code and support export into standard Python/Jupyter workflows.
+
+### 3.2 Inspectable automation
+
+Automation should produce editable artifacts.
+
+For example, AutoML should not merely return:
+
+`Best model: XGBoost, F1 = 0.87`
+
+It should produce or expose the corresponding executable graph showing preprocessing, feature handling, split strategy, model configuration, hyperparameters, evaluation method, and resulting metrics.
+
+The user should be able to modify that graph and continue experimentation manually.
+
+### 3.3 Practical interpretation over mathematical presentation
+
+The system must preserve legitimate statistical and ML metrics, but important outputs should also be translated into practical meaning.
+
+For example:
+
+`Recall = 0.91`
+
+should be accompanied by an interpretation comparable to:
+
+`Of 100 actual positive cases, this model would identify approximately 91 and miss approximately 9.`
+
+The project should not require a user to understand mathematical notation merely to understand what an experiment accomplished.
+
+### 3.4 Reproducible experimentation
+
+An experiment should be a durable artifact.
+
+The user should be able to determine:
+
+* what graph was executed;
+* what dataset/version was used;
+* what parameters were used;
+* what random seed or other reproducibility settings were used;
+* what result was produced;
+* how that experiment differed from another experiment.
+
+### 3.5 Progressive depth
+
+The system should be approachable at the surface while permitting deeper inspection.
+
+A beginner may see:
+
+`Dataset → Prepare → XGBoost → Evaluate`
+
+An advanced user may open the XGBoost node and inspect its parameters, or open a custom neural-network model and inspect its internal layer graph.
+
+Complexity should be available without requiring every user to confront it immediately.
+
+---
+
+# 4. Intended Users
+
+The system should support several overlapping users.
+
+**Exploratory user:** Someone with domain expertise who understands the problem being investigated but does not want to begin by writing pandas/sklearn boilerplate.
+
+**Learner:** Someone learning practical machine learning who benefits from seeing preprocessing, features, models, evaluation, and experiments as explicit components.
+
+**Working data scientist:** Someone who may prefer Python for advanced work but can use the graph for rapid exploration, reproducibility, explanation, experimentation, or generation of a starting notebook.
+
+**Agent-assisted user:** Eventually, someone who delegates graph modifications and experiments to an AI agent while retaining an inspectable visual representation of what the agent changed.
+
+The initial product should not assume that the user is a statistician.
+
+---
+
+# 5. Core Workflow
+
+The intended basic interaction is:
+
+`Load data → Profile → Explore → Prepare → Engineer/select features → Define target → Split/validate → Train model → Evaluate → Compare → Modify → Run again → Export`
+
+All major operations must be representable in the graph.
+
+The system should support branching so that models, preprocessing strategies, feature sets, or other experiments can be compared while sharing common upstream work.
+
+Example:
+
+`Prepared Data`
+
+→ `Random Forest → Evaluation`
+
+→ `XGBoost → Evaluation`
+
+→ `Neural Network → Evaluation`
+
+The graph should make it visually obvious which inputs and transformations are shared and which differ.
+
+---
+
+# 6. Node System
+
+The graph engine must support user-definable node types.
+
+Nodes must have explicit contracts describing their accepted inputs, outputs, parameters, execution behavior, and validation requirements.
+
+The node UI should be generated from or tightly associated with those contracts so that functionality is not hard-coded independently into the visual layer.
+
+The initial node taxonomy should conceptually cover:
+
+| Category             | Examples                                                                                    |
+| -------------------- | ------------------------------------------------------------------------------------------- |
+| Data                 | CSV, Parquet, table input, join, filter, sample                                             |
+| Exploration          | distribution, group-by, missingness, correlation, outlier inspection                        |
+| Preparation          | imputation, categorical encoding, scaling, normalization                                    |
+| Feature engineering  | derived features, buckets, date parts, text extraction, interactions                        |
+| Feature selection    | include/exclude fields, feature groups                                                      |
+| Splitting/validation | train/test split, cross-validation, grouped split, temporal split                           |
+| Models               | logistic regression, decision tree, Random Forest, XGBoost, CatBoost, neural network        |
+| Training             | class weighting, early stopping, objectives/loss configuration                              |
+| Optimization         | hyperparameter search / AutoML                                                              |
+| Evaluation           | accuracy, precision, recall, F1, ROC/PR where appropriate, confusion matrix, error analysis |
+| Combination          | voting, averaging, ensembles                                                                |
+| Output               | predictions, rankings, CSV, model artifact, notebook, report                                |
+
+The exact initial implementation set will be determined by the phased plan.
+
+The architecture must permit additional node families later without requiring substantial changes to the graph editor itself.
+
+---
+
+# 7. Typed Connections
+
+Connections between nodes should represent meaningful data or artifact types rather than arbitrary wires.
+
+Examples may include:
+
+`Table`
+
+`FeatureTable`
+
+`Target`
+
+`TrainSet`
+
+`ValidationSet`
+
+`Classifier`
+
+`Regressor`
+
+`Predictions`
+
+`Metrics`
+
+`ModelArtifact`
+
+Invalid connections should be rejected or clearly flagged.
+
+The type system should remain practical rather than attempting to model every possible data-science semantic distinction in the first release.
+
+---
+
+# 8. Dataset Profiling
+
+Loading a dataset should immediately produce useful information before the user creates a model.
+
+Profiling should eventually include appropriate subsets of:
+
+row and column count;
+
+inferred data types;
+
+numeric/categorical/text/date classification;
+
+missingness;
+
+cardinality;
+
+possible identifiers;
+
+target candidates where reasonably inferable;
+
+class imbalance;
+
+basic distributions;
+
+obvious quality warnings;
+
+potential temporal structure;
+
+possible leakage warnings where defensible;
+
+memory/resource information relevant to execution.
+
+Findings should be actionable.
+
+For example, a missing-values warning should be capable of leading directly to a relevant preparation node.
+
+Profiling must not silently transform the dataset.
+
+---
+
+# 9. Real Modeling Backends
+
+The project should integrate existing mature open-source implementations rather than reimplement established ML algorithms.
+
+Likely model/backend families include:
+
+scikit-learn;
+
+XGBoost;
+
+CatBoost and/or LightGBM where licensing and integration are appropriate;
+
+PyTorch for custom neural networks;
+
+Optuna or equivalent for hyperparameter optimization;
+
+an appropriate AutoML implementation if selected during planning.
+
+Exact dependencies must be evaluated for licensing, maintenance quality, compatibility, and packaging impact.
+
+The project itself must remain MIT-licensed.
+
+A dependency/license inventory is required.
+
+---
+
+# 10. Neural-Network Support
+
+Neural-network support should eventually permit visual construction of at least bounded feed-forward networks.
+
+A custom neural-network node may expose an internal subgraph such as:
+
+`Input → Dense → Activation → Dropout → Dense → Output`
+
+Supported elements may initially include a deliberately constrained subset such as:
+
+Dense layers;
+
+ReLU/GELU or other selected activations;
+
+Dropout;
+
+normalization where justified;
+
+output layers appropriate to supported tasks.
+
+The system is not initially intended to become a complete visual replacement for PyTorch or to support arbitrary research architectures.
+
+The graph abstraction should, however, avoid decisions that would make reasonable future expansion impossible.
+
+---
+
+# 11. AutoML
+
+AutoML should be treated as an optional accelerator and baseline generator, not as a competing product mode.
+
+The intended interaction is:
+
+`Dataset → Select target/goal → Run AutoML → Inspect generated experiments/results → Open preferred workflow as editable graph`
+
+AutoML must not become an opaque endpoint.
+
+Where technically possible, preprocessing decisions, model families, relevant hyperparameters, validation strategy, metrics, and experiment results should be surfaced.
+
+The user must be able to take an automatically generated result and continue experimenting manually.
+
+A major product question to preserve during planning is:
+
+> **What does this environment provide that simply running AutoML does not?**
+
+The intended answer is inspectability, experimentation, learning, branching, comparison, human hypotheses, domain reasoning, visualization, and the ability to turn automation into an editable workflow.
+
+---
+
+# 12. Experiment System
+
+Experiment tracking is a core capability rather than an optional polish feature.
+
+A run should retain sufficient information to reproduce and compare it.
+
+The system should support comparing experiments such as:
+
+`Baseline`
+
+`+ FamilySize feature`
+
+`Random Forest → XGBoost`
+
+`XGBoost depth 6 → 10`
+
+The comparison should identify both the changed configuration and the changed outcome.
+
+Example:
+
+`Changed: max_depth 6 → 10`
+
+`F1: 0.811 → 0.818`
+
+`Training score: increased substantially`
+
+`Validation score: increased slightly`
+
+`Interpretation: performance improved slightly while the training/validation gap increased; possible increased overfitting.`
+
+Experiment history should allow restoration or inspection of earlier graph states.
+
+---
+
+# 13. Results and Interpretation
+
+The system must support conventional ML metrics while emphasizing intuitive interpretation.
+
+Results should answer questions such as:
+
+What did the model accomplish?
+
+Where does it perform well?
+
+Where does it perform poorly?
+
+How much better or worse is this experiment than the previous one?
+
+What changed?
+
+Is the model showing signs of underfitting or overfitting?
+
+For ranking/filtering problems, the UI should be able to express outcomes in operational terms such as:
+
+starting population;
+
+candidate population;
+
+percentage reduction;
+
+known-positive retention;
+
+enrichment;
+
+review workload.
+
+The system should not imply certainty or causal relationships where only correlation or predictive performance has been established.
+
+---
+
+# 14. Hypothesis and Reasoning Support
+
+The graph should eventually permit experiments to carry human-readable reasoning.
+
+An experiment may optionally include:
+
+**Observation**
+
+**Hypothesis**
+
+**Change**
+
+**Expected effect**
+
+**Actual result**
+
+**Interpretation**
+
+This information should remain associated with the experiment rather than existing only in external notes.
+
+The product should support scientific/analytical reasoning rather than merely parameter tweaking.
+
+This capability need not block the earliest executable prototype, but the architecture and data model should account for it.
+
+---
+
+# 15. Export and Interoperability
+
+The project must avoid trapping users inside the visual environment.
+
+Target exports include:
+
+workflow graph format;
+
+Python script where appropriate;
+
+Jupyter notebook;
+
+predictions/output CSV or equivalent;
+
+trained model artifacts where appropriate.
+
+Jupyter export should produce reasonably structured and readable code, not merely a machine-generated monolith.
+
+Generated notebooks should use conventional sections comparable to:
+
+imports;
+
+data loading;
+
+profiling/preparation;
+
+feature engineering;
+
+validation strategy;
+
+model configuration;
+
+training;
+
+evaluation;
+
+outputs.
+
+Where feasible, graph nodes should be traceable to the generated notebook sections.
+
+A later capability may support lossless graph → generated notebook → graph round trips by embedding project metadata.
+
+Parsing arbitrary third-party notebooks into graphs is explicitly not required initially.
+
+---
+
+# 16. Workflow Format
+
+The saved workflow format must be open, versioned, inspectable, and suitable for source control.
+
+It should encode at minimum:
+
+node identities/types;
+
+node configuration;
+
+edges;
+
+graph/subgraph structure;
+
+relevant execution metadata;
+
+schema/version information.
+
+The format should be suitable for programmatic manipulation.
+
+The UI must not be the only way to construct or modify a graph.
+
+---
+
+# 17. Agent Compatibility
+
+Agent control is an intended future capability but should not be required to establish the core product.
+
+The graph/runtime architecture should eventually support constrained operations comparable to:
+
+`list_nodes`
+
+`inspect_node`
+
+`add_node`
+
+`remove_node`
+
+`set_parameter`
+
+`connect`
+
+`disconnect`
+
+`execute`
+
+`inspect_result`
+
+`compare_runs`
+
+Agents should manipulate the structured graph rather than routinely generating arbitrary application code.
+
+Human-visible graph changes should remain the source of truth.
+
+The initial product should first prove deterministic human-driven graph construction and execution before agent-driven experimentation becomes a dependency.
+
+---
+
+# 18. Testing and Quality Requirements
+
+Testing is a delivery requirement, not post-project cleanup.
+
+Every implementation phase created from this specification must define appropriate automated tests and acceptance tests.
+
+The eventual test strategy should cover at least:
+
+node contract validation;
+
+graph serialization/deserialization;
+
+execution ordering;
+
+invalid graph behavior;
+
+deterministic/reproducible runs where expected;
+
+model configuration propagation;
+
+data transformations;
+
+experiment comparison;
+
+export correctness;
+
+representative end-to-end workflows;
+
+failure/error presentation;
+
+regression coverage for discovered bugs.
+
+Where integration with third-party ML libraries is involved, tests should verify that UI/graph configuration actually reaches the underlying library as intended.
+
+The system must not merely display a parameter while silently ignoring or misapplying it.
+
+---
+
+# 19. Error Handling
+
+Errors should be surfaced at the level where the user can act on them.
+
+Whenever possible, avoid exposing only raw Python exceptions.
+
+Example:
+
+Instead of only:
+
+`ValueError: could not convert string to float`
+
+the system should identify that a model received an unencoded categorical field and point the user toward an appropriate preparation step.
+
+Raw technical diagnostics should remain available for debugging.
+
+The interface should provide both:
+
+**Plain-English explanation**
+
+and
+
+**Technical details**
+
+where appropriate.
+
+---
+
+# 20. Plain-English Planning Requirement
+
+Every future phase and execution step derived from this specification must include a plain-English explanation sufficient for a technically capable user who is not a professional ML researcher to understand what is being changed and why.
+
+Each implementation step should explain, before approval:
+
+**What we are building or changing.**
+
+**Why the system needs it.**
+
+**What real behavior it enables.**
+
+**How we will know that it works.**
+
+Technical implementation details may accompany this explanation but must not replace it.
+
+Plans should avoid approval requests whose practical meaning can only be understood by reading source code, framework internals, or mathematical notation.
+
+---
+
+# 21. Engineering Principles
+
+A separate heavyweight engineering-governance system comparable to Cognitive Lattice is not required.
+
+Instead, engineering principles should be encoded directly into phase and step requirements.
+
+Important principles include:
+
+modular boundaries;
+
+explicit interfaces/contracts;
+
+testability;
+
+deterministic behavior where applicable;
+
+reproducibility;
+
+minimal hidden state;
+
+clear ownership of persisted state;
+
+separation of UI representation from execution semantics;
+
+dependency isolation;
+
+backward-compatible workflow-version handling where reasonable;
+
+meaningful error handling;
+
+no silent failure or silent parameter ignoring;
+
+avoidance of premature abstraction;
+
+avoidance of unnecessary custom implementations where mature libraries already exist.
+
+The planner may add additional principles appropriate to a particular subsystem.
+
+---
+
+# 22. Architecture Expectations
+
+The implementation should preserve separation between at least:
+
+**Visual graph/UI layer**
+
+Responsible for interaction, visualization, node configuration, graph editing, and result presentation.
+
+**Graph/schema layer**
+
+Responsible for node definitions, edges, validation, workflow representation, and serialization.
+
+**Execution layer**
+
+Responsible for translating validated graph operations into real data-processing and ML execution.
+
+**Experiment/state layer**
+
+Responsible for run metadata, results, comparison, reproducibility, and artifact references.
+
+**Export layer**
+
+Responsible for translating workflows into external artifacts such as notebooks.
+
+These are logical boundaries rather than mandatory repositories/services/processes.
+
+The project should remain as operationally simple as practical.
+
+---
+
+## 22A. Canonical Workflow Execution Model
+
+The visual graph must be a representation of a structured executable workflow rather than the execution mechanism itself.
+
+The intended canonical loop is:
+
+`Visual Graph`
+
+→ `Structured Workflow / Node Definitions`
+
+→ `Graph and Contract Validation`
+
+→ `Intermediate Execution Representation`
+
+→ `Execution Engine`
+
+→ `Established Data/ML Libraries`
+
+→ `Run Results and Artifacts`
+
+→ `Experiment State`
+
+→ `User Interface Presentation`
+
+The frontend is responsible for editing and presenting the workflow.
+
+The graph/schema layer is responsible for describing the workflow.
+
+The execution layer is responsible for running the workflow.
+
+The experiment/state layer is responsible for preserving the resulting run.
+
+No individual layer should become the sole source of truth for behavior that belongs to another layer.
+
+### 22A.1 Node Runtime Contract
+
+Every executable node type must define or reference enough information to determine:
+
+* accepted input types;
+* produced output types;
+* configurable parameters;
+* validation requirements;
+* runtime implementation;
+* result/output representation;
+* code-export representation where export is supported.
+
+A node representing XGBoost, Random Forest, a preprocessing transform, or another known operation should execute through a deterministic integration with the corresponding supported library.
+
+Normal node execution must not require an LLM to generate arbitrary source code.
+
+### 22A.2 Intermediate Representation
+
+The system should maintain an execution representation that is independent of the visual layout.
+
+The intermediate representation should describe semantic operations such as:
+
+`LoadDataset`
+
+`TransformColumn`
+
+`CreateFeature`
+
+`SplitDataset`
+
+`CreateModel`
+
+`TrainModel`
+
+`GeneratePredictions`
+
+`Evaluate`
+
+rather than depending on UI coordinates or generated Python source.
+
+The planner may determine the exact representation, but the architecture must preserve the separation between graph presentation and executable semantics.
+
+### 22A.3 Execution Ordering
+
+The execution engine must derive execution order from validated graph dependencies.
+
+Execution must not depend on the order in which nodes were created or visually positioned.
+
+Branching graphs must support shared upstream computation and multiple downstream consumers.
+
+Where practical, unchanged upstream outputs should be reusable or cacheable rather than recomputed unnecessarily.
+
+Caching behavior must remain explicit enough to avoid stale or misleading experiment results.
+
+### 22A.4 Code Generation and Notebook Export
+
+Python/Jupyter export must be derived from the same canonical workflow representation used for execution.
+
+The notebook is an export artifact, not the internal runtime.
+
+Conceptually:
+
+`Validated Workflow / Intermediate Representation`
+
+→ `Runtime Executor`
+
+and independently:
+
+`Validated Workflow / Intermediate Representation`
+
+→ `Python/Jupyter Generator`
+
+Supported operations should provide deterministic code-generation implementations rather than requiring an LLM to recreate equivalent code.
+
+The generated artifact should preserve the workflow's dependency ordering, parameters, preprocessing, training configuration, evaluation logic, and reproducibility settings.
+
+Where deterministic reproduction is expected, equivalent execution through the application runtime and exported notebook should produce equivalent results within an appropriate tolerance.
+
+### 22A.5 Frontend/Backend Separation
+
+The frontend must not directly implement machine-learning semantics.
+
+For example, changing `max_depth` in an XGBoost node should update structured workflow state. The execution layer is responsible for translating that parameter into the real XGBoost invocation.
+
+Similarly, result values shown by the frontend must originate from recorded execution results rather than being independently recalculated by UI logic.
+
+This separation is required to keep the visual layer replaceable, testable, and consistent with notebook/code export.
+
+---
+
+# 23. Explicit Non-Goals for Initial Development
+
+Unless a future approved plan deliberately expands scope, the project is not initially intended to provide:
+
+distributed cluster computing;
+
+cloud ML orchestration;
+
+enterprise MLOps;
+
+production model serving;
+
+multi-user collaboration;
+
+RBAC/enterprise governance;
+
+data warehouse replacement;
+
+Airflow-style production ETL orchestration;
+
+arbitrary Python-to-graph reconstruction;
+
+a complete visual replacement for PyTorch;
+
+new ML algorithms;
+
+custom CUDA kernels;
+
+foundation-model training;
+
+a universal interface for every possible dataset or ML task;
+
+an agentic autonomous data scientist;
+
+a plugin marketplace;
+
+enterprise-scale data storage.
+
+These are not prohibited forever.
+
+They simply cannot be silently introduced as prerequisites for the core product.
+
+---
+
+# 24. Reference Validation Datasets
+
+The product should be validated against progressively harder real datasets.
+
+### Reference A — Titanic
+
+Purpose:
+
+Prove the core interaction model and end-to-end mechanics using a tiny, well-understood benchmark.
+
+Expected capabilities include data loading, profiling, target selection, basic preparation, feature engineering, multiple model families, evaluation, experiment comparison, AutoML baseline where implemented, notebook export, and valid prediction/submission output.
+
+Titanic is a development validation target, not the intended upper limit of the system.
+
+### Reference B — Healthcare
+
+Purpose:
+
+Test the abstraction against materially more realistic data complexity while leveraging existing domain expertise to detect conceptually invalid behavior.
+
+The selected dataset should force meaningful work involving several of:
+
+multiple dimensions/tables;
+
+time;
+
+grouping/aggregation;
+
+high-cardinality categories;
+
+class imbalance;
+
+candidate ranking;
+
+entity-level analysis;
+
+domain-aware interpretation.
+
+This stage should test whether the system remains intuitive when the analysis can no longer be represented by a handful of obvious features.
+
+### Reference C — Complex Unfamiliar Scientific Challenge
+
+The Enveda CASMI 2026 Molecule ID From Mass Spectra competition is the current candidate.
+
+Purpose:
+
+Stress the generality of the architecture using a large, unfamiliar, specialized scientific problem that may require non-tabular representations, domain-specific feature handling, specialized metrics/models, and significantly greater dataset scale.
+
+This is not required before the core product is useful.
+
+It is intended as evidence that the system did not accidentally become a Titanic/tabular-classification GUI.
+
+---
+
+# 25. Delivery Standard
+
+The project should not be considered complete merely because the happy path executes.
+
+For any major supported capability, delivery should require:
+
+functional implementation;
+
+automated tests;
+
+representative end-to-end validation;
+
+plain-English user interpretation;
+
+failure behavior;
+
+documentation sufficient to understand how the capability is intended to be used;
+
+confirmation that the visual configuration corresponds to real backend behavior;
+
+no known critical issue that makes the capability materially misleading.
+
+Polish should be proportional to the stage of the project, but correctness and inspectability are non-negotiable.
+
+---
+
+# 26. Planning and Execution Model
+
+This specification is the authoritative product-level source of truth.
+
+A Central planning agent should own alignment to this document and maintain the approved phased implementation plan and roadmap.
+
+Central should not directly perform normal implementation work.
+
+The working model should be:
+
+`Project Specification`
+
+→ `Central`
+
+→ `Phased Plan`
+
+→ `Step/Execution Packet`
+
+→ `Execution Worker`
+
+→ `Validation/Audit`
+
+→ `Central reconciliation`
+
+Central is responsible for preserving product intent, dependencies, scope, and completion state.
+
+Execution workers are responsible for implementing bounded packets.
+
+The phased plan may group related work according to architecture and dependencies rather than mechanically following the section order of this document.
+
+---
+
+# 27. Step Planning
+
+Complex implementation steps may receive a dedicated step-planning pass before execution.
+
+Step planning should translate an approved phase item into an executable packet containing sufficient technical detail, tests, constraints, affected components, and acceptance conditions.
+
+For unusually consequential architectural work, a stronger reasoning model may be used for step planning while routine implementation and Central coordination may use a less expensive model when demonstrated adequate.
+
+Model choice is operational policy and should not become part of the product architecture.
+
+---
+
+# 28. Audit and Review
+
+The project does not require the heavyweight audit/security machinery used for novel agentic systems.
+
+It does require independent verification at meaningful boundaries.
+
+The default review model should be lightweight:
+
+**Execution worker implements.**
+
+**Tests run.**
+
+**A separate validation/review pass checks the implementation against the execution packet and relevant specification requirements.**
+
+**Central reconciles completion and unresolved issues.**
+
+Audit depth should scale with risk.
+
+A UI styling change may require minimal review.
+
+Graph serialization, experiment reproducibility, notebook generation, data transformation correctness, or ML configuration propagation deserve substantially stronger verification.
+
+The goal is not process for its own sake.
+
+The goal is to avoid allowing the implementing agent to be the sole authority that its own implementation is correct.
+
+---
+
+# 29. Roadmap Requirement
+
+This document does not define the detailed implementation roadmap.
+
+Central must first create the phased implementation plan from this specification.
+
+After the phased plan is approved, Central must create and maintain a more detailed roadmap derived from that plan.
+
+The roadmap should identify:
+
+major capability milestones;
+
+dependencies;
+
+validation datasets/milestones;
+
+user-visible deliverables;
+
+major architectural checkpoints;
+
+deferred capabilities;
+
+known scope boundaries;
+
+completion status.
+
+The roadmap must remain subordinate to this specification and the approved phased plan.
+
+It should communicate project progress rather than invent new requirements.
+
+---
+
+# 30. Scope-Control Rule
+
+When an implementation problem is discovered, the default question is:
+
+> **What is the smallest robust solution that satisfies the existing product requirement?**
+
+not:
+
+> **What generalized platform could solve every future version of this problem?**
+
+Scope expansion is justified when the narrower solution would materially undermine correctness, extensibility explicitly required by this document, user usefulness, or an already-approved future requirement.
+
+Scope expansion must otherwise be surfaced explicitly rather than silently incorporated into implementation.
+
+This rule exists specifically to keep a composition-heavy project from evolving into an unnecessary research platform.
+
+---
+
+# 31. Success Definition
+
+The project succeeds when a technically curious person with useful domain knowledge can take a genuine dataset and, without beginning from boilerplate Python:
+
+understand what is in the data;
+
+construct or automatically generate an executable analysis/modeling workflow;
+
+see how data is transformed;
+
+use established ML algorithms;
+
+change meaningful parameters and features;
+
+compare experiments;
+
+understand model results in practical language;
+
+investigate why a result changed;
+
+retain a reproducible record of the experiment;
+
+and export the work into standard data-science artifacts when deeper code-level work is desired.
+
+An experienced data scientist should be able to recognize the underlying operations as genuine conventional data-science practices rather than simplified educational imitations.
+
+The final product should make sophisticated machinery easier to reason about without pretending that the underlying analytical problem has become trivial.
