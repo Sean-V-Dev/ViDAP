@@ -2,8 +2,9 @@
 
 | Field | Value |
 |---|---|
-| Status | Draft for review |
-| Version | 0.1 |
+| Status | Approved |
+| Version | 1.0 |
+| Approved | 2026-09-17 |
 | Parent | `ViDAP_Roadmap.md` version 1.0 |
 | Spine phase | P0 - Project Foundation and Delivery Baseline |
 | Product source | `ViDAP_Overview.txt` |
@@ -465,6 +466,6 @@ Phase 0 may not define the workflow schema on Phase 1's behalf.
 
 ---
 
-## 16. Next Action After Plan Approval
+## 16. Next Action
 
-After this plan is approved, Central should create `P0-EP01 - Baseline and Architecture Decision` as a separate execution packet for review. No repository initialization, stack installation, scaffolding, or application implementation is authorized by this draft plan.
+P0-EP01 and P0-EP02 are complete, and D0.1-D0.7 are accepted. `ViDAP_P0_EP03.md` version 1.0 is approved for bounded execution of `Open-Source and Repository Baseline`. A fresh worker may create only its authorized repository-governance artifacts and implementation report. Dependency installation, application scaffolding, product implementation, and P0-EP04 remain unauthorized.

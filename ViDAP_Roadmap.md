@@ -5,6 +5,7 @@
 | Status | Approved |
 | Version | 1.0 |
 | Approved | 2026-09-17 |
+| Last updated | 2026-09-17 |
 | Parent | `ViDAP_Phased_Plan_Spine.md` version 1.0 |
 | Product source | `ViDAP_Overview.txt` |
 | Created | 2026-09-17 |
@@ -36,9 +37,9 @@ Detailed work is planned one phase at a time. Roadmap changes may clarify sequen
 | Product specification | Governing source | `ViDAP_Overview.txt` |
 | Phased Plan Spine | Approved | Version 1.0, approved 2026-09-17 |
 | Roadmap | Approved | Version 1.0, approved 2026-09-17 |
-| Phase 0 | Planning | Draft Phase 0 plan prepared for review |
+| Phase 0 | Active | P0-EP01 and P0-EP02 complete; P0-EP03 approved for bounded execution |
 | Phases 1-11 | Sequenced only | Remain at roadmap resolution until predecessor reconciliation |
-| Execution packets | Not authorized | Require an approved phase plan and separate packet approval |
+| Execution packets | Two complete; one approved | P0-EP01 and P0-EP02 complete; P0-EP03 approved for bounded execution |
 | Product implementation | Not started | No implementation is authorized by this roadmap |
 
 No percentage-complete values are used. A phase moves state only when its named gate and evidence support the change.
@@ -99,7 +100,7 @@ H3 is the first target that demonstrates the core product promise end to end. H4
 - **Visible demonstration:** A new environment can follow documented setup, run checks, and launch the shell without undocumented local state.
 - **Architectural checkpoint A0:** Application shape, component boundaries, repository organization, supported development environment, and dependency policy are explicit and proportionate.
 - **Decisions due in the phase plan:** Application/frontend/backend shape; packaging and local runtime expectations; language/runtime versions; testing layers; CI policy; dependency/license workflow; decision-record format; fixture rules.
-- **Status:** Planning; draft Phase 0 plan prepared for review.
+- **Status:** Active; P0-EP01 and P0-EP02 complete, with D0.1-D0.7 accepted; P0-EP03 is approved for bounded execution.
 
 ### P1 - Canonical Workflow and Node Contract Kernel
 
@@ -334,6 +335,4 @@ Calendar estimates may be added after Phase 0 establishes the repository baselin
 
 ## 12. Next Action
 
-The next subordinate artifact is `ViDAP_Phase_0_Plan.md`. It inspects the actual repository state, schedules the P0 decisions named above, defines workstreams and acceptance evidence, and proposes bounded execution-packet boundaries.
-
-The roadmap authorizes Phase 0 planning, not implementation. Phase 0 execution requires an approved Phase 0 plan and separately approved execution packets.
+`ViDAP_P0_EP03.md` version 1.0 is approved for bounded execution. A fresh worker may create only the Section 7 repository-governance artifacts and `ViDAP_P0_EP03_Implementation_Report.md`, then must stop for independent validation. Installation, application scaffolding, remote changes, product implementation, and P0-EP04 remain unauthorized.
