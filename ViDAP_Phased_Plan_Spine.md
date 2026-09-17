@@ -1,7 +1,8 @@
 # ViDAP Phased Plan Spine
 
-**Status:** Draft for review  
-**Version:** 0.1  
+**Status:** Approved  
+**Version:** 1.0  
+**Approved:** 2026-09-17  
 **Source of truth:** `ViDAP_Overview.txt`  
 **Purpose:** Define the stable implementation sequence, phase boundaries, and approval gates without expanding into detailed phase plans or execution instructions.
 
@@ -393,8 +394,8 @@ Agent compatibility remains an architectural consideration and later controlled 
 
 ---
 
-## 10. Next Planning Action After Approval
+## 10. Next Planning Action
 
-Once this spine is approved, Central should create the first version of the living roadmap. The roadmap should elaborate milestones, dependencies, validation demonstrations, architectural checkpoints, deferrals, and status while preserving the phase boundaries above.
+The next subordinate artifact is `ViDAP_Roadmap.md`. The roadmap elaborates milestones, dependencies, validation demonstrations, architectural checkpoints, deferrals, and status while preserving the phase boundaries above.
 
 Only after the roadmap is approved should Central draft the detailed Phase 0 plan. No execution packet or implementation work is authorized by approval of this spine alone.
