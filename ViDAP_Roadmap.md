@@ -1,11 +1,14 @@
 # ViDAP Implementation Roadmap
 
-**Status:** Draft for review  
-**Version:** 0.1  
-**Parent:** `ViDAP_Phased_Plan_Spine.md` version 1.0  
-**Product source:** `ViDAP_Overview.txt`  
-**Created:** 2026-09-17  
-**Owner:** Central  
+| Field | Value |
+|---|---|
+| Status | Approved |
+| Version | 1.0 |
+| Approved | 2026-09-17 |
+| Parent | `ViDAP_Phased_Plan_Spine.md` version 1.0 |
+| Product source | `ViDAP_Overview.txt` |
+| Created | 2026-09-17 |
+| Owner | Central |
 
 ---
 
@@ -32,8 +35,8 @@ Detailed work is planned one phase at a time. Roadmap changes may clarify sequen
 |---|---|---|
 | Product specification | Governing source | `ViDAP_Overview.txt` |
 | Phased Plan Spine | Approved | Version 1.0, approved 2026-09-17 |
-| Roadmap | Draft for review | Approval required before Phase 0 planning |
-| Phase 0 | Not planned | Blocked on roadmap approval |
+| Roadmap | Approved | Version 1.0, approved 2026-09-17 |
+| Phase 0 | Planning | Draft Phase 0 plan prepared for review |
 | Phases 1-11 | Sequenced only | Remain at roadmap resolution until predecessor reconciliation |
 | Execution packets | Not authorized | Require an approved phase plan and separate packet approval |
 | Product implementation | Not started | No implementation is authorized by this roadmap |
@@ -96,7 +99,7 @@ H3 is the first target that demonstrates the core product promise end to end. H4
 - **Visible demonstration:** A new environment can follow documented setup, run checks, and launch the shell without undocumented local state.
 - **Architectural checkpoint A0:** Application shape, component boundaries, repository organization, supported development environment, and dependency policy are explicit and proportionate.
 - **Decisions due in the phase plan:** Application/frontend/backend shape; packaging and local runtime expectations; language/runtime versions; testing layers; CI policy; dependency/license workflow; decision-record format; fixture rules.
-- **Status:** Not planned; awaiting roadmap approval.
+- **Status:** Planning; draft Phase 0 plan prepared for review.
 
 ### P1 - Canonical Workflow and Node Contract Kernel
 
@@ -329,8 +332,8 @@ Calendar estimates may be added after Phase 0 establishes the repository baselin
 
 ---
 
-## 12. Next Action After Roadmap Approval
+## 12. Next Action
 
-After this roadmap is approved, Central should draft the detailed Phase 0 plan only. That plan should inspect the actual repository state, resolve or schedule the P0 decisions named above, define workstreams and acceptance evidence, and propose bounded execution-packet boundaries.
+The next subordinate artifact is `ViDAP_Phase_0_Plan.md`. It inspects the actual repository state, schedules the P0 decisions named above, defines workstreams and acceptance evidence, and proposes bounded execution-packet boundaries.
 
-Approval of this roadmap will authorize Phase 0 planning, not implementation.
+The roadmap authorizes Phase 0 planning, not implementation. Phase 0 execution requires an approved Phase 0 plan and separately approved execution packets.
