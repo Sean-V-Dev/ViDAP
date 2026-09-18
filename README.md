@@ -6,8 +6,9 @@ transform data, train and evaluate established machine-learning libraries,
 compare experiments, understand results in practical language, and export
 conventional Python or Jupyter artifacts.
 
-> **Foundation planning is active. No runnable application exists yet.** Setup,
-> build, test, and launch commands arrive only in later approved packets.
+> **Foundation scaffold is implemented and awaiting independent validation.** It
+> builds an intentionally empty web entry point only; no runnable application
+> shell or product behavior exists.
 
 ## Intended architecture and prerequisites
 
@@ -16,17 +17,33 @@ CPython/FastAPI host. The browser remains a visual editing and presentation
 layer; future workflow and execution semantics are outside browser-only state.
 This describes intended architecture, not implementation.
 
-The accepted future setup contract is Windows, Git, Node.js 24 LTS with its
-bundled npm, CPython 3.14.x subject to P0-EP04 compatibility verification, and
-uv. These are planned prerequisites, not usable setup instructions today.
+Windows is the only currently supported development environment. Prerequisites
+are Git, Node.js 24 LTS with its bundled npm, and uv. CPython 3.14.7 is pinned
+in the Python workspace and is selected or provisioned by uv; a separate
+system Python setup is not a contributor prerequisite.
+
+## Setup and build
+
+In Windows PowerShell, use `npm.cmd` so no PowerShell execution-policy change
+is needed:
+
+```powershell
+npm.cmd run setup
+npm.cmd run build
+```
+
+`setup` performs only locked npm installation and locked uv synchronization.
+`build` produces only the ignored `apps/web/dist/` output from the empty web
+entry point. Both committed lockfiles are authoritative and must not be
+casually regenerated or replaced.
 
 ## Scope today
 
-Phase 0 is establishing project policy and reproducible foundations. It does
-not implement a node graph, workflow schema, dataset loading, profiling,
-training, experiments, exports, hosted services, authentication, deployment,
-or cross-platform support. Windows is the only planned platform claim until
-other environments are validated.
+Phase 0 is establishing project policy and reproducible foundations. There is
+no `dev` or `launch` command, application shell, workflow schema, API, dataset,
+model, test suite, CI workflow, hosted service, authentication, deployment, or
+cross-platform support claim. Windows remains the only supported platform until
+other environments are independently validated.
 
 ## Authority and navigation
 

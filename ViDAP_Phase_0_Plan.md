@@ -468,4 +468,4 @@ Phase 0 may not define the workflow schema on Phase 1's behalf.
 
 ## 16. Next Action
 
-P0-EP01 through P0-EP03 are complete. D0.1-D0.7 and the open-source/repository baseline are accepted in their respective Central reconciliation records. `ViDAP_P0_EP04.md` version 1.0 is approved for bounded execution of `Reproducible Project Scaffold`. A fresh worker may create only its authorized scaffold artifacts and implementation report. P0-EP05, CI, quality/test configuration, fixtures, shell startup, and product implementation remain unauthorized.
+P0-EP01 through P0-EP04 are complete. D0.1-D0.7, the open-source/repository baseline, and the reproducible scaffold are accepted in their respective Central reconciliation records. `ViDAP_P0_EP05.md` has been drafted for review as the bounded `Quality and Test Harness` packet. The next action is user review and explicit approval or revision of that packet. P0-EP05 execution, CI, fixtures, shell startup, and product implementation remain unauthorized.

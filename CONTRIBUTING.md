@@ -1,9 +1,30 @@
 # Contributing to ViDAP
 
-Thank you for helping shape ViDAP. The repository is still pre-scaffold: it
-has no runnable application or project commands yet. Contributions should make
-the approved work clearer, safer, or more verifiable without implying that a
+Thank you for helping shape ViDAP. The repository has a bounded foundation
+scaffold that is awaiting independent validation. It builds an intentionally
+empty web entry point, not a runnable product application. Contributions should
+make approved work clearer, safer, or more verifiable without implying that a
 planned capability already exists.
+
+## Supported setup and build commands
+
+Windows is the only currently supported development environment. Install Node
+24 LTS with its bundled npm and uv. CPython 3.14.7 is pinned in `python/` and
+selected or provisioned by uv; no separate system Python setup is required.
+
+From Windows PowerShell, use these authoritative commands:
+
+```powershell
+npm.cmd run setup
+npm.cmd run build
+```
+
+`setup` installs only the committed npm and uv locks. `build` creates only
+ignored web build output. Do not replace or casually regenerate
+`package-lock.json` or `python/uv.lock`.
+
+There is no `dev`, `launch`, quality, test, CI, dependency-control, or
+process-smoke task yet. Those are owned by later approved packets.
 
 ## Authority and approval
 
@@ -49,9 +70,8 @@ Every proposed change should say:
 - limitations or unresolved findings; and
 - the linked governing requirement, decision, or approved packet.
 
-Tests and documentation are delivery work, not cleanup. Executable project
-commands will be added only by approved P0-EP04 through P0-EP06 work; do not
-invent commands before then.
+Tests and documentation are delivery work, not cleanup. Do not invent public
+project commands beyond the approved setup/build scaffold.
 
 ## Dependencies, data, and durable decisions
 

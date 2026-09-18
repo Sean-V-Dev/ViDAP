@@ -10,6 +10,9 @@ indent_style = space
 [*.{js,cjs,mjs,ts,tsx,jsx,json,yml,yaml,css,html,md}]
 indent_size = 2
 
+[*.{toml,lock}]
+indent_size = 2
+
 [*.py]
 indent_size = 4
 
