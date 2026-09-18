@@ -1,49 +1,63 @@
 # ViDAP
 
-> **Active construction:** ViDAP is currently in its foundation and planning stage. There is no runnable application, supported release, or installation process yet.
+ViDAP is an open-source, local-first visual data-science playground. Its goal
+is to let people work with real data through an inspectable graph: explore and
+transform data, train and evaluate established machine-learning libraries,
+compare experiments, understand results in practical language, and export
+conventional Python or Jupyter artifacts.
 
-ViDAP—the Visual Data Science Playground—is being built as a local-first, open-source environment for exploring data and experimenting with machine learning through an inspectable visual workflow.
+> **Foundation planning is active. No runnable application exists yet.** Setup,
+> build, test, and launch commands arrive only in later approved packets.
 
-The goal is to let someone bring in real data and use an interactive node graph to explore, transform, model, evaluate, and compare experiments without hiding the underlying data-science process. Visual workflows are intended to remain reproducible, understandable, and exportable to conventional Python and Jupyter artifacts.
+## Intended architecture and prerequisites
 
-## Planned direction
+The accepted direction is a TypeScript/React local web UI and a separate local
+CPython/FastAPI host. The browser remains a visual editing and presentation
+layer; future workflow and execution semantics are outside browser-only state.
+This describes intended architecture, not implementation.
 
-ViDAP is intended to provide:
+The accepted future setup contract is Windows, Git, Node.js 24 LTS with its
+bundled npm, CPython 3.14.x subject to P0-EP04 compatibility verification, and
+uv. These are planned prerequisites, not usable setup instructions today.
 
-- an interactive visual graph for building executable data-science workflows;
-- real integrations with established Python data and machine-learning libraries;
-- visible parameters, validation choices, errors, and experiment results;
-- reproducible experiment branching and comparison;
-- practical explanations of metrics and model behavior;
-- inspectable automation that produces editable workflows; and
-- export to readable Python and Jupyter-based work.
+## Scope today
 
-These are project goals, not claims about currently available functionality.
+Phase 0 is establishing project policy and reproducible foundations. It does
+not implement a node graph, workflow schema, dataset loading, profiling,
+training, experiments, exports, hosted services, authentication, deployment,
+or cross-platform support. Windows is the only planned platform claim until
+other environments are validated.
 
-## Current status
+## Authority and navigation
 
-The project is establishing its architecture, repository conventions, development environments, quality checks, and delivery process before application scaffolding begins.
-
-At present:
-
-- the product specification, phased plan, roadmap, and initial architecture/tooling decisions exist;
-- the repository baseline and contributor guidance are being prepared;
-- no application source, package setup, build, test, or launch command is available; and
-- interfaces, file formats, and implementation details may change as the approved phases are completed.
-
-## Project documents
-
-- [Product overview and specification](ViDAP_Overview.txt)
-- [Phased plan spine](ViDAP_Phased_Plan_Spine.md)
-- [Implementation roadmap](ViDAP_Roadmap.md)
+- [Product specification](ViDAP_Overview.txt)
+- [Phased Plan Spine](ViDAP_Phased_Plan_Spine.md)
+- [Roadmap](ViDAP_Roadmap.md)
 - [Phase 0 plan](ViDAP_Phase_0_Plan.md)
+- [P0-EP01 reconciliation](ViDAP_P0_EP01_Validation_and_Reconciliation.md)
+- [P0-EP02 reconciliation](ViDAP_P0_EP02_Validation_and_Reconciliation.md)
+- [Contribution guide](CONTRIBUTING.md)
+- [Security policy](SECURITY.md)
+- [Decision-record guide](docs/decisions/README.md)
+- [MIT License](LICENSE)
 
-These documents describe the intended product and delivery sequence. They should not be read as evidence that planned functionality has already been implemented.
+## Contributing and reporting
 
-## Contributing and security
+Start with the [contribution guide](CONTRIBUTING.md). Report ordinary,
+non-sensitive bugs and proposals through
+[GitHub Issues](https://github.com/Sean-V-Dev/ViDAP/issues). Report suspected
+vulnerabilities only through the private route in [SECURITY.md](SECURITY.md).
 
-Contribution and security-reporting instructions are still being established. Please do not publish credentials, personal data, exploit details, or other sensitive information in a public issue.
+## Local and generated state
+
+`.vidap-local/` is reserved for untracked developer or runtime state only when
+a later packet names a legitimate use. Build, test, coverage, environment,
+package-cache, and downloaded-data paths are untracked under `.gitignore`.
+Approved tracked fixture content is permitted only under accepted D0.7 policy;
+generated and local fixture subareas remain ignored. New mutable or generated
+paths must be named and documented with their ignore rules in the same later
+packet. Ignored state is not an approved location for secrets.
 
 ## License
 
-ViDAP is intended to be released under the MIT License. The repository's formal `LICENSE` file will be added as part of the active foundation work; until then, this statement does not grant a software license.
+ViDAP is licensed under the [MIT License](LICENSE).

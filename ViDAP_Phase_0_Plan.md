@@ -468,4 +468,4 @@ Phase 0 may not define the workflow schema on Phase 1's behalf.
 
 ## 16. Next Action
 
-P0-EP01 and P0-EP02 are complete, and D0.1-D0.7 are accepted. `ViDAP_P0_EP03.md` version 1.0 is approved for bounded execution of `Open-Source and Repository Baseline`. A fresh worker may create only its authorized repository-governance artifacts and implementation report. Dependency installation, application scaffolding, product implementation, and P0-EP04 remain unauthorized.
+P0-EP01 through P0-EP03 are complete. D0.1-D0.7 and the open-source/repository baseline are accepted in their respective Central reconciliation records. `ViDAP_P0_EP04.md` version 1.0 is approved for bounded execution of `Reproducible Project Scaffold`. A fresh worker may create only its authorized scaffold artifacts and implementation report. P0-EP05, CI, quality/test configuration, fixtures, shell startup, and product implementation remain unauthorized.
