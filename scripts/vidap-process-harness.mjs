@@ -200,8 +200,9 @@ async function waitForStatus(target, records, stage) {
       return;
     } catch (error) {
       if (
+        error instanceof Error &&
         error.message ===
-        "The loopback status response did not match the static foundation status."
+          "The loopback status response did not match the static foundation status."
       ) {
         throw new Error(
           failureMessage(
@@ -209,6 +210,7 @@ async function waitForStatus(target, records, stage) {
             "Confirm the local foundation uses the locked static status response.",
             records.flatMap((record) => record.diagnostics),
           ),
+          { cause: error },
         );
       }
       await delay(POLL_INTERVAL_MS);
@@ -272,6 +274,8 @@ function startPythonHost() {
     "run",
     "--locked",
     "uvicorn",
+    "--app-dir",
+    "src",
     "vidap_execution.app:create_app",
     "--factory",
     "--host",

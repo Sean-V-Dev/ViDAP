@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 
-
 FOUNDATION_STATUS = {
     "application": "ViDAP",
     "scope": "phase-0-foundation",

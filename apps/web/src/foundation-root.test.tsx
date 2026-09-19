@@ -8,65 +8,64 @@ describe("FoundationRoot", () => {
   });
 
   it("shows the bounded checking state before the one status request settles", () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(() => new Promise<Response>(() => undefined)),
-    );
+    const fetchMock = vi.fn<typeof fetch>();
+    fetchMock.mockImplementation(() => new Promise<Response>(() => undefined));
+    vi.stubGlobal("fetch", fetchMock);
 
     render(<FoundationRoot />);
 
     expect(
       screen.getByText("Checking the local foundation host."),
-    ).toBeInTheDocument();
-    expect(globalThis.fetch).toHaveBeenCalledOnce();
-    expect(globalThis.fetch).toHaveBeenCalledWith("/api/status");
+    ).not.toBeNull();
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(fetchMock).toHaveBeenCalledWith("/api/status");
   });
 
   it("shows ready only for the exact static foundation status", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(
-        new Response(
-          JSON.stringify({
-            application: "ViDAP",
-            scope: "phase-0-foundation",
-            status: "ready",
-          }),
-          { status: 200 },
-        ),
+    const fetchMock = vi.fn<typeof fetch>();
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          application: "ViDAP",
+          scope: "phase-0-foundation",
+          status: "ready",
+        }),
+        { status: 200 },
       ),
     );
+    vi.stubGlobal("fetch", fetchMock);
 
     render(<FoundationRoot />);
 
     expect(
       await screen.findByText("Local foundation host is ready."),
-    ).toBeInTheDocument();
+    ).not.toBeNull();
   });
 
   it("shows the actionable unavailable state for malformed status", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi
-        .fn()
-        .mockResolvedValue(new Response(JSON.stringify({ status: "ready" }))),
+    const fetchMock = vi.fn<typeof fetch>();
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ status: "ready" })),
     );
+    vi.stubGlobal("fetch", fetchMock);
 
     render(<FoundationRoot />);
 
     expect(
       await screen.findByText(/Local foundation host is unavailable/),
-    ).toBeInTheDocument();
-    expect(screen.getByText("npm.cmd run launch")).toBeInTheDocument();
+    ).not.toBeNull();
+    expect(screen.getByText("npm.cmd run launch")).not.toBeNull();
   });
 
   it("shows the actionable unavailable state when the request fails", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+    const fetchMock = vi.fn<typeof fetch>();
+    fetchMock.mockRejectedValue(new Error("offline"));
+    vi.stubGlobal("fetch", fetchMock);
 
     render(<FoundationRoot />);
 
     expect(
       await screen.findByText(/Local foundation host is unavailable/),
-    ).toBeInTheDocument();
+    ).not.toBeNull();
   });
 });
