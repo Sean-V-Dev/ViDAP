@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Approved for bounded execution |
+| Status | Complete — accepted by Central |
 | Packet version | 0.1 |
 | Parent phase plan | `ViDAP_Phase_0_Plan.md` version 1.0 |
 | Prerequisites | P0-EP01 through P0-EP06 — Complete |
@@ -10,6 +10,7 @@
 | Workstream | WS0.6 — Fixtures and minimal shell |
 | Packet type | Bounded local fixture, shell, loopback process-harness, and smoke-test implementation |
 | Created | 2026-09-19 |
+| Central acceptance | 2026-09-19 |
 | Owner | Central |
 
 ---

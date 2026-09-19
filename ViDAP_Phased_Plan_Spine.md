@@ -1,9 +1,9 @@
 # ViDAP Phased Plan Spine
 
 **Status:** Approved, amended
-**Version:** 1.1
+**Version:** 1.2
 **Approved:** 2026-09-17
-**Amended:** 2026-09-18 (decision record 0002)
+**Amended:** 2026-09-19 (worker completion-attestation clarification)
 **Source of truth:** `ViDAP_Overview.txt`
 **Purpose:** Define the stable implementation sequence, phase boundaries, and approval gates without expanding into detailed phase plans or execution instructions.
 
@@ -88,6 +88,14 @@ Every overview requirement must ultimately be implemented, explicitly deferred w
 
 Technology selections remain open until their owning phase has enough evidence to evaluate compatibility, maintainability, licensing, packaging, testability, and user impact. The spine does not preselect a frontend framework, backend framework, persistence engine, workflow encoding, AutoML library, or optional model family.
 
+### 2.6 Worker completion attestation
+
+Every execution packet must name the final local commands and evidence required for a worker-completion attestation. Before reporting implementation complete or requesting independent validation, the worker must run those commands against the final post-change working tree. If a required command fails, the worker must repair the failure within packet scope and rerun the applicable attestation, or return a named blocker; pre-change results never count as completion evidence.
+
+The worker report must record the final commands, their successful outcomes, and any packet-required lock, cleanup, or generated-state evidence. A worker may not defer required checks to the validator.
+
+This attestation is evidence for validation, not validation itself. The worker cannot issue an independent verdict, accept work for Central, or replace the validator's independent reproduction and review.
+
 ---
 
 ## 3. Program-Wide Invariants
@@ -110,6 +118,7 @@ These constraints apply to every relevant phase and packet:
 14. **Proportional architecture:** Extensibility required by the specification is preserved without generalizing into distributed compute, enterprise MLOps, or other stated non-goals.
 15. **Data responsibility:** Fixtures and validation datasets require known provenance, permitted use, manageable storage, and no unnecessary sensitive information.
 16. **Intentional visual design and UX:** User-facing capabilities require intentional, coherent visual hierarchy, interaction quality, accessibility, and readability at realistic information density. Functional correctness alone is insufficient; substantial UI work must follow an approved concise design system or equivalent and receive proportionate independent visual/UX review.
+17. **Completion claims require final evidence:** An execution worker cannot call work complete based on an implementation narrative, pre-change command output, or a belief that the validator will discover defects. The packet-defined post-change attestation must be green, or the worker must return a blocker.
 
 ---
 
@@ -337,7 +346,7 @@ A phase may enter detailed planning only when:
 - its intended outcome remains consistent with the approved spine;
 - its planning effort will not prematurely lock a later-phase choice.
 
-A phase may enter execution only when its phase plan is approved and its first execution packet is bounded, testable, and approved.
+A phase may enter execution only when its phase plan is approved and its first execution packet is bounded, testable, approved, and defines its final worker-completion attestation commands. Where applicable, this includes quality, test, build, smoke, dependency, and cleanup checks; the exact commands remain packet-specific.
 
 A phase is complete only when:
 
@@ -361,7 +370,7 @@ Validation depth increases with the risk of misleading or irreversible behavior.
 - **Strong:** Workflow serialization, contract validation, execution ordering, caching, experiment lineage, reproducibility, model parameter propagation, metrics, and export parity.
 - **Specialized:** Domain-sensitive interpretation, temporal/grouped validation, AutoML decisions, neural-network semantics, migration behavior, and scientific extension claims.
 
-Implementers do not provide final acceptance for their own work. Independent review may be lightweight, but it must examine the relevant requirement and evidence rather than merely confirm that tests ran.
+Implementers do not provide final acceptance for their own work. Independent review may be lightweight, but it must examine the relevant requirement and evidence rather than merely confirm that tests ran. It is not a substitute for the worker's required post-change attestation.
 
 ---
 

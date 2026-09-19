@@ -2,10 +2,11 @@
 
 | Field | Value |
 |---|---|
-| Status | Approved |
-| Version | 1.0 |
+| Status | Approved, amended |
+| Version | 1.3 |
 | Approved | 2026-09-17 |
-| Parent | `ViDAP_Roadmap.md` version 1.0 |
+| Last updated | 2026-09-19 |
+| Parent | `ViDAP_Roadmap.md` version 1.4 |
 | Spine phase | P0 - Project Foundation and Delivery Baseline |
 | Product source | `ViDAP_Overview.txt` |
 | Created | 2026-09-17 |
@@ -468,4 +469,4 @@ Phase 0 may not define the workflow schema on Phase 1's behalf.
 
 ## 16. Next Action
 
-P0-EP01 through P0-EP06 are complete. D0.1-D0.7, the open-source/repository baseline, reproducible scaffold, quality/test harness, and CI/dependency/license controls are accepted in their respective Central reconciliation records. P0-EP05 version 0.1 was blocked before implementation by a frontend quality-tool peer-compatibility conflict; decision record 0001 selected a maintained peer-compatible TypeScript 6.x line and deferred JSX-a11y, and P0-EP05 version 0.2 was accepted after independent validation. P0-EP06 version 0.4 was accepted after locked local controls, a green user-authorized Windows hosted run, independent validation, and Central reconciliation. P0-EP07 is now ready to draft as a separate bounded packet. Fixtures, shell startup, product implementation, and remote changes remain unauthorized until that packet receives its own explicit approval.
+P0-EP01 through P0-EP07 are complete. D0.1-D0.7, the open-source/repository baseline, reproducible scaffold, quality/test harness, CI/dependency/license controls, and the bounded runnable-shell seam are accepted in their respective Central reconciliation records. P0-EP05 version 0.1 was blocked before implementation by a frontend quality-tool peer-compatibility conflict; decision record 0001 selected a maintained peer-compatible TypeScript 6.x line and deferred JSX-a11y, and P0-EP05 version 0.2 was accepted after independent validation. P0-EP06 version 0.4 was accepted after locked local controls, a green user-authorized Windows hosted run, independent validation, and Central reconciliation. P0-EP07 version 0.1 was accepted after independent validation of final commit 9a85dca1, including a green hosted Windows smoke path. P0-EP08 version 0.1 is approved for one fresh read-only evidence worker. Independent validation and Central reconciliation remain required before Phase 0 can be complete.
