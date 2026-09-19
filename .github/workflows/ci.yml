@@ -19,9 +19,6 @@ concurrency:
 jobs:
   quality-windows:
     runs-on: windows-latest
-    env:
-      NPM_CONFIG_CACHE: ${{ runner.temp }}\vidap-npm-cache
-      UV_CACHE_DIR: ${{ runner.temp }}\vidap-uv-cache
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -36,16 +33,19 @@ jobs:
         if: github.event_name != 'schedule'
         uses: actions/cache@a7833574556fa59680c1b7cb190c1735db73ebf0 # v5.0.0
         with:
-          path: ${{ env.NPM_CONFIG_CACHE }}
+          path: ${{ runner.temp }}\vidap-npm-cache
           key: npm-${{ runner.os }}-${{ runner.arch }}-node24-npm11-uv0.12.16-${{ hashFiles('package-lock.json', 'python/pyproject.toml', 'python/uv.lock') }}
       - name: Restore uv package cache
         if: github.event_name != 'schedule'
         uses: actions/cache@a7833574556fa59680c1b7cb190c1735db73ebf0 # v5.0.0
         with:
-          path: ${{ env.UV_CACHE_DIR }}
+          path: ${{ runner.temp }}\vidap-uv-cache
           key: uv-${{ runner.os }}-${{ runner.arch }}-node24-npm11-uv0.12.16-${{ hashFiles('package-lock.json', 'python/pyproject.toml', 'python/uv.lock') }}
       - name: Locked setup
         shell: pwsh
+        env:
+          NPM_CONFIG_CACHE: ${{ runner.temp }}\vidap-npm-cache
+          UV_CACHE_DIR: ${{ runner.temp }}\vidap-uv-cache
         run: npm.cmd run setup
       - name: Quality checks
         shell: pwsh
@@ -56,9 +56,6 @@ jobs:
 
   dependency-license-windows:
     runs-on: windows-latest
-    env:
-      NPM_CONFIG_CACHE: ${{ runner.temp }}\vidap-npm-cache
-      UV_CACHE_DIR: ${{ runner.temp }}\vidap-uv-cache
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -73,16 +70,19 @@ jobs:
         if: github.event_name != 'schedule'
         uses: actions/cache@a7833574556fa59680c1b7cb190c1735db73ebf0 # v5.0.0
         with:
-          path: ${{ env.NPM_CONFIG_CACHE }}
+          path: ${{ runner.temp }}\vidap-npm-cache
           key: npm-${{ runner.os }}-${{ runner.arch }}-node24-npm11-uv0.12.16-${{ hashFiles('package-lock.json', 'python/pyproject.toml', 'python/uv.lock') }}
       - name: Restore uv package cache
         if: github.event_name != 'schedule'
         uses: actions/cache@a7833574556fa59680c1b7cb190c1735db73ebf0 # v5.0.0
         with:
-          path: ${{ env.UV_CACHE_DIR }}
+          path: ${{ runner.temp }}\vidap-uv-cache
           key: uv-${{ runner.os }}-${{ runner.arch }}-node24-npm11-uv0.12.16-${{ hashFiles('package-lock.json', 'python/pyproject.toml', 'python/uv.lock') }}
       - name: Locked setup
         shell: pwsh
+        env:
+          NPM_CONFIG_CACHE: ${{ runner.temp }}\vidap-npm-cache
+          UV_CACHE_DIR: ${{ runner.temp }}\vidap-uv-cache
         run: npm.cmd run setup
       - name: Locked dependency inventory
         shell: pwsh

@@ -8,7 +8,7 @@
 | Execution date | 2026-09-18 |
 | Approval | Fresh user direction to proceed after the packet, graph review, and accepted record `0003` were rechecked |
 | Hosted workflow evidence | **Pending user-authorized run**; this worker did not dispatch or mutate remote state |
-| Post-validation correction | 2026-09-18: tightened after independent validator P1 findings; current live license result is intentionally fail-closed pending Central disposition |
+| Post-validation correction | 2026-09-18: tightened after independent validator P1 findings and corrected the hosted workflow's invalid job-level `runner.temp` references; current live license result is intentionally fail-closed pending Central disposition |
 
 ## 1. Authority, baseline, and bounded scope
 
@@ -41,6 +41,7 @@ The normal Windows uv path was rechecked before network-backed work: uv `0.12.16
 - The license classifier applies D0.6 and only the literal record-`0003` catalog. Base allows are exact SPDX strings only; generic aliases, full-text claims, prefixes, and fallback-to-later Python fields do not authorize a package. It has no ranges, prefixes, wildcards, or inferred roles. It emits the record ID, restricted role, and re-review trigger for each catalog match.
 - The audit temporary root must itself be an existing non-reparse directory outside the checkout and OneDrive before a bounded child can be created or cleaned.
 - Added Windows CI parity, a weekly clean-cache path, bounded cache/artifact handling, and weekly npm/GitHub-Actions-only Dependabot configuration.
+- After GitHub rejected the initial workflow before runner allocation, moved the two `runner.temp` cache variables from job-level `env` to their individual cache/setup steps. The cache directories, keys, actions, and all artifact/cleanup boundaries are unchanged.
 - Updated public contributor guidance for the controls, literal exception boundary, no-auto-fix/no-SBOM posture, triage, updates, and `SECURITY.md`.
 
 ## 4. Locks and command evidence
@@ -107,7 +108,7 @@ Local audit output is created only as a new randomly named child of the resolved
 
 ## 7. Static CI, Dependabot, documentation, and scope evidence
 
-Static worker inspection found a two-job `windows-latest` workflow with the approved PR/main/manual/weekly triggers, top-level `contents: read`, no secrets/write/deployment/container/reusable path, and PR-only cancellation. Every action is full-SHA pinned with an adjacent release comment. Only npm download and uv package caches are keyed by OS, architecture, Node/uv versions, and all three authority files; the scheduled run bypasses restore. The artifact is restricted to the temporary Python advisory JSON, uses `always()` with `if-no-files-found: ignore`, and has 14-day retention plus bounded cleanup.
+Static worker inspection found a two-job `windows-latest` workflow with the approved PR/main/manual/weekly triggers, top-level `contents: read`, no secrets/write/deployment/container/reusable path, and PR-only cancellation. The original hosted parse failure was corrected by moving `runner.temp` references out of job-level `env`; those references now occur only in cache/setup or artifact steps after runner allocation. Every action is full-SHA pinned with an adjacent release comment. Only npm download and uv package caches are keyed by OS, architecture, Node/uv versions, and all three authority files; the scheduled run bypasses restore. The artifact is restricted to the temporary Python advisory JSON, uses `always()` with `if-no-files-found: ignore`, and has 14-day retention plus bounded cleanup.
 
 Dependabot has exactly weekly npm and GitHub Actions entries, each limited to two open pull requests and patch/minor development grouping within its ecosystem. It has no UV entry, auto-merge, bypass, or cross-ecosystem group.
 
