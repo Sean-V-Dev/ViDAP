@@ -3,13 +3,15 @@
 | Field | Value |
 |---|---|
 | Status | Approved for bounded execution |
-| Packet version | 0.1 |
-| Parent phase plan | ViDAP_Phase_0_Plan.md version 1.1 |
+| Packet version | 0.3 |
+| Parent phase plan | ViDAP_Phase_0_Plan.md version 1.7 |
 | Prerequisites | P0-EP01 through P0-EP07 — Complete |
 | Prerequisite reconciliations | ViDAP_P0_EP01_Validation_and_Reconciliation.md through ViDAP_P0_EP07_Validation_and_Reconciliation.md |
 | Workstream | WS0.7 — Validation and closeout |
 | Packet type | Bounded read-only fresh-environment evidence collection |
 | Created | 2026-09-19 |
+| Versions 0.1-0.2 disposition | Blocked evidence retained; no acceptance |
+| Revised | 2026-09-19 |
 | Approved | 2026-09-19 |
 | Owner | Central |
 
@@ -17,10 +19,13 @@
 
 ## 1. Authorization boundary
 
-Version 0.1 received fresh explicit user approval on 2026-09-19. No approval
-of another packet or a later revision carries forward.
+Versions 0.1 and 0.2 were approved on 2026-09-19 but returned incomplete
+evidence under B-EP08-001 and B-EP08-002. Version 0.3 received fresh explicit
+user approval on 2026-09-19. No approval of another packet or later revision
+carries forward.
 
-After approval, one fresh evidence worker may create only the Section 7 report
+After approval, one fresh evidence worker may create only the Section 7 final
+evidence report
 in the repository. The worker may inspect the repository read-only; create one
 exact temporary clean checkout outside the repository and OneDrive; run the
 approved locked commands in that temporary checkout; and remove only the
@@ -30,7 +35,10 @@ The worker may not modify product, configuration, dependency, lock, CI,
 governance, or remote state; accept Phase 0; commit; push; dispatch CI; open a
 browser; install or alter a system/global prerequisite; or begin Phase 1.
 This packet gathers closeout evidence. It is not permission to repair a
-failure. A failed prerequisite or command is a named blocker for Central.
+failure. A failed prerequisite or command is a named blocker for Central. The
+blocked version 0.1 and version 0.2 reports remain historical evidence and
+may not be overwritten, amended, or used as a substitute for the complete
+version 0.3 proof.
 
 ## 2. Plain-English intent
 
@@ -54,8 +62,8 @@ The worker and later independent validator must read these sources in order:
 3. ViDAP_Phased_Plan_Spine.md version 1.2, especially the authority chain,
    local-first, testing, data-responsibility, completion-attestation, and
    independent-validation rules.
-4. ViDAP_Roadmap.md version 1.2, especially Phase 0 and its A0 checkpoint.
-5. ViDAP_Phase_0_Plan.md version 1.1, especially WS0.7, Sections 9-11,
+4. ViDAP_Roadmap.md version 1.7, especially Phase 0 and its A0 checkpoint.
+5. ViDAP_Phase_0_Plan.md version 1.7, especially WS0.7, Sections 9-11,
    P0-AC01 through P0-AC13, and the Phase 0 exclusions.
 6. The accepted P0-EP01 through P0-EP07 reconciliation records, including the
    accepted D0.1-D0.7 decisions and their bounded evidence.
@@ -99,6 +107,12 @@ repository and OneDrive. It must originate from the recorded committed target,
 not copy the current working tree or include uncommitted content. npm and uv
 caches used for this proof must be isolated from prior project caches.
 
+The audit control has its own safety-managed temporary directory. For
+npm.cmd run deps:audit, the worker must not set, pass, or redirect
+VIDAP_AUDIT_DIR. The control must create and remove its own default, bounded
+system-temporary child. The external checkout and isolated npm/uv caches do
+not authorize an audit-directory override.
+
 Before network-backed setup or audit work, the worker must confirm that no
 inherited certificate override or invalid SSL trust setting is active for the
 normal Windows uv path. It must not bypass certificate validation, add a
@@ -118,11 +132,19 @@ path, the worker must run and record concise final outcomes for:
 6. npm.cmd run deps:audit
 
 The aggregate check is the authoritative quality/build/in-process
-integration/smoke path and must run with smoke last. The worker must also
-exercise npm.cmd run launch in the temporary checkout: wait only for its
-documented loopback-ready message, send Ctrl+C only to that worker-started
-launch process, and confirm its known child processes exit. No browser may be
-opened.
+integration/smoke path and must run with smoke last. The automated runtime
+proof for process startup and cleanup is smoke. The worker must inspect the
+launch-mode lifecycle in the harness and confirm all of the following: launch
+uses the same prescribed child-start/readiness sequence as smoke; it prints
+the documented manual URL/Ctrl+C instruction after readiness; it registers
+SIGINT and SIGTERM cleanup; and its final cleanup targets only its recorded
+children.
+
+The worker must not try to emulate a human Ctrl+C through a hidden, bridged, or
+detached Windows console. That console-control mechanism is not a reliable
+test of the documented interactive terminal behavior. The user-facing manual
+launch/Ctrl+C instruction remains documented, while the finite smoke path is
+the repeatable automated cleanup proof. No browser may be opened.
 
 The worker must record Node, npm, uv, and selected CPython versions; both
 SHA-256 lock hashes before and after all routine commands; and the direct and
@@ -136,8 +158,7 @@ The worker must independently inspect the target and temporary checkout for:
 - a clean Git diff and no staged change before/after the proof;
 - ignored dependency, environment, cache, build, coverage, PID, and log
   state, with authored fixture content remaining trackable;
-- no listener remaining on either prescribed loopback port after smoke and
-  controlled launch shutdown;
+- no listener remaining on either prescribed loopback port after smoke;
 - current README and CONTRIBUTING instructions matching the observed commands,
   runtime prerequisites, loopback ports, manual-browser rule, and deferrals;
 - current dependency inventory, fail-closed license policy, literal Decisions
@@ -169,7 +190,7 @@ The worker may create or modify only this repository file:
 
 | Path | Purpose |
 |---|---|
-| ViDAP_P0_EP08_Implementation_Report.md | Sanitized fresh-environment evidence, P0 acceptance map, findings, limitations, and independent-validation handoff. |
+| ViDAP_P0_EP08_Final_Implementation_Report.md | Sanitized complete v0.3 fresh-environment evidence, P0 acceptance map, findings, limitations, and independent-validation handoff. |
 
 The report must state that it is evidence only and does not accept EP08 or
 Phase 0. It must not contain credentials, user data, absolute user paths, raw
@@ -204,13 +225,15 @@ After approval, the worker must:
 
 1. Read all governing inputs and record the exact approved packet version,
    target commit, target baseline, pre-existing work, and permitted report path.
+   Record B-EP08-001 and B-EP08-002 as superseded only by this new complete
+   proof; do not use their partial command results as current evidence.
 2. Verify the prerequisites and hosted-evidence applicability gate in Section
    4 before creating any temporary checkout.
 3. Verify the normal Windows Node/npm/uv/CPython and certificate-trust
    posture; record a blocker rather than changing the host if unsuitable.
 4. Create the one external clean checkout with isolated npm/uv caches.
 5. Capture pre-command lock hashes and run the complete Section 5.2 command
-   set, including controlled launch and cleanup observation.
+   set, including the launch-lifecycle inspection and smoke cleanup proof.
 6. Capture post-command lock hashes; perform the Section 5.3 hygiene,
    documentation, dependency/license, phase-boundary, and P0 acceptance review.
 7. Remove only the exact temporary checkout and its known caches, then verify
@@ -222,7 +245,7 @@ After approval, the worker must:
 
 ## 10. Required worker evidence
 
-ViDAP_P0_EP08_Implementation_Report.md must include:
+ViDAP_P0_EP08_Final_Implementation_Report.md must include:
 
 1. Packet identity, approval, worker role, governing inputs, target commit,
    sanitized remote identity, pre-existing work, and exact repository scope.
@@ -232,7 +255,7 @@ ViDAP_P0_EP08_Implementation_Report.md must include:
 4. Node/npm/uv/CPython facts, certificate-trust result, and pre/post lock
    hashes.
 5. Concise results for every Section 5.2 command, including aggregate check,
-   coverage, controls, controlled launch, smoke, and cleanup.
+   coverage, controls, smoke cleanup, and launch-lifecycle inspection.
 6. Documentation, links, ignored-state, sensitive-content, whitespace,
    scope, fixture, dependency/license, and advisory conclusions.
 7. A P0-AC01 through P0-AC13 evidence matrix, with each criterion marked
@@ -258,10 +281,14 @@ P0-EP08 may be accepted only when:
 - **EP08-AC05:** Locked setup succeeds without manual file edits, global
   package use, certificate bypass, or undocumented prerequisite.
 - **EP08-AC06:** The aggregate check succeeds with the documented smoke path
-  last; coverage and all three dependency-control commands also succeed.
-- **EP08-AC07:** Controlled launch proves its documented loopback-ready path
-  and known-child Ctrl+C cleanup without opening a browser or leaving a
-  listener.
+  last; coverage and all three dependency-control commands also succeed. The
+  advisory control uses its default managed system-temporary path with no
+  VIDAP_AUDIT_DIR override.
+- **EP08-AC07:** The repeatable smoke path proves prescribed loopback startup
+  and known-child cleanup without a remaining listener; launch-mode inspection
+  proves the shared readiness sequence, documented manual Ctrl+C instruction,
+  signal registration, and recorded-child-only final cleanup. No automated
+  hidden/bridged-console Ctrl+C emulation or browser opening occurs.
 - **EP08-AC08:** The fresh proof leaves no generated dependency, environment,
   cache, build, coverage, PID, log, or temporary-copy residue in the target
   repository or at the exact temporary location.
@@ -295,11 +322,12 @@ P0-EP08 may be accepted only when:
 
 Validation occurs in a fresh chat after the worker stops. The validator must
 read all governing inputs, every prior reconciliation, the approved packet,
-the one Section 7 report, the committed target, and the current Phase 0
+the two blocked historical reports, the one Section 7 final report, the
+committed target, and the current Phase 0
 artifacts. It must independently reproduce the fresh-checkout proof in its
 own isolated location, including setup, check, coverage, dependency controls,
-smoke, controlled launch shutdown, lock hashes, hygiene, documentation, and
-P0-AC mapping.
+smoke cleanup, launch-lifecycle inspection, lock hashes, hygiene,
+documentation, and P0-AC mapping.
 
 The validator must confirm that existing hosted evidence remains applicable or
 return Blocked with the required new evidence. It must inspect exact file
@@ -315,13 +343,13 @@ commit, push, dispatch CI, alter remote/system state, or begin Phase 1.
 
 ### Execution worker prompt
 
-> Execute freshly approved ViDAP_P0_EP08.md version 0.1 as the bounded Phase 0 closeout evidence worker. Read every governing input and all P0-EP01 through P0-EP07 reconciliations. Modify only ViDAP_P0_EP08_Implementation_Report.md. First prove the exact committed target and prior hosted Windows evidence remain applicable. In one exact clean checkout outside the repository and OneDrive, with isolated npm and uv caches, use the documented Windows path to run setup, check, coverage, dependency inventory, license check, advisory audit, and a controlled launch/Ctrl+C cleanup observation. Verify lock hashes, documentation, hygiene, dependency policy, Phase 0 exclusions, and every P0-AC01 through P0-AC13. Run the entire final post-change attestation before reporting. Do not fix findings, change source/configuration/locks/CI/governance, open a browser, alter system settings, stage/commit/push, self-validate, or begin Phase 1. Return a named blocker if any required condition fails; otherwise stop with the sanitized report for independent validation.
+> Execute freshly approved ViDAP_P0_EP08.md version 0.3 as the bounded Phase 0 closeout evidence worker. Read every governing input and all P0-EP01 through P0-EP07 reconciliations. Preserve ViDAP_P0_EP08_Implementation_Report.md and ViDAP_P0_EP08_Rerun_Implementation_Report.md as blocked historical records; modify only ViDAP_P0_EP08_Final_Implementation_Report.md. First prove the exact committed target and prior hosted Windows evidence remain applicable. In one exact clean checkout outside the repository and OneDrive, with isolated npm and uv caches, use the documented Windows path to run setup, check, coverage, dependency inventory, license check, and advisory audit. Run advisory audit with no VIDAP_AUDIT_DIR override: its own default safe system-temporary child is required. Treat smoke as the runtime proof of startup and recorded-child cleanup. Inspect the harness launch lifecycle for its shared readiness sequence, documented manual Ctrl+C instruction, SIGINT/SIGTERM registration, and recorded-child-only cleanup; do not emulate Ctrl+C through a hidden, bridged, or detached console. Verify lock hashes, documentation, hygiene, dependency policy, Phase 0 exclusions, and every P0-AC01 through P0-AC13. Run the entire final post-change attestation before reporting. Do not fix findings, change source/configuration/locks/CI/governance, open a browser, alter system settings, stage/commit/push, self-validate, or begin Phase 1. Return a named blocker if any required condition fails; otherwise stop with the sanitized report for independent validation.
 
 ### Independent validator prompt
 
-> Act as the independent validator for freshly approved ViDAP_P0_EP08.md version 0.1. Read every governing input, all accepted P0-EP01 through P0-EP07 reconciliation records, the Section 7 report, the committed target, and all Phase 0 artifacts. In your own isolated fresh checkout, independently reproduce setup, check, coverage, dependency inventory/license/advisory controls, smoke, controlled launch/Ctrl+C cleanup, lock-hash, hygiene, documentation, dependency-policy, and Phase 0 acceptance evidence. Confirm existing hosted Windows evidence remains applicable or return Blocked. Do not edit files, repair findings, accept for Central, alter remote/system state, or begin Phase 1. Return Accept, Revise, or Blocked with criterion-linked findings and an explicit Phase 0 reconciliation recommendation.
+> Act as the independent validator for freshly approved ViDAP_P0_EP08.md version 0.3. Read every governing input, all accepted P0-EP01 through P0-EP07 reconciliation records, both blocked historical reports, the Section 7 final report, the committed target, and all Phase 0 artifacts. In your own isolated fresh checkout, independently reproduce setup, check, coverage, dependency inventory/license/advisory controls, smoke cleanup, launch-lifecycle inspection, lock-hash, hygiene, documentation, dependency-policy, and Phase 0 acceptance evidence. Confirm advisory audit uses its default safe system-temporary child with no VIDAP_AUDIT_DIR override. Confirm existing hosted Windows evidence remains applicable or return Blocked. Do not emulate Ctrl+C through a hidden, bridged, or detached console; do not edit files, repair findings, accept for Central, alter remote/system state, or begin Phase 1. Return Accept, Revise, or Blocked with criterion-linked findings and an explicit Phase 0 reconciliation recommendation.
 
 ## 14. Next action
 
-Version 0.1 is approved for one fresh read-only evidence worker. Independent
+Version 0.3 is approved for one fresh read-only evidence worker. Independent
 validation and Central Phase 0 reconciliation remain separate later gates.

@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Status | Approved, amended |
-| Version | 1.4 |
+| Version | 1.7 |
 | Approved | 2026-09-17 |
 | Last updated | 2026-09-19 |
 | Parent | `ViDAP_Phased_Plan_Spine.md` version 1.2 |
@@ -36,10 +36,10 @@ Detailed work is planned one phase at a time. Roadmap changes may clarify sequen
 |---|---|---|
 | Product specification | Governing source | `ViDAP_Overview.txt` |
 | Phased Plan Spine | Approved, amended | Version 1.2, approved 2026-09-17 and amended 2026-09-19 |
-| Roadmap | Approved, amended | Version 1.4, approved 2026-09-17 and updated 2026-09-19 |
-| Phase 0 | Active | P0-EP01 through P0-EP07 complete; P0-EP08 approved for bounded execution |
+| Roadmap | Approved, amended | Version 1.7, approved 2026-09-17 and updated 2026-09-19 |
+| Phase 0 | Active | P0-EP01 through P0-EP07 complete; P0-EP08 v0.3 approved for bounded execution |
 | Phases 1-11 | Sequenced only | Remain at roadmap resolution until predecessor reconciliation |
-| Execution packets | Seven complete; one active packet | P0-EP01 through P0-EP07 complete; P0-EP08 version 0.1 is approved for bounded execution |
+| Execution packets | Seven complete; one active packet | P0-EP01 through P0-EP07 complete; P0-EP08 version 0.3 is approved for bounded execution |
 | Product implementation | Not started | No implementation is authorized by this roadmap |
 
 No percentage-complete values are used. A phase moves state only when its named gate and evidence support the change.
@@ -100,7 +100,7 @@ H3 is the first target that demonstrates the core product promise end to end. H4
 - **Visible demonstration:** A new environment can follow documented setup, run checks, and launch the shell without undocumented local state.
 - **Architectural checkpoint A0:** Application shape, component boundaries, repository organization, supported development environment, and dependency policy are explicit and proportionate.
 - **Decisions due in the phase plan:** Application/frontend/backend shape; packaging and local runtime expectations; language/runtime versions; testing layers; CI policy; dependency/license workflow; decision-record format; fixture rules.
-- **Status:** Active; P0-EP01 through P0-EP07 complete, with D0.1-D0.7, the repository baseline, reproducible scaffold, quality/test harness, CI/dependency/license controls, and the bounded minimal shell accepted. P0-EP05 v0.1 was blocked before implementation by a frontend quality-tool compatibility conflict; decision record 0001 selected a compatible TypeScript 6.x line and deferred JSX-a11y, and P0-EP05 v0.2 was accepted after independent validation. P0-EP06 v0.4 was accepted after a green hosted Windows run and independent validation. P0-EP07 v0.1 was accepted after independent validation of final commit 9a85dca1, including a green hosted Windows check run whose final task is smoke. P0-EP08 v0.1 is approved for bounded execution.
+- **Status:** Active; P0-EP01 through P0-EP07 complete, with D0.1-D0.7, the repository baseline, reproducible scaffold, quality/test harness, CI/dependency/license controls, and the bounded minimal shell accepted. P0-EP05 v0.1 was blocked before implementation by a frontend quality-tool compatibility conflict; decision record 0001 selected a compatible TypeScript 6.x line and deferred JSX-a11y, and P0-EP05 v0.2 was accepted after independent validation. P0-EP06 v0.4 was accepted after a green hosted Windows run and independent validation. P0-EP07 v0.1 was accepted after independent validation of final commit 9a85dca1, including a green hosted Windows check run whose final task is smoke. P0-EP08 v0.1 used a nonconforming audit temporary-directory override, and v0.2 used a non-reproducible hidden-console Ctrl+C observation; corrected v0.3 is approved for bounded execution.
 
 ### P1 - Canonical Workflow and Node Contract Kernel
 
@@ -335,4 +335,4 @@ Calendar estimates may be added after Phase 0 establishes the repository baselin
 
 ## 12. Next Action
 
-Execute approved P0-EP08 version 0.1 with one fresh, read-only evidence worker. Independent validation and Central reconciliation remain required before Phase 0 can be complete.
+Execute approved P0-EP08 version 0.3 with one fresh read-only evidence worker. It retains smoke as the automated process-cleanup proof and makes launch-lifecycle inspection the reliable evidence for the documented manual Ctrl+C path. Independent validation and Central reconciliation remain required before Phase 0 can be complete.
