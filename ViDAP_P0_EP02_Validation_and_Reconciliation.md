@@ -67,7 +67,7 @@ The accepted foundation quality roles are:
 - direct coverage.py and Vitest V8 reports, with no numeric Phase 0 coverage threshold; and
 - a repository-owned Node 24 cross-process smoke harness.
 
-Full browser end-to-end testing is deferred to P3. Exact compatible versions and executable configuration remain subject to the named P0-EP04 through P0-EP07 implementation gates.
+Full browser end-to-end testing is deferred to P3. Exact compatible versions and executable configuration remain subject to the named P0-EP04 through P0-EP07 implementation gates. Decision record `docs/decisions/0001-ep05-frontend-quality-compatibility.md` amends the EP05 implementation posture: a compatible maintained TypeScript 6.x line is selected for TypeScript-ESLint integration, and JSX-a11y is deferred until it has a maintained compatible peer intersection and meaningful JSX UI exists to check.
 
 ### D0.5 - CI and branch expectations: Accepted
 

@@ -1,0 +1,13 @@
+node_modules/
+apps/web/dist/
+coverage/
+.venv/
+python/.venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+.vidap-local/
+reports/
+package-lock.json
+python/uv.lock

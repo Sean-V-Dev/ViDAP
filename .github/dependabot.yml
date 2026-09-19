@@ -1,0 +1,25 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 2
+    groups:
+      development-patch-minor:
+        dependency-type: development
+        update-types:
+          - version-update:semver-patch
+          - version-update:semver-minor
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 2
+    groups:
+      development-patch-minor:
+        patterns:
+          - "*"
+        update-types:
+          - version-update:semver-patch
+          - version-update:semver-minor

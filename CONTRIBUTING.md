@@ -23,8 +23,53 @@ npm.cmd run build
 ignored web build output. Do not replace or casually regenerate
 `package-lock.json` or `python/uv.lock`.
 
-There is no `dev`, `launch`, quality, test, CI, dependency-control, or
-process-smoke task yet. Those are owned by later approved packets.
+There is no `dev`, `launch`, or `smoke` task. Cross-process smoke work remains
+owned by a later approved packet.
+
+## Local quality evidence
+
+After `npm.cmd run setup`, use the locked root tasks below:
+
+```powershell
+npm.cmd run format:check
+npm.cmd run lint
+npm.cmd run typecheck
+npm.cmd run test:unit
+npm.cmd run test:integration
+npm.cmd run coverage
+npm.cmd run check
+```
+
+`check` is the ordered non-mutating aggregate. `coverage` produces ignored V8
+and coverage.py reports without a percentage requirement. `format:write` and
+`lint:fix` are explicit repair actions and must not be folded into normal
+checks. The current lint layer intentionally covers TypeScript-aware rules and
+React Hooks; JSX accessibility linting is deferred under decision record 0001,
+not completed or replaced by another linter.
+
+## Dependency controls and CI expectations
+
+After locked setup, run `npm.cmd run deps:inventory`, `npm.cmd run
+license:check`, and `npm.cmd run deps:audit` when a change affects a manifest,
+lock, dependency policy, or GitHub Action. These commands are evidence only:
+they do not run a fix, accept a license, or prove a vulnerability is exploitable.
+They use the installed locked graphs and preserve `package-lock.json` and
+`python/uv.lock`.
+
+The Windows GitHub Actions workflow invokes the same root setup, quality,
+coverage, inventory, license, and audit tasks. It has read-only repository
+permissions and no secrets. Dependabot proposes at most two weekly npm or
+GitHub Actions update PRs per ecosystem; only patch/minor development-tool
+updates may be grouped. Major and security updates remain individually
+reviewable. UV bot updates, auto-merge, and bot trust bypasses are not used.
+
+See [dependency controls](docs/dependency-controls.md) and accepted [Decision
+Record 0003](docs/decisions/0003-ep06-locked-license-disposition.md) for the
+allowed, review-required, prohibited, and literal-catalog license treatment;
+advisory triage; temporary audit-output rules; the no-SBOM deferral; and the
+no-auto-fix policy. Continue
+to report suspected vulnerabilities through the private route in
+[SECURITY.md](SECURITY.md).
 
 ## Authority and approval
 

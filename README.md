@@ -37,13 +37,59 @@ npm.cmd run build
 entry point. Both committed lockfiles are authoritative and must not be
 casually regenerated or replaced.
 
+## Local quality commands
+
+After setup, Windows contributors can run these locked, non-mutating checks:
+
+```powershell
+npm.cmd run format:check
+npm.cmd run lint
+npm.cmd run typecheck
+npm.cmd run test:unit
+npm.cmd run test:integration
+npm.cmd run coverage
+npm.cmd run check
+```
+
+`check` runs formatting, linting, types, unit tests, build, and in-process
+integration tests in that order. `coverage` writes ignored Vitest V8 and
+coverage.py reports only; no Phase 0 coverage percentage is an acceptance
+threshold. `format:write` and `lint:fix` are explicit opt-in repair commands
+and never run through `check`.
+
+## Dependency controls and CI
+
+After setup, these locked control tasks inspect the installed npm and Python
+graphs without changing either lock:
+
+```powershell
+npm.cmd run deps:inventory
+npm.cmd run license:check
+npm.cmd run deps:audit
+```
+
+They provide inventory, fail-closed license review, and advisory evidence; the
+only reviewed exceptions are the literal entries in [Decision Record
+0003](docs/decisions/0003-ep06-locked-license-disposition.md). They do not
+auto-fix dependencies, resolve a floating graph, create an SBOM, or make legal
+or exploitability conclusions. See [dependency controls](docs/dependency-controls.md)
+for the license policy, temporary-output guardrails, triage expectations, and
+weekly update posture.
+
+GitHub Actions runs the same root setup, quality, coverage, and dependency
+control tasks on Windows for pull requests to `main`, pushes to `main`, manual
+runs, and a weekly clean-cache run. Dependabot is limited to weekly npm and
+GitHub Actions updates; it neither updates uv nor auto-merges anything.
+
 ## Scope today
 
 Phase 0 is establishing project policy and reproducible foundations. There is
-no `dev` or `launch` command, application shell, workflow schema, API, dataset,
-model, test suite, CI workflow, hosted service, authentication, deployment, or
-cross-platform support claim. Windows remains the only supported platform until
-other environments are independently validated.
+no `dev`, `launch`, or `smoke` command, application shell, workflow schema,
+API, dataset, model, hosted service, authentication, deployment, or
+cross-platform support claim. Windows remains the only supported platform
+until other environments are independently validated. JSX accessibility linting
+is intentionally deferred by decision record 0001 until a maintained compatible
+peer set and meaningful visible JSX exist.
 
 ## Authority and navigation
 

@@ -1,9 +1,10 @@
 # ViDAP Phased Plan Spine
 
-**Status:** Approved  
-**Version:** 1.0  
-**Approved:** 2026-09-17  
-**Source of truth:** `ViDAP_Overview.txt`  
+**Status:** Approved, amended
+**Version:** 1.1
+**Approved:** 2026-09-17
+**Amended:** 2026-09-18 (decision record 0002)
+**Source of truth:** `ViDAP_Overview.txt`
 **Purpose:** Define the stable implementation sequence, phase boundaries, and approval gates without expanding into detailed phase plans or execution instructions.
 
 ---
@@ -108,6 +109,7 @@ These constraints apply to every relevant phase and packet:
 13. **No runtime LLM dependency:** Normal workflow execution and deterministic code export do not require an LLM to generate arbitrary source code.
 14. **Proportional architecture:** Extensibility required by the specification is preserved without generalizing into distributed compute, enterprise MLOps, or other stated non-goals.
 15. **Data responsibility:** Fixtures and validation datasets require known provenance, permitted use, manageable storage, and no unnecessary sensitive information.
+16. **Intentional visual design and UX:** User-facing capabilities require intentional, coherent visual hierarchy, interaction quality, accessibility, and readability at realistic information density. Functional correctness alone is insufficient; substantial UI work must follow an approved concise design system or equivalent and receive proportionate independent visual/UX review.
 
 ---
 
@@ -167,13 +169,13 @@ The requirement citations below identify primary ownership, not exclusive applic
 
 **Outcome:** A user can construct, validate, save, load, and run a deliberately narrow real workflow through the visual interface.
 
-**Includes:** Initial graph editor; contract-driven node configuration; typed connection feedback; run controls and status; basic result presentation; an intentionally small CSV-to-baseline-result workflow using real backend operations; visible validation and error details. The slice proves integration with only the minimum operations needed and does not preempt the broader data or modeling policies owned by later phases.
+**Includes:** Initial graph editor; contract-driven node configuration; typed connection feedback; run controls and status; basic result presentation; an intentionally small CSV-to-baseline-result workflow using real backend operations; visible validation and error details; and an approved concise visual design system or equivalent that governs substantial UI implementation. The slice proves integration with only the minimum operations needed and does not preempt the broader data or modeling policies owned by later phases.
 
 **Excludes:** Broad node coverage, polished exploration, comprehensive modeling, and advanced experiment management.
 
-**Entry gate:** Phase 2 complete; the vertical-slice capability and UX acceptance path are approved.
+**Entry gate:** Phase 2 complete; the vertical-slice capability and UX acceptance path are approved. Before substantial user-facing UI packets are approved, the Phase 3 plan must approve the visual design system or equivalent, its design/UX support mechanism, representative states, and proportionate validation method.
 
-**Exit evidence:** A fresh user can assemble and execute the selected reference slice; the saved graph is the same canonical workflow used by the runtime; UI parameters demonstrably reach backend operations; a representative failure is understandable and actionable.
+**Exit evidence:** A fresh user can assemble and execute the selected reference slice; the saved graph is the same canonical workflow used by the runtime; UI parameters demonstrably reach backend operations; a representative failure is understandable and actionable; and independent proportionate visual/UX review confirms the approved design system, hierarchy, interaction, accessibility, and representative-state expectations.
 
 **Primary requirements:** OV §§2–7, 18–22A, 25, 31.
 
@@ -373,6 +375,7 @@ The following choices are deliberately unresolved at spine level:
 | Workflow serialization encoding and compatibility policy | Phase 1 plan | Openness, readability, deterministic behavior, evolution, source-control suitability |
 | Execution isolation and artifact persistence | Phase 2 plan | Reproducibility, failure containment, local simplicity, inspectability |
 | Initial vertical-slice operation set | Phase 3 plan | Architectural coverage with minimal breadth and real user value |
+| Visual design system or equivalent, design/UX support mechanism, and visual validation method | Phase 3 plan | Analytical-workspace hierarchy, readability, information density, accessibility, interaction quality, maintained support, and proportionate reviewability |
 | Initial supported data formats and size bounds | Phase 4 plan | Common usefulness, reliability, packaging, memory behavior |
 | Initial task types, model families, and metric policy | Phase 5 plan | Real-world legitimacy, interpretability, testability, dependency cost |
 | Export formats and equivalence tolerances | Phase 7 plan | User value, readable output, reproducibility, library behavior |

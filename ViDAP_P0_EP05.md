@@ -2,11 +2,13 @@
 
 | Field | Value |
 |---|---|
-| Status | Draft for review |
-| Packet version | 0.1 |
+| Status | Complete |
+| Packet version | 0.2 |
 | Parent phase plan | `ViDAP_Phase_0_Plan.md` version 1.0 |
 | Prerequisite packets | P0-EP01 through P0-EP04 - Complete |
 | Prerequisite reconciliations | `ViDAP_P0_EP01_Validation_and_Reconciliation.md`; `ViDAP_P0_EP02_Validation_and_Reconciliation.md`; `ViDAP_P0_EP03_Validation_and_Reconciliation.md`; `ViDAP_P0_EP04_Validation_and_Reconciliation.md` |
+| Compatibility decision | `docs/decisions/0001-ep05-frontend-quality-compatibility.md` |
+| Central reconciliation | `ViDAP_P0_EP05_Validation_and_Reconciliation.md` |
 | Workstream | WS0.4 - Quality and testing |
 | Packet type | Bounded local quality, test, and report-only coverage implementation |
 | Created | 2026-09-18 |
@@ -16,11 +18,11 @@
 
 ## 1. Authorization Boundary
 
-This is a proposed execution packet. Drafting it does not authorize execution.
+This is a completed revised execution packet. Version 0.1 was blocked before implementation by B-EP05-001; version 0.2 incorporates Central's accepted compatibility amendment, was approved on 2026-09-18, and completed Central reconciliation on 2026-09-18.
 
-After explicit user approval, one bounded execution worker may create or modify only the Section 7 quality/test artifacts, update only the two authoritative lockfiles through intentional direct development-dependency changes, run the accepted local checks, and create the implementation report. Independent validation and Central reconciliation remain required before P0-EP05 is `Complete`.
+The bounded execution worker created or modified only the Section 7 quality/test artifacts, updated only the two authoritative lockfiles through intentional direct development-dependency changes, ran the accepted local checks, and created the implementation report. Independent validation and Central reconciliation are recorded in `ViDAP_P0_EP05_Validation_and_Reconciliation.md`.
 
-Approval does not authorize CI, dependency/license/audit controls, fixture files, browser automation, process startup, API routes, health endpoints, workflow/schema semantics, data/ML behavior, remote changes, commits, or P0-EP06 through P0-EP08 work.
+Approval does not authorize CI, dependency/license/audit controls, fixture files, browser automation, process startup, API routes, health endpoints, workflow/schema semantics, data/ML behavior, remote changes, commits, or P0-EP06 through P0-EP08 work. It also does not authorize `eslint-plugin-jsx-a11y`, a substitute accessibility linter, forced peer dependencies, or an unsupported ESLint line.
 
 ---
 
@@ -54,10 +56,11 @@ The worker must read these sources in authority order before changing anything:
 4. `ViDAP_Roadmap.md` version 1.0, especially P0 and the quality/dependency delivery tracks.
 5. `ViDAP_Phase_0_Plan.md` version 1.0, especially P0-G4, WS0.4, deliverables 6-7, P0-AC07, and Phase 0 guardrails.
 6. `ViDAP_P0_EP01_Validation_and_Reconciliation.md`, authoritative for the Node 24, CPython 3.14, uv, npm, Windows, topology, and root-task decisions.
-7. `ViDAP_P0_EP02_Validation_and_Reconciliation.md`, authoritative for D0.4 and its Q01-Q08 quality decisions.
+7. `ViDAP_P0_EP02_Validation_and_Reconciliation.md`, authoritative for D0.4 and its Q01-Q08 quality decisions, as amended for EP05 by `docs/decisions/0001-ep05-frontend-quality-compatibility.md`.
 8. `ViDAP_P0_EP03_Validation_and_Reconciliation.md`, authoritative for repository hygiene, local-state, and contribution policies.
 9. `ViDAP_P0_EP04_Validation_and_Reconciliation.md`, authoritative for the accepted scaffold and elevated uv execution-environment note.
-10. This approved packet.
+10. `docs/decisions/0001-ep05-frontend-quality-compatibility.md`.
+11. This approved revised packet.
 
 This packet advances OV §18, OV §§20-21, OV §22A's separation constraints, OV §§25-30, Spine invariants 4, 7, 9, and 11, and Phase 0 WS0.4. It implements Q01-Q08 only; Q09 belongs to P0-EP07 and Q10-Q13 belong to P0-EP06.
 
@@ -69,7 +72,7 @@ The worker must preserve these accepted constraints:
 
 1. Node 24.x/npm and CPython 3.14.x/uv are the only supported project runtime and package-management paths. The elevated Windows execution path is required when restricted tooling denies the WinGet-installed `uv.exe`.
 2. Root `package.json`/`package-lock.json` and `python/pyproject.toml`/`python/uv.lock` remain the only manifest and lock authorities. No requirements export, alternate lockfile, second package manager, global tool, or user-profile dependency is allowed.
-3. TypeScript type checking uses `tsc --noEmit`; Prettier owns formatting; ESLint flat config owns frontend static lint; Vitest plus React Testing Library/jsdom owns frontend tests; Ruff owns Python formatting/lint; mypy owns Python typing; pytest plus AnyIO and HTTPX ASGI transport owns Python unit/integration testing; direct Vitest V8 and coverage.py reports own coverage.
+3. TypeScript type checking uses `tsc --noEmit` on a maintained TypeScript 6.x version declared compatible with the selected TypeScript-ESLint integration; Prettier owns formatting; ESLint flat config owns TypeScript-aware frontend static lint and React Hooks checks; Vitest plus React Testing Library/jsdom owns frontend tests; Ruff owns Python formatting/lint; mypy owns Python typing; pytest plus AnyIO and HTTPX ASGI transport owns Python unit/integration testing; direct Vitest V8 and coverage.py reports own coverage. JSX-a11y is explicitly deferred under decision record 0001.
 4. Formatting/linting check tasks are non-mutating. Explicit format/fix tasks are opt-in and never aggregate into `check`. CI is not created here.
 5. Quality rules must have an actual Phase 0 purpose. Do not add rules merely to maximize a score, add a second tool for a role, or use an empty test as evidence.
 6. Frontend source remains build plumbing only. The React root must still render no user-visible application content.
@@ -78,7 +81,7 @@ The worker must preserve these accepted constraints:
 9. Python tests use registered strict markers `unit`, `integration`, `smoke`, and `slow`; the project uses the AnyIO pytest integration with the single `asyncio` backend. `pytest-asyncio` is prohibited.
 10. Coverage is report-only in P0. No coverage percentage threshold, ratchet, or pass/fail floor may be introduced.
 11. `dev`, `launch`, `smoke`, CI, dependency/license/audit, fixture, and release tasks remain absent. P0-EP07 later owns cross-process smoke and a minimal shell.
-12. Current direct versions, licenses, maintenance status, Node 24/Python 3.14 support, and Windows compatibility of every added quality dependency must be rechecked from primary sources and reported. P0-EP06 later owns full transitive license and vulnerability evidence.
+12. Current direct versions, licenses, maintenance status, Node 24/Python 3.14 support, and Windows compatibility of every added quality dependency must be rechecked from primary sources and reported. The selected TypeScript 6.x and TypeScript-ESLint peer intersection must be declared compatible and maintained; no peer override is allowed. P0-EP06 later owns full transitive license and vulnerability evidence.
 
 ---
 
@@ -86,17 +89,17 @@ The worker must preserve these accepted constraints:
 
 Before changing any file, the worker must confirm and record:
 
-1. This packet is explicitly approved for execution and matches its approved version.
+1. This packet is explicitly approved for execution and matches approved version 0.2.
 2. P0-EP01 through P0-EP04 remain complete and all reconciliation records are present.
 3. The current branch, commit, sanitized remote, pre-existing worktree changes, and existing scaffold paths.
 4. Node 24/npm and uv/CPython 3.14 are callable; when default restricted execution denies uv, the worker must retry via the normal/elevated Windows execution path before declaring a project prerequisite failure.
 5. Existing `npm.cmd run setup` and `npm.cmd run build` succeed with unchanged locks before the intentional quality dependency change.
-6. Current primary sources support every candidate direct quality dependency on Node 24 or Windows CPython 3.14, and each has a license compatible with the accepted D0.6 policy.
+6. Current primary sources support every candidate direct quality dependency on Node 24 or Windows CPython 3.14, and each has a license compatible with the accepted D0.6 policy. The exact TypeScript 6.x and TypeScript-ESLint releases must declare a maintained peer-compatible intersection; the current ESLint, official base config, and React Hooks plugin must likewise have a maintained peer-compatible intersection. JSX-a11y is not a candidate in this packet.
 7. No existing quality/test/configuration file collides with the Section 7 path set.
 8. A worker-created temporary location outside the repository and OneDrive is available for negative-diagnostic and clean-copy verification.
 9. A temporary exception to the restricted uv sandbox is usable for required lock/sync/test commands; if it is not, stop with an execution-environment finding rather than substituting Python tooling.
 
-If a necessary package cannot meet the Python 3.14/Windows or license gate, if any required check needs product behavior, or if a meaningful test cannot be written within this packet's boundary, stop and return the evidence to Central.
+If a necessary package cannot meet the Python 3.14/Windows, license, maintenance, or peer-compatibility gate, if any required check needs product behavior, or if a meaningful test cannot be written within this packet's boundary, stop and return the evidence to Central.
 
 ---
 
@@ -125,7 +128,7 @@ After approval, the worker may create or modify only these paths:
 
 | Path | Authorized purpose |
 |---|---|
-| `package.json` | Add accepted JS quality dependencies and root quality task scripts |
+| `package.json` | Replace scaffold TypeScript 7.x with the accepted compatible TypeScript 6.x, add accepted JS quality dependencies, and add root quality task scripts |
 | `package-lock.json` | Sole updated JavaScript lock after intentional quality dependency changes |
 | `python/pyproject.toml` | Add accepted Python quality dependencies/groups and tool configuration |
 | `python/uv.lock` | Sole updated Python lock after intentional quality dependency changes |
@@ -133,7 +136,7 @@ After approval, the worker may create or modify only these paths:
 | `scripts/verify-node-version.test.mjs` | Real Vitest coverage of accepted/rejected Node-major logic |
 | `.prettierrc.json` | Minimal project Prettier configuration |
 | `.prettierignore` | Explicit formatting exclusions for generated/ignored state |
-| `eslint.config.js` | Flat ESLint configuration with TypeScript, React Hooks, and JSX accessibility roles |
+| `eslint.config.js` | Flat ESLint configuration with TypeScript-aware and React Hooks roles; no JSX-a11y plugin or substitute accessibility linter |
 | `apps/web/vitest.config.ts` | Vitest/jsdom/coverage configuration for the web area |
 | `apps/web/src/foundation-root.tsx` | Explicit no-UI foundation component returning `null` |
 | `apps/web/src/foundation-root.test.tsx` | React Testing Library assertion of the intentional empty mount |
@@ -159,7 +162,7 @@ The worker must not create `.github/`, root `tests/`, root `fixtures/`, browser 
 The worker must use current primary sources to select, lock, and report only the accepted direct development dependencies needed for:
 
 - Prettier;
-- ESLint, its official base configuration, TypeScript flat-config integration, React Hooks plugin, and JSX accessibility plugin;
+- ESLint, its official base configuration, TypeScript flat-config integration, and React Hooks plugin;
 - Vitest, its V8 coverage provider, jsdom, React Testing Library, and testing-library DOM matchers;
 - Ruff;
 - mypy;
@@ -168,7 +171,7 @@ The worker must use current primary sources to select, lock, and report only the
 - HTTPX; and
 - coverage.py.
 
-No Black, isort, Flake8, Pyright, Jest, `pytest-asyncio`, Playwright, Selenium, `concurrently`, `wait-on`, a CSS lint tool, or a second formatter/linter/test runner is permitted. Version choices must be intentional and current, not copied from ambient caches. Direct package evidence belongs in the implementation report; P0-EP06 owns full graph inventory and advisory/license reports.
+The scaffold's TypeScript 7.x direct dependency must be intentionally replaced with an exact current maintained TypeScript 6.x release that is within the selected TypeScript-ESLint peer range. No `eslint-plugin-jsx-a11y`, alternate accessibility linter, Black, isort, Flake8, Pyright, Jest, `pytest-asyncio`, Playwright, Selenium, `concurrently`, `wait-on`, CSS lint tool, or second formatter/linter/test runner is permitted. Version choices must be intentional and current, not copied from ambient caches. Direct package evidence belongs in the implementation report; P0-EP06 owns full graph inventory and advisory/license reports.
 
 ### 8.2 Root task contract
 
@@ -192,7 +195,7 @@ Each task must use local locked binaries and uv's locked project environment. Th
 
 - TypeScript remains strict with `noEmit`; test type coverage must not weaken production compilation settings.
 - Prettier configuration must be minimal, project-local, and align with `.editorconfig`; ignore generated dependencies, environments, build output, coverage, caches, and reports without ignoring authored source or documentation.
-- ESLint must use flat configuration. It must include TypeScript-aware linting, React Hooks, and JSX accessibility rules with no Prettier style-rule duplication. Rules start with stable correctness/import/React/a11y signal; no preview/broad style doctrine or blanket disable is allowed.
+- ESLint must use flat configuration. It must include TypeScript-aware linting and React Hooks checks with no Prettier style-rule duplication. Rules start with stable correctness/import/React signal; no preview/broad style doctrine or blanket disable is allowed. JSX accessibility linting is deferred by decision record 0001; do not install, configure, or claim it.
 - Vitest must use jsdom, deterministic `run` mode for command execution, clear test inclusion, and V8 coverage configured to measure only first-party web source while excluding tests, configuration, and generated output.
 - Ruff configuration belongs in `pyproject.toml`, targets Python 3.14, uses formatter plus lint rules for baseline correctness, imports, upgrades, bugbear, and narrowly justified security/error checks. It must not enable preview or broad docstring/style doctrine.
 - mypy configuration belongs in `pyproject.toml`, sets Python 3.14, checks first-party Python source strictly, uses explicit package roots, enables `warn_return_any`, `warn_unused_ignores`, `warn_redundant_casts`, `warn_unused_configs`, and `no_implicit_optional`, and must not use global `ignore_missing_imports`.
@@ -330,12 +333,12 @@ P0-EP05 may be accepted only when:
 
 - **EP05-AC01:** Authority, prerequisites, baseline, repository identity, and pre-existing work are accurately recorded.
 - **EP05-AC02:** Only Section 7 paths were created or modified by the worker.
-- **EP05-AC03:** Every added direct quality dependency has current primary-source, license, maintenance, Node/Python/Windows compatibility, and role evidence.
+- **EP05-AC03:** Every added direct quality dependency, including the replacement TypeScript 6.x, has current primary-source, license, maintenance, Node/Python/Windows compatibility, peer-range, and role evidence.
 - **EP05-AC04:** `package-lock.json` and `python/uv.lock` remain the sole authorities and intentional updates are documented.
 - **EP05-AC05:** Routine setup/check/build/coverage runs leave both locks unchanged.
 - **EP05-AC06:** Prettier is project-local, aligned, nonmutating in check mode, and separate from explicit write mode.
-- **EP05-AC07:** ESLint uses flat config with TypeScript, React Hooks, and JSX accessibility roles without Prettier duplication or blanket disables.
-- **EP05-AC08:** `tsc --noEmit` performs strict TypeScript checking without generated output.
+- **EP05-AC07:** ESLint uses flat config with TypeScript-aware and React Hooks roles without Prettier duplication, blanket disables, JSX-a11y, or an alternate accessibility linter.
+- **EP05-AC08:** A maintained, peer-compatible TypeScript 6.x line runs `tsc --noEmit` strict checking without generated output.
 - **EP05-AC09:** Vitest, React Testing Library, jsdom, and V8 coverage have distinct configured roles and deterministic run behavior.
 - **EP05-AC10:** Ruff owns Python format/lint/import ordering without Black/isort/Flake8 overlap or preview/style overreach.
 - **EP05-AC11:** mypy checks first-party Python source with the accepted strict settings and no global missing-import blind spot.
@@ -355,7 +358,7 @@ P0-EP05 may be accepted only when:
 - **EP05-AC25:** Generated dependencies, environments, caches, coverage/reports, build output, and temporary state remain ignored and untracked.
 - **EP05-AC26:** README and CONTRIBUTING accurately document quality tasks, prerequisites, no-threshold coverage, and remaining deferrals.
 - **EP05-AC27:** Existing license, security, ignore, attribute, editor, decision-record, and local-state policies remain intact.
-- **EP05-AC28:** No CI, dependency/license/audit, fixture, browser, process, dev/launch, health/API, workflow, data/ML, or product behavior is introduced.
+- **EP05-AC28:** No CI, dependency/license/audit, fixture, browser, process, dev/launch, health/API, workflow, data/ML, product behavior, JSX-a11y, or substitute accessibility linter is introduced.
 - **EP05-AC29:** No global/system policy/runtime mutation, remote mutation, staging, commit, push, or unrelated-file modification occurs.
 - **EP05-AC30:** Text, configuration, links, sensitive-content scan, and `git diff --check` pass.
 - **EP05-AC31:** The implementation report provides reproducible, sanitized evidence and distinguishes pre-existing work from worker changes.
@@ -372,7 +375,7 @@ Stop, preserve only permitted evidence, and return to Central if:
 1. The packet is not explicitly approved or its approved version differs from the execution copy.
 2. A prerequisite reconciliation is absent, superseded, or conflicts with the packet.
 3. Node 24/npm, elevated uv, or CPython 3.14 cannot perform a required locked operation.
-4. A needed quality dependency is incompatible, unmaintained, license-unclear/incompatible, or requires an unapproved substitute.
+4. A needed quality dependency is incompatible, unmaintained, license-unclear/incompatible, outside a declared peer range, or requires an unapproved substitute.
 5. A task needs a global tool, npx download, alternative lock/resolver, system policy change, actual server/browser/network, or a product capability to work.
 6. A test cannot make a meaningful assertion without defining a future contract or adding a prohibited fixture/data file.
 7. A required configuration/path is outside Section 7 or conflicts with existing user work.
@@ -420,11 +423,11 @@ The validation report must include verdict, scope, commands/evidence, acceptance
 
 ### Execution worker prompt
 
-> Execute approved `ViDAP_P0_EP05.md` as the bounded quality/test-harness worker. Read every governing input and follow the packet exactly. Create or modify only the Section 7 artifacts and `ViDAP_P0_EP05_Implementation_Report.md`. Use Node 24/npm and elevated uv-managed CPython 3.14; do not mistake the restricted sandbox's WinGet uv access denial for a project prerequisite failure. Implement Q01-Q08 only, prove meaningful real foundation checks/tests/negative diagnostics/report-only coverage, and keep all product/process/CI/fixture work out of scope. Do not validate or accept your own work, mutate remote state, or stage/commit/push. Stop with the implementation report and independent-validation handoff.
+> Execute approved `ViDAP_P0_EP05.md` version 0.2 as the bounded quality/test-harness worker. Read every governing input, including decision record 0001, and follow the packet exactly. Create or modify only the Section 7 artifacts and `ViDAP_P0_EP05_Implementation_Report.md`. Use Node 24/npm and elevated uv-managed CPython 3.14; do not mistake the restricted sandbox's WinGet uv access denial for a project prerequisite failure. Replace the scaffold's TypeScript 7.x with a maintained, declared peer-compatible TypeScript 6.x; implement TypeScript-aware ESLint and React Hooks checks, but do not install JSX-a11y or an accessibility-linter substitute. Implement Q01-Q08 as amended, prove meaningful real foundation checks/tests/negative diagnostics/report-only coverage, and keep all product/process/CI/fixture work out of scope. Do not validate or accept your own work, mutate remote state, or stage/commit/push. Stop with the implementation report and independent-validation handoff.
 
 ### Independent validator prompt
 
-> Act as the independent validator for approved `ViDAP_P0_EP05.md`. Read its governing inputs, all Section 7 artifacts, and `ViDAP_P0_EP05_Implementation_Report.md`. Follow Section 16 exactly. Independently verify direct dependency evidence, tool configuration, every root task, lock invariance, meaningful tests, negative diagnostics, coverage/no-threshold policy, clean-copy behavior, exact file scope, and absence of P0-EP06/later work. Use elevated uv execution when the restricted sandbox denies the WinGet uv executable. Create only `ViDAP_P0_EP05_Validation_Report.md`, or return the identical structured report in chat. Do not edit implementation or governing files, change remote state, accept for Central, or begin P0-EP06. Return `Accept`, `Revise`, or `Blocked` with criterion-linked findings.
+> Act as the independent validator for approved `ViDAP_P0_EP05.md` version 0.2. Read its governing inputs, including decision record 0001, all Section 7 artifacts, and `ViDAP_P0_EP05_Implementation_Report.md`. Follow Section 16 exactly. Independently verify direct dependency evidence, the declared maintained TypeScript 6.x/TypeScript-ESLint peer intersection, ESLint/React Hooks configuration, intentional JSX-a11y deferral, every root task, lock invariance, meaningful tests, negative diagnostics, coverage/no-threshold policy, clean-copy behavior, exact file scope, and absence of P0-EP06/later work. Use elevated uv execution when the restricted sandbox denies the WinGet uv executable. Create only `ViDAP_P0_EP05_Validation_Report.md`, or return the identical structured report in chat. Do not edit implementation or governing files, change remote state, accept for Central, or begin P0-EP06. Return `Accept`, `Revise`, or `Blocked` with criterion-linked findings.
 
 ---
 
@@ -445,6 +448,6 @@ The validator must return the Section 16 report. Central will preserve the actua
 
 ---
 
-## 19. Next Action After Packet Approval
+## 19. Next Action
 
-After explicit approval, a fresh bounded worker may execute only this packet. Execution ends with the implementation report and validation handoff. It must not proceed automatically into validation, Central reconciliation, P0-EP06, CI, fixture creation, shell startup, or product implementation.
+P0-EP05 is complete. Central may draft P0-EP06 as a separate bounded packet; P0-EP06 execution, CI, fixtures, shell startup, product implementation, and remote changes remain unauthorized unless a new packet is explicitly approved.

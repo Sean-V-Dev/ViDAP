@@ -2,11 +2,11 @@
 
 | Field | Value |
 |---|---|
-| Status | Approved |
-| Version | 1.0 |
+| Status | Approved, amended |
+| Version | 1.1 |
 | Approved | 2026-09-17 |
-| Last updated | 2026-09-17 |
-| Parent | `ViDAP_Phased_Plan_Spine.md` version 1.0 |
+| Last updated | 2026-09-18 |
+| Parent | `ViDAP_Phased_Plan_Spine.md` version 1.1 |
 | Product source | `ViDAP_Overview.txt` |
 | Created | 2026-09-17 |
 | Owner | Central |
@@ -35,11 +35,11 @@ Detailed work is planned one phase at a time. Roadmap changes may clarify sequen
 | Artifact or scope | Status | Evidence or next gate |
 |---|---|---|
 | Product specification | Governing source | `ViDAP_Overview.txt` |
-| Phased Plan Spine | Approved | Version 1.0, approved 2026-09-17 |
-| Roadmap | Approved | Version 1.0, approved 2026-09-17 |
-| Phase 0 | Active | P0-EP01 through P0-EP04 complete; P0-EP05 drafted for review |
+| Phased Plan Spine | Approved, amended | Version 1.1, approved 2026-09-17 and amended 2026-09-18 |
+| Roadmap | Approved, amended | Version 1.1, approved 2026-09-17 and amended 2026-09-18 |
+| Phase 0 | Active | P0-EP01 through P0-EP05 complete; P0-EP06 approved for bounded execution |
 | Phases 1-11 | Sequenced only | Remain at roadmap resolution until predecessor reconciliation |
-| Execution packets | Four complete; one draft | P0-EP01 through P0-EP04 complete; P0-EP05 awaits review and explicit approval |
+| Execution packets | Five complete; one approved | P0-EP01 through P0-EP05 complete; P0-EP06 awaits bounded execution, hosted evidence, validation, and Central reconciliation |
 | Product implementation | Not started | No implementation is authorized by this roadmap |
 
 No percentage-complete values are used. A phase moves state only when its named gate and evidence support the change.
@@ -100,7 +100,7 @@ H3 is the first target that demonstrates the core product promise end to end. H4
 - **Visible demonstration:** A new environment can follow documented setup, run checks, and launch the shell without undocumented local state.
 - **Architectural checkpoint A0:** Application shape, component boundaries, repository organization, supported development environment, and dependency policy are explicit and proportionate.
 - **Decisions due in the phase plan:** Application/frontend/backend shape; packaging and local runtime expectations; language/runtime versions; testing layers; CI policy; dependency/license workflow; decision-record format; fixture rules.
-- **Status:** Active; P0-EP01 through P0-EP04 complete, with D0.1-D0.7, the repository baseline, and the reproducible scaffold accepted; P0-EP05 is drafted for review.
+- **Status:** Active; P0-EP01 through P0-EP05 complete, with D0.1-D0.7, the repository baseline, reproducible scaffold, and quality/test harness accepted. P0-EP05 v0.1 was blocked before implementation by a frontend quality-tool compatibility conflict; decision record 0001 selected a compatible TypeScript 6.x line and deferred JSX-a11y, and P0-EP05 v0.2 was accepted after independent validation. P0-EP06 is approved for bounded execution.
 
 ### P1 - Canonical Workflow and Node Contract Kernel
 
@@ -126,7 +126,7 @@ H3 is the first target that demonstrates the core product promise end to end. H4
 - **Roadmap contribution:** Proves that a visual graph can edit and execute the same canonical workflow without duplicating backend semantics.
 - **Visible demonstration:** A user visually assembles, validates, saves, reloads, and executes one deliberately narrow real workflow, including one actionable failure path.
 - **Architectural checkpoint A3:** Forms derive from node contracts; connection rules come from workflow types; displayed results come from recorded execution results.
-- **Decisions due in the phase plan:** Minimal vertical-slice operations; essential graph interactions; result and error presentation; accessibility baseline; UI/runtime integration contract.
+- **Decisions due in the phase plan:** Minimal vertical-slice operations; essential graph interactions; result and error presentation; accessibility baseline; UI/runtime integration contract; concise visual design system or equivalent; current maintained design/UX support mechanism; representative screen/state set; and proportionate visual/UX validation method.
 - **Status:** Sequenced; not ready for detailed planning.
 
 ### P4 - Data Intake, Profiling, and Preparation
@@ -232,7 +232,7 @@ These tracks run through every applicable phase but do not become separate featu
 | Security and data responsibility | Bounded file/data handling, safe defaults, fixture provenance, and no unnecessary sensitive data |
 | Performance and resources | Phase-appropriate size envelope, measured bottlenecks, cancellation where needed, and honest limitations |
 | Compatibility and migration | Workflow/schema versions, backward-compatibility policy, migration tests where persistence becomes durable |
-| Accessibility and usability | Keyboard/readability expectations, understandable validation, and task-based user acceptance appropriate to the phase |
+| Visual design, accessibility, and usability | Approved design-system alignment for substantial UI; clear hierarchy, readable information density, progressive disclosure, keyboard/accessibility expectations, understandable validation, representative interaction states, and independent proportionate visual/UX acceptance |
 
 No phase can defer a cross-cutting obligation when omitting it would make the delivered capability materially misleading, irreproducible, unsafe, or unmaintainable.
 
@@ -335,4 +335,4 @@ Calendar estimates may be added after Phase 0 establishes the repository baselin
 
 ## 12. Next Action
 
-Review `ViDAP_P0_EP05.md` and either revise it or explicitly approve version 0.1 for bounded execution. Creating the draft does not authorize execution. CI, dependency/license controls, fixture creation, shell startup, remote changes, product implementation, and P0-EP06 remain unauthorized.
+Execute approved `ViDAP_P0_EP06.md` version 0.1 through one fresh bounded worker, then obtain a user-authorized hosted Windows workflow run, independent validation, and Central reconciliation. Fixtures, shell startup, remote changes, product implementation, and P0-EP07 remain unauthorized to the worker.
