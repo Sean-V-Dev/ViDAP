@@ -38,6 +38,7 @@ node_modules/
 .yarn/
 .yarn-cache/
 .cache/
+node-compile-cache/
 .parcel-cache/
 .vite/
 .next/
