@@ -35,7 +35,9 @@ export function validateLoopbackStatusUrl(value, port) {
   try {
     url = new URL(value);
   } catch {
-    throw new Error("Readiness target must be an exact loopback HTTP status URL.");
+    throw new Error(
+      "Readiness target must be an exact loopback HTTP status URL.",
+    );
   }
 
   if (
@@ -46,7 +48,9 @@ export function validateLoopbackStatusUrl(value, port) {
     url.search !== "" ||
     url.hash !== ""
   ) {
-    throw new Error("Readiness target must use the prescribed loopback status URL.");
+    throw new Error(
+      "Readiness target must use the prescribed loopback status URL.",
+    );
   }
 
   return url;
@@ -72,13 +76,16 @@ export function validateFixtureData(fixture, byteSize) {
       "No personal, sensitive, credential, path, network, or telemetry data." ||
     fixture.reviewer !== "Central" ||
     fixture.reviewDate !== "2026-09-19" ||
-    JSON.stringify(fixture.expectedStatus) !== JSON.stringify(FOUNDATION_STATUS) ||
+    JSON.stringify(fixture.expectedStatus) !==
+      JSON.stringify(FOUNDATION_STATUS) ||
     !Array.isArray(fixture.permittedConsumers) ||
     fixture.permittedConsumers.length !== 2 ||
     fixture.permittedConsumers[0] !== "P0-EP07 harness" ||
     fixture.permittedConsumers[1] !== "P0-EP07 tests"
   ) {
-    throw new Error("Fixture metadata does not match the bounded EP07 status contract.");
+    throw new Error(
+      "Fixture metadata does not match the bounded EP07 status contract.",
+    );
   }
 
   return fixture;
@@ -167,7 +174,9 @@ async function requestExactStatus(target) {
 
   const body = await response.json();
   if (JSON.stringify(body) !== JSON.stringify(FOUNDATION_STATUS)) {
-    throw new Error("The loopback status response did not match the static foundation status.");
+    throw new Error(
+      "The loopback status response did not match the static foundation status.",
+    );
   }
 }
 
@@ -190,7 +199,10 @@ async function waitForStatus(target, records, stage) {
       await requestExactStatus(target);
       return;
     } catch (error) {
-      if (error.message === "The loopback status response did not match the static foundation status.") {
+      if (
+        error.message ===
+        "The loopback status response did not match the static foundation status."
+      ) {
         throw new Error(
           failureMessage(
             stage,
@@ -222,7 +234,9 @@ async function waitForChildExit(record) {
       record.child.once("close", resolveExit);
     }),
     delay(5_000).then(() => {
-      throw new Error(`${record.name} did not exit after process-tree termination.`);
+      throw new Error(
+        `${record.name} did not exit after process-tree termination.`,
+      );
     }),
   ]);
 }
@@ -301,8 +315,14 @@ async function waitForLaunchExit(records) {
 export async function runHarness(mode) {
   validateMode(mode);
   const fixture = await readFixture();
-  const directStatus = validateLoopbackStatusUrl("http://127.0.0.1:8000/api/status", 8000);
-  const proxiedStatus = validateLoopbackStatusUrl("http://127.0.0.1:5173/api/status", 5173);
+  const directStatus = validateLoopbackStatusUrl(
+    "http://127.0.0.1:8000/api/status",
+    8000,
+  );
+  const proxiedStatus = validateLoopbackStatusUrl(
+    "http://127.0.0.1:5173/api/status",
+    5173,
+  );
   const records = [];
   let signalCleanup = false;
 
@@ -324,17 +344,28 @@ export async function runHarness(mode) {
     records.push(startWebHost());
     await waitForStatus(proxiedStatus, records, "web proxy readiness");
 
-    if (JSON.stringify(fixture.expectedStatus) !== JSON.stringify(FOUNDATION_STATUS)) {
-      throw new Error("Fixture expected status is inconsistent with the static foundation response.");
+    if (
+      JSON.stringify(fixture.expectedStatus) !==
+      JSON.stringify(FOUNDATION_STATUS)
+    ) {
+      throw new Error(
+        "Fixture expected status is inconsistent with the static foundation response.",
+      );
     }
 
     if (mode === "launch") {
-      console.log("ViDAP Phase 0 foundation is ready at http://127.0.0.1:5173.");
-      console.log("Open that loopback URL manually; press Ctrl+C to stop both local processes.");
+      console.log(
+        "ViDAP Phase 0 foundation is ready at http://127.0.0.1:5173.",
+      );
+      console.log(
+        "Open that loopback URL manually; press Ctrl+C to stop both local processes.",
+      );
       await waitForLaunchExit(records);
     }
 
-    console.log("Smoke verified the direct and proxied loopback foundation status.");
+    console.log(
+      "Smoke verified the direct and proxied loopback foundation status.",
+    );
   } finally {
     process.removeListener("SIGINT", onSignal);
     process.removeListener("SIGTERM", onSignal);
@@ -343,9 +374,8 @@ export async function runHarness(mode) {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  runHarness(process.argv[2])
-    .catch((error) => {
-      console.error(error.message);
-      process.exitCode = 1;
-    });
+  runHarness(process.argv[2]).catch((error) => {
+    console.error(error.message);
+    process.exitCode = 1;
+  });
 }

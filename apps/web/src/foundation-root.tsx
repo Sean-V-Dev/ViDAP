@@ -42,14 +42,18 @@ export function FoundationRoot() {
   return (
     <main>
       <h1>ViDAP</h1>
-      <p>Phase 0 foundation only. Workflow, data, and model capabilities are not available.</p>
+      <p>
+        Phase 0 foundation only. Workflow, data, and model capabilities are not
+        available.
+      </p>
       <section aria-live="polite" aria-label="Local foundation status">
         <h2>Bounded host status</h2>
         {status === "checking" && <p>Checking the local foundation host.</p>}
         {status === "ready" && <p>Local foundation host is ready.</p>}
         {status === "unavailable" && (
           <p>
-            Local foundation host is unavailable. Start it with <code>npm.cmd run launch</code>.
+            Local foundation host is unavailable. Start it with{" "}
+            <code>npm.cmd run launch</code>.
           </p>
         )}
       </section>

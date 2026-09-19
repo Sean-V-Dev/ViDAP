@@ -8,11 +8,16 @@ describe("FoundationRoot", () => {
   });
 
   it("shows the bounded checking state before the one status request settles", () => {
-    vi.stubGlobal("fetch", vi.fn(() => new Promise<Response>(() => undefined)));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => new Promise<Response>(() => undefined)),
+    );
 
     render(<FoundationRoot />);
 
-    expect(screen.getByText("Checking the local foundation host.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Checking the local foundation host."),
+    ).toBeInTheDocument();
     expect(globalThis.fetch).toHaveBeenCalledOnce();
     expect(globalThis.fetch).toHaveBeenCalledWith("/api/status");
   });
@@ -34,13 +39,17 @@ describe("FoundationRoot", () => {
 
     render(<FoundationRoot />);
 
-    expect(await screen.findByText("Local foundation host is ready.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Local foundation host is ready."),
+    ).toBeInTheDocument();
   });
 
   it("shows the actionable unavailable state for malformed status", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(new Response(JSON.stringify({ status: "ready" }))),
+      vi
+        .fn()
+        .mockResolvedValue(new Response(JSON.stringify({ status: "ready" }))),
     );
 
     render(<FoundationRoot />);
