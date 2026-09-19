@@ -3,20 +3,20 @@
 | Field | Value |
 |---|---|
 | Packet | `ViDAP_P0_EP06.md` — CI, Dependency, and License Controls |
-| Packet version | 0.2 |
+| Packet version | 0.4 |
 | Worker role | Bounded scaffold worker |
-| Execution date | 2026-09-18 |
-| Approval | Fresh user direction to proceed after the packet, graph review, and accepted record `0003` were rechecked |
+| Execution date | 2026-09-19 |
+| Approval | Fresh explicit user direction after the amended packet, both license reviews, and accepted records `0003` and `0004` were rechecked |
 | Hosted workflow evidence | **Pending user-authorized run**; this worker did not dispatch or mutate remote state |
-| Post-validation correction | 2026-09-18: tightened after independent validator P1 findings and corrected the hosted workflow's invalid job-level `runner.temp` references; current live license result is intentionally fail-closed pending Central disposition |
+| Remedial result | The seven literal Record `0004` scanner keys now pass; changed, generic, unknown, and unlisted claims remain fail-closed |
 
 ## 1. Authority, baseline, and bounded scope
 
-The worker read the complete Section 3 governing chain, including the product overview, spine, roadmap, Phase 0 plan, EP02 decision/reconciliation, EP03–EP05 reconciliations, accepted records `0001` and `0003`, the EP06 v0.2 packet, and `ViDAP_P0_EP06_License_Graph_Review.md`. The latter two artifacts were added to the packet after the earlier v0.1 fail-closed stop; record `0003` is the Central-owned, accepted policy amendment applied here.
+The worker read the complete Section 3 governing chain, including the product overview, spine, roadmap, Phase 0 plan, EP02 decision/reconciliation, EP03–EP05 reconciliations, accepted records `0001`, `0003`, and `0004`, the EP06 v0.4 packet, `ViDAP_P0_EP06_License_Graph_Review.md`, and `ViDAP_P0_EP06_Generic_License_Review.md`. Records `0003` and `0004` are Central-owned accepted policy decisions; the reviews provide the evidence they govern.
 
 Baseline was `main` at `befb3dd7b67401ca931aee29f23b97b69ea93685` with a configured sanitized GitHub `origin`. Existing Phase 0 planning, scaffold, and quality-harness changes predated this worker and were preserved. No files were staged, committed, pushed, dispatched, or changed remotely.
 
-Worker changes are limited to packet Section 7: `.github/workflows/ci.yml`, `.github/dependabot.yml`, `package.json`, `package-lock.json`, `python/pyproject.toml`, `python/uv.lock`, `scripts/dependency-controls.ps1`, `docs/dependency-controls.md`, `README.md`, `CONTRIBUTING.md`, and this report. No fixture, product behavior, API, process, shell, P0-EP07, or later-phase work was added.
+The earlier EP06 scaffold changed the broader original Section 7 set. This v0.4 remedial execution changed only the five approved existing paths: `scripts/dependency-controls.ps1`, `docs/dependency-controls.md`, `README.md`, `CONTRIBUTING.md`, and this report. It did not alter manifests, either lock, workflow, Dependabot, decision records, fixtures, product behavior, API, process, shell, P0-EP07, or later-phase work.
 
 ## 2. Direct controls and action provenance
 
@@ -38,7 +38,7 @@ The normal Windows uv path was rechecked before network-backed work: uv `0.12.16
 - Added exact root tasks `deps:inventory`, `license:check`, and `deps:audit`. They call only the local no-profile PowerShell control script.
 - Added the named direct tools through the authoritative npm and uv locks; no peer override, global tool, alternate package manager, hand-edited lock, or automatic fix was used.
 - The audit flow uses `npm audit --json` and the required locked uv export with `--all-extras --all-groups --no-emit-project`, followed by `pip-audit --require-hashes --disable-pip --strict`. It neither resolves nor fixes dependencies.
-- The license classifier applies D0.6 and only the literal record-`0003` catalog. Base allows are exact SPDX strings only; generic aliases, full-text claims, prefixes, and fallback-to-later Python fields do not authorize a package. It has no ranges, prefixes, wildcards, or inferred roles. It emits the record ID, restricted role, and re-review trigger for each catalog match.
+- The license classifier applies D0.6 and only the literal record-`0003` and record-`0004` catalogs. Base allows are exact SPDX strings only; generic aliases, full-text claims, prefixes, and fallback-to-later Python fields do not authorize a package. It has no ranges, prefixes, wildcards, name normalization, inferred roles, or runtime license-text parsing. It emits the record ID, restricted role, and re-review trigger for each catalog match.
 - The audit temporary root must itself be an existing non-reparse directory outside the checkout and OneDrive before a bounded child can be created or cleaned.
 - Added Windows CI parity, a weekly clean-cache path, bounded cache/artifact handling, and weekly npm/GitHub-Actions-only Dependabot configuration.
 - After GitHub rejected the initial workflow before runner allocation, moved the two `runner.temp` cache variables from job-level `env` to their individual cache/setup steps. The cache directories, keys, actions, and all artifact/cleanup boundaries are unchanged.
@@ -52,7 +52,7 @@ The normal Windows uv path was rechecked before network-backed work: uv `0.12.16
 | Intentional direct-tool update | `FB7119F6A4052FBFEEB243D413823767F3540199C03981BB5D170A84A14282FA` | `AC31501B29599D38D0F1983763CED28F55ACB5216A6548F27172974AEC784355` | Only the permitted direct control tools were added. |
 | After setup, quality, coverage, build, inventory, license, and audit | Same | Same | Routine commands did not rewrite either authority. |
 
-Before the post-validation correction, `npm.cmd run setup`, `check`, `coverage`, `build`, `deps:inventory`, `license:check`, and `deps:audit` completed successfully from the locked environment. The hardened `deps:audit` remains successful, while the hardened `license:check` now intentionally fails as described below. Inventory prints actual direct/transitive npm and installed Python facts without writing a second authority. npm audit reported zero vulnerabilities; pip-audit reported no known vulnerabilities. Those results are scanner evidence, not a safety guarantee or exploitability conclusion.
+After the v0.4 amendment, `npm.cmd run setup`, `check`, `coverage`, `build`, `deps:inventory`, `license:check`, and `deps:audit` completed successfully from the locked environment. The same complete set succeeded in a fresh system-temporary clean copy with separate npm and uv caches. Inventory prints actual direct/transitive npm and installed Python facts without writing a second authority. npm audit reported zero vulnerabilities; pip-audit reported no known vulnerabilities. Those results are scanner evidence, not a safety guarantee or exploitability conclusion.
 
 ## 5. Exact record-0003 license evidence
 
@@ -74,24 +74,31 @@ The pre-correction installed graph passed for 431 packages. The following are th
 
 This worker created no license exception or legal conclusion. Record `0003` already existed as the accepted Central decision; any changed, unknown, unlisted, ambiguous, or otherwise unapproved finding remains fail-closed. Required notices and distribution obligations remain future Central review work.
 
-### Post-validation fail-closed result
+### Record-0004 remedial license evidence
 
-The validator correctly identified that generic labels and prefix matching were
-too permissive. The corrected policy now accepts only exact SPDX base strings
-or literal record-`0003` entries and selects Python declaration fields in a
-fixed priority order without seeking a later allowed alternative. The current
-locked graph consequently has these unapproved metadata-only claims:
+The post-validation correction remains fail-closed: only exact SPDX base
+strings or an exact record-`0003`/`0004` key may pass. Record `0004` supplies
+the following seven literal package/version/gate-value dispositions. The
+scanner names are deliberately literal: `pip_api`, `pip_audit`, and `tomli_w`
+are neither hyphenated nor normalized.
 
-- `defusedxml@0.7.1` — `PSFL`;
-- `markdown-it-py@4.2.0`, `mdurl@0.1.2`, and `tomli_w@1.2.0` — `MIT License`;
-- `pip_api@0.0.35` — embedded Apache 2.0 full text;
-- `pip_audit@2.10.1` — `Apache Software License`; and
-- `sortedcontainers@2.4.0` — `Apache 2.0`.
+| Exact match | Restricted role | Re-review trigger |
+|---|---|---|
+| `defusedxml@0.7.1`, `PSFL` | Transitive defensive XML handling in pip-audit CycloneDX support. | Any version, gate value, role, modification, vendoring, or distribution change; retain the license text/notices. |
+| `markdown-it-py@4.2.0`, `MIT License` | Transitive markdown renderer supporting pip-audit output. | Any version, gate value, role, modification, vendoring, or distribution change; retain license/copyright. |
+| `mdurl@0.1.2`, `MIT License` | Transitive URL parsing supporting markdown-it-py. | Any version, gate value, role, modification, vendoring, or distribution change; retain license/copyright. |
+| `pip_api@0.0.35`, reviewed full Apache 2.0 metadata value (SHA-256 `DCB058E1702F3BB0DC7C1E0C7DF595E5C04AD727187FFA8FF0A39E4C5A0519FE`) | Transitive pip-environment access within pip-audit. | Any version, gate value, role, modification, vendoring, or distribution change; retain the license and applicable NOTICE. |
+| `pip_audit@2.10.1`, `Apache Software License` | Direct development-only dependency audit in CI. | Any version, gate value, role, modification, vendoring, or distribution change; retain the license and applicable NOTICE. |
+| `sortedcontainers@2.4.0`, `Apache 2.0` | Transitive sorted-collection support in pip-audit. | Any version, gate value, role, modification, vendoring, or distribution change; retain the license and applicable NOTICE. |
+| `tomli_w@1.2.0`, `MIT License` | Transitive TOML-writing support in pip-audit. | Any version, gate value, role, modification, vendoring, or distribution change; retain license/copyright. |
 
-`license:check` exits nonzero for these entries. They are not silently
-normalized because record `0003` does not authorize them. Central must either
-record an exact disposition or choose another approved approach before the
-license task can pass.
+The full `pip_api` value is stored as the reviewed literal gate value and is
+compared as a value; the worker added no parser or normalization path. Live
+`license:check` passed with all seven record-`0004` matches. In the isolated
+copy, changing `markdown-it-py` to `4.2.1`, changing an unlisted npm `MIT`
+claim to `MIT License`, and changing it to `UNLICENSED` each produced a
+nonzero fail-closed result. Thus the seven decisions do not authorize changed,
+generic, unknown, or unlisted claims.
 
 ## 6. Safety, temporary paths, negative controls, and clean copy
 
@@ -102,9 +109,8 @@ Local audit output is created only as a new randomly named child of the resolved
   was rejected before audit creation or cleanup; a normal system-temporary
   audit still completed and removed its bounded child.
 - In a new isolated system-temporary clean copy with separate npm/uv caches, setup, quality, inventory, license, and audit controls reproduced successfully.
-- In that copy only, changing `caniuse-lite` metadata to `UNLICENSED` caused the license task to fail closed with a nonzero exit.
-- In that copy only, a temporary mock `npm audit` result returned nonzero; the script retained the nonzero result after the locked Python scan and performed no fix, resolution, or live-lock mutation.
-- The clean copy, mock directory, separate caches, and audit children were reparse-checked and removed. No temporary evidence was written to tracked paths or left as repository residue.
+- In that copy only, changed `markdown-it-py@4.2.1`, an unlisted `MIT License` claim, and `UNLICENSED` each caused the license task to fail closed with a nonzero exit.
+- The clean copy and separate caches were reparse-checked and removed. No temporary evidence was written to tracked paths or left as repository residue.
 
 ## 7. Static CI, Dependabot, documentation, and scope evidence
 
@@ -112,27 +118,23 @@ Static worker inspection found a two-job `windows-latest` workflow with the appr
 
 Dependabot has exactly weekly npm and GitHub Actions entries, each limited to two open pull requests and patch/minor development grouping within its ecosystem. It has no UV entry, auto-merge, bypass, or cross-ecosystem group.
 
-`git diff --check` passed. The final scope comparison found only the authorized worker paths above; other existing modified/untracked Phase 0 files remain pre-existing and untouched by this worker. Generated build, coverage, environment, cache, audit, and temporary-copy state remained ignored/untracked.
+`git diff --check` passed. The v0.4 scope comparison found only its five authorized worker paths; the amended packet, generic-license review, and record `0004` were pre-existing Central inputs and were untouched. The repository also has 93 pre-existing tracked `node-compile-cache/` files. That generated state is outside the five-path authority and remains a Central/repository-maintainer remediation item, not a worker change. No additional generated build, coverage, environment, cache, audit, or temporary-copy residue was created.
 
 ## 8. Worker self-assessment — not independent validation
 
 | Criteria | Worker evidence status |
 |---|---|
 | AC01–AC04 | Implemented and evidenced: authority/baseline/scope recorded; direct-tool provenance and lock invariance recorded. |
-| AC05–AC14 | Implemented and locally exercised: unchanged root tasks, distinct locked controls, installed-graph inventory, exact record-`0003` catalog, fail-closed audit/license/temporary/certificate safeguards. **AC08 now correctly fails closed for the unapproved claims listed above.** |
+| AC05–AC14 | Implemented and locally exercised: unchanged root tasks, distinct locked controls, installed-graph inventory, exact record-`0003` and `0004` catalogs, and fail-closed audit/license/temporary/certificate safeguards. **AC08 passes only for the exact reviewed keys and fails closed otherwise.** |
 | AC15–AC21 | Implemented with worker static evidence: approved Windows workflow, pins, caches, concurrency, artifact boundary, Dependabot, and documentation. |
-| AC22–AC25 | Setup, quality, coverage, build, inventory, and audit pass; safe negative controls and clean copy pass; temporary/generated state removed or ignored. **AC22 is blocked because the corrected license task must fail closed until Central disposes of the seven unapproved entries.** |
-| AC26–AC32 | Implemented/evidenced within scope: no substitute authority/global tool/TLS bypass/later work/remote mutation; whitespace and scope checks pass; scanner limitations are stated. **AC32 is blocked by the unresolved license-policy disposition.** |
+| AC22–AC25 | Setup, quality, coverage, build, inventory, license, and audit pass; safe negative controls and clean copy pass. **AC25 remains blocked for Central/repository maintainer by the 93 pre-existing tracked `node-compile-cache/` files, which v0.4 does not authorize this worker to remove.** |
+| AC26–AC32 | Implemented/evidenced within scope: no substitute authority/global tool/TLS bypass/later work/remote mutation; whitespace and scope checks pass; scanner limitations are stated. The record-`0004` disposition resolves the prior local license-policy block; cache-state acceptance remains outside worker authority. |
 | AC33 | **Pending independent validator.** |
-| AC34–AC35 | **Pending user-authorized hosted Windows run; blocked until that evidence and independent verdict exist.** |
+| AC34–AC35 | **Pending user-owned green hosted Windows v0.4 run and independent verdict.** The earlier supplied hosted run parsed and created jobs but its license job was red before record `0004`; it is not v0.4 pass evidence. |
 | AC36 | **Central-owned and pending.** |
 
 ## 9. Independent-validation handoff
 
-An independent validator must inspect every governing input and Section 7 artifact; verify every literal record-`0003` match and negative case; reproduce safe local controls after certificate-trust verification; inspect lock hashes, cleanup guards, action provenance, workflow/Dependabot constraints, scope, and the absence of later work. The validator must not edit files, dispatch CI, alter remote state, accept for Central, or begin P0-EP07.
+An independent validator must inspect every governing input and Section 7 artifact; verify every literal record-`0003` and record-`0004` match, including the full reviewed `pip_api` gate value and literal underscore scanner names; reproduce safe local controls after certificate-trust verification; and inspect lock hashes, cleanup guards, action provenance, workflow/Dependabot constraints, scope, and the absence of later work. The validator must not edit files, dispatch CI, alter remote state, accept for Central, or begin P0-EP07.
 
-Central must first decide the exact disposition for the seven unapproved
-metadata-only claims above. A commit/push or hosted run cannot substitute for
-that policy decision.
-
-Hosted evidence remains **Pending user-authorized run**. Until the user supplies a `windows-latest` run, the validator must return `Blocked` for AC34/AC35 while preserving its separate local/static findings.
+The independent handoff must retain two separate blockers: Central/repository-maintainer disposition of the 93 pre-existing tracked `node-compile-cache/` files, and user-owned green hosted Windows v0.4 evidence. Until the latter is supplied, the validator must return `Blocked` for AC34/AC35 while preserving separate local/static findings.

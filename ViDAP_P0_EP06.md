@@ -3,24 +3,37 @@
 | Field | Value |
 |---|---|
 | Status | Approved for bounded execution |
-| Packet version | 0.2 |
+| Packet version | 0.4 |
 | Parent phase plan | `ViDAP_Phase_0_Plan.md` version 1.0 |
 | Prerequisites | P0-EP01 through P0-EP05 - Complete |
 | Prerequisite reconciliations | `ViDAP_P0_EP01_Validation_and_Reconciliation.md`; `ViDAP_P0_EP02_Validation_and_Reconciliation.md`; `ViDAP_P0_EP03_Validation_and_Reconciliation.md`; `ViDAP_P0_EP04_Validation_and_Reconciliation.md`; `ViDAP_P0_EP05_Validation_and_Reconciliation.md` |
 | Workstream | WS0.5 - CI and dependency controls |
 | Packet type | Bounded local controls, repository workflow configuration, and evidence implementation |
 | Created | 2026-09-18 |
-| Revised | 2026-09-18 after `B-EP06-LICENSE-001` |
+| Revised | 2026-09-19 after literal scanner-identity correction to Decision Record 0004 |
 | Owner | Central |
 
 ---
 
 ## 1. Authorization Boundary
 
-Version 0.1 stopped correctly at the license gate. Version 0.2 received fresh
-explicit user approval on 2026-09-18; the prior approval did not carry forward.
+Version 0.1 stopped correctly at the license gate. Version 0.2 established the
+bounded controls, but independent review correctly required its generic Python
+metadata claims to remain fail-closed. Decision Record 0004 now provides an
+exact, user-authorized Central disposition for those seven locked claims.
+The v0.3 worker correctly stopped because three Record 0004 entries used lock
+project names rather than the scanner's literal installed-metadata names. This
+v0.4 amendment corrects only those three record keys; it adds no name-
+normalization rule. Version 0.4 received fresh explicit user approval on
+2026-09-19; no approval of an earlier version carried forward.
 
-One bounded worker may implement only the Section 7 CI, dependency, license, and advisory-control artifacts; intentionally update only the two authoritative locks for the named direct control tools; run the local controls; and create the implementation report. Independent validation and Central reconciliation remain required before P0-EP06 is `Complete`.
+After approval, one fresh bounded worker may modify only the Section 7 remedial
+paths, implement the literal Record 0004 catalog beside the existing Record
+0003 catalog, update the related public guidance, run the local controls, and
+update the implementation report. This amendment must not alter a manifest,
+lock, workflow, Dependabot policy, or any other existing control behavior.
+Independent validation and Central reconciliation remain required before
+P0-EP06 is `Complete`.
 
 Approval would not authorize repository-settings changes, branch protection, required-check enforcement, Secrets, remote workflow dispatches, commits, pushes, releases, fixtures, a shell, browser automation, server/process startup, APIs, workflow semantics, data/ML behavior, Dependabot UV updates, auto-merge, or P0-EP07 and later work.
 
@@ -53,8 +66,9 @@ The worker and validator must read these sources in authority order:
 7. `ViDAP_P0_EP03_Validation_and_Reconciliation.md`, authoritative for repository and security-reporting hygiene.
 8. `ViDAP_P0_EP04_Validation_and_Reconciliation.md`, authoritative for Windows/Node/uv baseline and the elevated-uv environment distinction.
 9. `ViDAP_P0_EP05_Validation_and_Reconciliation.md` and decision record `docs/decisions/0001-ep05-frontend-quality-compatibility.md`, authoritative for the quality task baseline and JSX-a11y deferral.
-10. `ViDAP_P0_EP06_License_Graph_Review.md` and accepted decision record `docs/decisions/0003-ep06-locked-license-disposition.md`, authoritative for the current locked-graph license dispositions only.
-11. This packet.
+10. `ViDAP_P0_EP06_License_Graph_Review.md` and accepted decision record `docs/decisions/0003-ep06-locked-license-disposition.md`, authoritative for its existing locked-graph license dispositions only.
+11. `ViDAP_P0_EP06_Generic_License_Review.md` and accepted decision record `docs/decisions/0004-ep06-generic-license-metadata-disposition.md`, authoritative only for the seven literal Python package/version/gate-value dispositions recorded there.
+12. This packet.
 
 This packet implements D0.5 and D0.6's Q10-Q13 only. Q09, controlled fixtures, shell startup, and cross-process smoke remain P0-EP07; P0-EP08 owns fresh-environment phase validation.
 
@@ -67,11 +81,11 @@ This packet implements D0.5 and D0.6's Q10-Q13 only. Q09, controlled fixtures, s
 3. The existing root tasks (`setup`, `format:check`, `lint`, `typecheck`, `test:unit`, `test:integration`, `coverage`, `build`, and `check`) remain authoritative. CI calls them; it must not reimplement, skip, repair, or replace their behavior.
 4. CI uses GitHub Actions with pull-request-to-`main`, `main` push, manual, and weekly scheduled triggers; top-level `permissions: contents: read`; no secrets; safe lock-keyed caches; full-commit-SHA-pinned third-party actions with release comments; and cancellation only for superseded PR runs.
 5. The only direct control tools introduced here are `license-checker-rseidelsohn` for the locked npm graph and `pip-licenses` plus `pip-audit` for the locked Python graph. Versions, licenses, maintenance, Node 24/Python 3.14/Windows support, and peer compatibility must be rechecked from primary sources before installation.
-6. License automation must fail on unknown, missing, ambiguous, custom, prohibited, or unreviewed-review-required licenses. D0.6 governs as amended only by accepted decision record `0003`; its exact package/version/license dispositions are pre-existing Central policy, not worker-created exceptions.
+6. License automation must fail on unknown, missing, ambiguous, custom, prohibited, or unreviewed-review-required licenses. D0.6 governs only as amended by accepted Records `0003` and `0004`; their literal package/version/license-or-gate-value dispositions are pre-existing Central policy, not worker-created exceptions.
 7. Advisory controls use `npm audit --json` and the exact D0.6 `uv export --locked --all-extras --all-groups --no-emit-project --format requirements.txt` to hashed requirements followed by `pip-audit --require-hashes --disable-pip --strict`. `pip-audit --locked`, `npm audit fix`, `pip-audit --fix`, floating resolution, hand-maintained requirements files, and lock rewriting are prohibited.
 8. CI Python-audit steps independently derive only `RUNNER_TEMP\vidap-pip-audit`; they do not use `GITHUB_ENV`, a carried environment variable, checkout output, a cache key, or a broad deletion target. Local override behavior must be normalized, system-temp-bounded, expected-name constrained, new-only, and fail closed exactly as D0.6 specifies.
 9. Dependabot is configured weekly for npm and GitHub Actions only, with no auto-merge, at most two open PRs per ecosystem, patch/minor development-tool grouping only within an ecosystem, and individually reviewable majors/security updates. Dependabot UV updates are prohibited in P0.
-10. P0 has no SBOM, unmanaged license exception, ignored permanent report, coverage threshold, browser test, remote setting change, product dependency, or user-visible product behavior. Record `0003` is the sole current Central license disposition and does not authorize a distribution notice bundle.
+10. P0 has no SBOM, unmanaged license exception, ignored permanent report, coverage threshold, browser test, remote setting change, product dependency, or user-visible product behavior. Records `0003` and `0004` are the only current Central license dispositions and do not authorize a distribution notice bundle.
 11. The `SSL_CERT_DIR` note in the EP05 reconciliation is a host-environment constraint. Before any network-backed audit/install evidence, the worker must verify that the invoked normal/elevated uv path has usable certificate trust with no invalid-certificate warning. It must stop with a host-environment blocker rather than weaken TLS or alter project/system certificate configuration.
 
 ---
@@ -114,25 +128,24 @@ P0-EP06 is complete only when:
 
 ## 7. Exact Authorized Outputs
 
-The worker may create or modify only these paths:
+Version 0.4 is a remedial amendment. The worker may modify only these existing
+paths; it may not create a new path:
 
 | Path | Authorized purpose |
 |---|---|
-| `.github/workflows/ci.yml` | Windows GitHub Actions quality and dependency-control workflow only |
-| `.github/dependabot.yml` | Restricted npm and GitHub Actions Dependabot policy only |
-| `package.json` | Add direct npm control dependency and explicit inventory/license/audit tasks; retain existing task semantics |
-| `package-lock.json` | Sole updated JavaScript lock after the intentional direct control dependency change |
-| `python/pyproject.toml` | Add `pip-licenses` and `pip-audit` as Python development controls only |
-| `python/uv.lock` | Sole updated Python lock after the intentional direct control-tool change |
-| `scripts/dependency-controls.ps1` | Bounded Windows implementation of inventory, license, and lock-faithful advisory operations and cleanup guards |
-| `docs/dependency-controls.md` | Human-readable license categories, inventory/audit interpretation, exception, update, and report-handling guide |
-| `README.md` | Accurate control-task, CI, and deferral documentation |
-| `CONTRIBUTING.md` | Accurate contributor dependency/update/triage and CI expectations |
-| `ViDAP_P0_EP06_Implementation_Report.md` | Worker evidence and validation handoff |
+| `scripts/dependency-controls.ps1` | Add only the seven literal Decision Record 0004 catalog entries to the existing fail-closed license control, without changing audit, cleanup, inventory, or workflow behavior. |
+| `docs/dependency-controls.md` | Accurately identify Records 0003 and 0004 as the only literal license-disposition catalogs. |
+| `README.md` | Update the control-policy reference to include Record 0004 without broadening claims. |
+| `CONTRIBUTING.md` | Update the contributor policy reference to include Record 0004 without broadening claims. |
+| `ViDAP_P0_EP06_Implementation_Report.md` | Record the remedial worker evidence, exact seven matches, unchanged locks, and hosted-run status. |
 
-The worker may create only the necessary `.github/workflows/` and `docs/` parent directories. It may not create any other path.
-
-The worker must not create a fixture, source/test file, browser configuration, CSS/design file, application shell, API route, health endpoint, server/process script, `requirements*.txt`, `package-lock` alternative, Python export/requirements authority, SBOM, committed report, license exception, branch policy configuration, secret, remote setting, or P0-EP07/later output.
+The worker may read, but must not modify, the existing workflow, Dependabot
+policy, manifests, both locks, decision records, review reports, or any other
+file. It must not create a fixture, source/test file, browser configuration,
+CSS/design file, application shell, API route, health endpoint, server/process
+script, `requirements*.txt`, package/lock alternative, Python
+export/requirements authority, SBOM, license exception, branch-policy
+configuration, secret, remote setting, or P0-EP07/later output.
 
 ---
 
@@ -166,22 +179,26 @@ No cleanup may recursively delete a path unless it first confirms the exact comp
 
 ### 8.3 License policy implementation
 
-The implementation must encode D0.6 as amended by accepted decision record
-`docs/decisions/0003-ep06-locked-license-disposition.md`; it must not invent a
-new policy:
+The implementation must retain D0.6 as amended only by accepted decision
+records `docs/decisions/0003-ep06-locked-license-disposition.md` and
+`docs/decisions/0004-ep06-generic-license-metadata-disposition.md`; it must
+not invent a new policy:
 
 - allow SPDX-identified MIT, BSD-2-Clause, BSD-3-Clause, ISC, Apache-2.0, 0BSD, Zlib, PSF-2.0, and CC0-1.0 when required notices can be retained, plus exact SPDX MIT-0;
-- permit only the exact versioned normalization and bounded exception catalog in record `0003`; each match must emit its package, version, license, record ID, restricted role, and distribution re-review trigger;
-- treat a generic BSD label, an `A OR B` expression, an `AND` expression, MPL, BlueOak, CC-BY, native/platform material, and data material as unapproved unless that exact package/version/license is in record `0003`'s catalog;
+- permit only the exact versioned normalization and bounded exception catalogs in Records `0003` and `0004`; each match must emit its package, version, license or gate value, record ID, restricted role, and distribution re-review trigger;
+- permit Record `0004` only for its seven literal package/version/gate-value keys. Its generic labels and embedded Apache text must not become a general normalization rule;
+- treat a generic BSD label, a generic `MIT License`/Apache/PSFL label, an `A OR B` expression, an `AND` expression, MPL, BlueOak, CC-BY, native/platform material, and data material as unapproved unless that exact package/version/license-or-gate-value is in Record `0003` or `0004`'s catalog;
 - fail closed on normally prohibited GPL-only, AGPL, SSPL, Commons-Clause/BUSL/non-commercial/no-derivatives terms, unlicensed packages, and missing/ambiguous/custom claims;
-- fail closed as review-required on MPL, EPL, LGPL, CDDL, Artistic, Unicode/data, multi-license, platform-binary, material-notice, or generated/native cases unless the exact record `0003` catalog entry matches; and
+- fail closed as review-required on MPL, EPL, LGPL, CDDL, Artistic, Unicode/data, multi-license, platform-binary, material-notice, or generated/native cases unless the exact Record `0003` or `0004` catalog entry matches; and
 - report source/tool limitations and state that automated classification is not legal advice.
 
 The control may not use ranges, prefixes, wildcard matching, or inferred roles
-for record `0003` entries. A changed version or license, a new package, or any
-unlisted finding must fail closed. Do not create or edit an exception record,
-placeholder, or distribution notice bundle. Notices/reports remain review
-evidence, not an SBOM.
+for either record's entries. A changed version, license, gate value, or role; a
+new package; or any unlisted finding must fail closed. In particular, the
+worker must not parse a future package's license file to normalize its metadata
+at runtime. Do not create or edit an exception record, placeholder, or
+distribution notice bundle. Notices/reports remain review evidence, not an
+SBOM.
 
 ### 8.4 CI workflow contract
 
@@ -232,16 +249,15 @@ The worker must not:
 After approval, the worker must:
 
 1. Read all governing inputs and record baseline branch/commit/worktree/remote/path collisions.
-2. Reproduce locked setup, `check`, `coverage`, and `build`, recording lock hashes before and after.
+2. Confirm that the pre-existing workflow, Dependabot policy, manifests, and locks are outside this remedial scope; record both lock hashes before and after every command.
 3. Recheck normal/elevated uv certificate trust before a network-backed operation; stop if the inherited environment is unsafe.
-4. Research exact primary-source direct-tool/action versions, licenses, support, full action commits, and release provenance; stop on a gate failure.
-5. Add only the named direct control tools/configuration and intentionally regenerate the two authoritative locks.
-6. Implement the root control tasks, bounded PowerShell controls, dependency documentation, CI workflow, and Dependabot policy within Section 7.
-7. Run setup, every existing quality task, every control task, and prove routine commands do not change locks.
-8. Demonstrate controlled failures in exact temporary copies: an unsafe local audit directory is rejected before cleanup; a representative unknown/prohibited license classification fails closed; and an advisory-result fixture or safely mocked scanner response preserves a nonzero exit without live-lock mutation. Never place an intentional failure in the live repository or use live vulnerability data as a fabricated fixture.
-9. Verify workflow YAML/action full-SHA/comment/policy constraints statically and inspect every cleanup guard. Do not dispatch it.
-10. Demonstrate clean-copy setup, quality, and control-task behavior with isolated caches where network/advisory evidence is safely available; remove all exact temporary paths.
-11. Create `ViDAP_P0_EP06_Implementation_Report.md`, perform final scope/ignore/lock/whitespace/sensitive-content evidence, and stop for independent validation.
+4. Confirm the seven literal Decision Record 0004 keys against the installed locked metadata and review; stop if any name, version, or gate value differs.
+5. Update only the five Section 7 paths. The script change must add exactly the seven literal Record 0004 entries beside the existing Record 0003 catalog; it must not revise the classifier's base rules, cleanup, audit, inventory, cache, or workflow logic.
+6. Run setup, every existing quality task, every control task, and prove routine commands do not change locks.
+7. Demonstrate in an exact temporary copy that a Record 0004 key passes and that a changed version or gate value, an unknown/prohibited license, and an unlisted generic label fail closed. Never place an intentional failure in the live repository or use live vulnerability data as a fabricated fixture.
+8. Re-inspect the existing workflow YAML/action pins and cleanup guards statically; do not edit or dispatch the workflow.
+9. Demonstrate clean-copy setup, quality, and control-task behavior with isolated caches where network/advisory evidence is safely available; remove all exact temporary paths.
+10. Update `ViDAP_P0_EP06_Implementation_Report.md`, perform final exact-scope/ignore/lock/whitespace/sensitive-content evidence, and stop for independent validation.
 
 ---
 
@@ -253,7 +269,7 @@ The implementation report must include:
 2. Direct tool/action table: version or commit, role, primary source/retrieval date, license, support/peer evidence, action release comment, and rationale.
 3. Intentional manifest/lock changes and hash invariance after setup, quality, inventory, license, audit, and build commands.
 4. Root task map and actual concise results, including explicit no-fix/no-resolution behavior.
-5. License inventory/category results, every record `0003` catalog match and its restricted role/re-review trigger, all unapproved findings, notices/limitations, and confirmation that no worker-created exception was needed.
+5. License inventory/category results, every Records `0003` and `0004` catalog match and its restricted role/re-review trigger, the exact seven Record 0004 keys, all remaining unapproved findings, notices/limitations, and confirmation that no worker-created exception was needed.
 6. npm and Python audit commands/results, scanner limitations, and the exact safe temporary/artifact/cleanup path policy without sensitive values.
 7. Workflow trigger, permission, job, cache, artifact, concurrency, action-pin, and Dependabot static evidence.
 8. Clean-copy, negative-control, ignored-output, certificate-trust, and cleanup evidence.
@@ -270,14 +286,14 @@ The report must omit secrets, absolute user paths, tokens, full lockfile bodies,
 P0-EP06 may be accepted only when:
 
 - **EP06-AC01:** Authority, prerequisites, baseline, repository identity, pre-existing work, and output collisions are accurately recorded.
-- **EP06-AC02:** Only Section 7 paths were created or modified by the worker.
+- **EP06-AC02:** Only the five existing Section 7 remedial paths were modified by the worker; no path was created.
 - **EP06-AC03:** Every direct control tool and action has current primary-source, license, maintenance, Node/Python/Windows/peer or commit-provenance evidence.
-- **EP06-AC04:** `package-lock.json` and `python/uv.lock` remain the sole authorities; updates are intentional and routine tasks leave them unchanged.
+- **EP06-AC04:** `package-lock.json` and `python/uv.lock` remain the sole authorities and remain byte-identical throughout this remedial execution.
 - **EP06-AC05:** Existing root quality tasks remain semantically unchanged and CI invokes them through `npm.cmd run` after locked setup.
 - **EP06-AC06:** `deps:inventory`, `license:check`, and `deps:audit` have distinct, local, lock-respecting, no-fix roles.
 - **EP06-AC07:** Inventory covers actual direct/transitive npm and Python locked graphs without creating a second authority or committed report.
-- **EP06-AC08:** License checking implements the D0.6 posture as amended by record `0003`, matches only its exact catalog, and fails closed for every unknown, changed, or unreviewed finding.
-- **EP06-AC09:** No worker-created license exception, legal conclusion, or generated distribution notice bundle is fabricated; record `0003` is accurately applied without expansion.
+- **EP06-AC08:** License checking implements the D0.6 posture as amended only by Records `0003` and `0004`, matches only their exact literal catalogs, and fails closed for every unknown, changed, unlisted, or unreviewed finding.
+- **EP06-AC09:** No worker-created license exception, legal conclusion, or generated distribution notice bundle is fabricated; Records `0003` and `0004` are accurately applied without expansion or generic metadata normalization.
 - **EP06-AC10:** `npm audit --json` preserves advisory evidence and nonzero results without `audit fix` or lock mutation.
 - **EP06-AC11:** Python advisory input is exported from `uv.lock` with `uv export --locked --all-extras --all-groups --no-emit-project --format requirements.txt`; it retains hashes and excludes only the first-party project.
 - **EP06-AC12:** Python audit uses `pip-audit --require-hashes --disable-pip --strict`, never `pip-audit --locked`, resolution, or automatic fix.
@@ -290,7 +306,7 @@ P0-EP06 may be accepted only when:
 - **EP06-AC19:** CI artifacts are limited to the bounded Python audit JSON when available, retained for 14 days where permitted, and exclude prohibited content.
 - **EP06-AC20:** Dependabot has only weekly npm and GitHub Actions entries with approved limits/grouping and no UV/auto-merge/bypass configuration.
 - **EP06-AC21:** Documentation accurately describes controls, interpretation, triage, updates, Dependabot, SBOM deferral, and no-auto-fix boundaries.
-- **EP06-AC22:** Local setup, all quality tasks, all control tasks, and build pass from locked environments.
+- **EP06-AC22:** Local setup, all quality tasks, all control tasks, and build pass from locked environments; the hosted Windows license job no longer fails for any of the seven exact Record 0004 keys.
 - **EP06-AC23:** Representative isolated negative controls fail safely for unsafe audit path, license classification, and preserved advisory failure behavior.
 - **EP06-AC24:** Clean-copy reproduction uses isolated state, leaves no residue, and does not rely on cache as proof.
 - **EP06-AC25:** Generated dependency, audit, report, cache, coverage, build, and temporary state remain ignored/untracked.
@@ -322,14 +338,14 @@ The validation report must return one verdict (`Accept`, `Revise`, or `Blocked`)
 
 ### Execution worker prompt
 
-> Execute freshly approved `ViDAP_P0_EP06.md` version 0.2 as the bounded CI/dependency/license-controls worker. Read every governing input, especially D0.5-D0.6, `ViDAP_P0_EP06_License_Graph_Review.md`, and accepted decision record `docs/decisions/0003-ep06-locked-license-disposition.md`. Create or modify only Section 7 artifacts and the implementation report. Preserve root-task authority and implement the exact record-0003 package/version/license catalog without ranges, wildcard matching, inferred roles, policy expansion, a new exception record, or a notice bundle. Re-run the complete locked evidence. Stop for every changed, unknown, unlisted, or otherwise unapproved license; do not bypass TLS, force dependencies, suppress findings, dispatch CI, or mutate remote state. Do not self-validate, stage/commit/push, or begin P0-EP07. Hosted-run evidence is user-owned and may remain pending in your report.
+> Execute freshly approved `ViDAP_P0_EP06.md` version 0.4 as the bounded remedial license-control worker. Read every governing input, especially D0.5-D0.6, both EP06 license reviews, and accepted decision records `0003` and `0004`. Modify only the five existing Section 7 remedial paths; do not create any file or alter manifests, locks, workflow, Dependabot, or decision records. Preserve root-task authority. Add only the seven exact Record 0004 package/version/gate-value entries beside the existing exact Record 0003 catalog. In particular, use `pip_api`, `pip_audit`, and `tomli_w` as literal scanner names—do not transform names in either direction. Do not add ranges, wildcard matching, inferred roles, generic-label normalization, runtime license-text parsing, policy expansion, a new exception record, or a notice bundle. Re-run complete locked evidence and prove locks stay identical. Stop for every changed, unknown, unlisted, or otherwise unapproved license; do not bypass TLS, force dependencies, suppress findings, dispatch CI, or mutate remote state. Do not self-validate, stage/commit/push, or begin P0-EP07. Hosted-run evidence is user-owned and may remain pending in your report.
 
 ### Independent validator prompt
 
-> Act as the independent validator for freshly approved `ViDAP_P0_EP06.md` version 0.2. Read all governing inputs, including `ViDAP_P0_EP06_License_Graph_Review.md` and decision record `0003`, every Section 7 artifact, and `ViDAP_P0_EP06_Implementation_Report.md`. Independently verify that every permitted license match is an exact catalog match with the stated restricted role and that all changed, unknown, unlisted, or otherwise review-required/prohibited findings fail closed. Verify tool/action metadata, lock invariance, root-task parity, actual inventory/license/advisory behavior, D0.6's exact hashed uv-export/pip-audit procedure, safe temporary/artifact cleanup, workflow constraints, negative controls, clean-copy evidence, and absence of P0-EP07/later work. Do not edit files, dispatch CI, alter remote state, accept for Central, or begin P0-EP07. Inspect user-supplied hosted Windows run evidence; return `Blocked` if it is absent. Return `Accept`, `Revise`, or `Blocked` with criterion-linked findings.
+> Act as the independent validator for freshly approved `ViDAP_P0_EP06.md` version 0.4. Read all governing inputs, including both EP06 license reviews and decision records `0003` and `0004`, every Section 7 artifact, and `ViDAP_P0_EP06_Implementation_Report.md`. Independently verify every Record 0004 package/version/gate-value key and its restricted role, with particular attention that `pip_api`, `pip_audit`, and `tomli_w` are literal scanner identities rather than normalized names. Confirm the seven actual locked artifacts remain as reviewed, and prove that changed versions/gate values, generic labels, and all unknown/unlisted/review-required/prohibited findings fail closed. Verify the exact five-path worker scope, lock invariance, root-task parity, actual inventory/license/advisory behavior, D0.6's hashed uv-export/pip-audit procedure, safe temporary/artifact cleanup, existing workflow/Dependabot constraints, negative controls, clean-copy evidence, and absence of P0-EP07/later work. Do not edit files, dispatch CI, alter remote state, accept for Central, or begin P0-EP07. Inspect user-supplied hosted Windows run evidence; return `Blocked` if it is absent or the license job is red. Return `Accept`, `Revise`, or `Blocked` with criterion-linked findings.
 
 ---
 
 ## 16. Next Action
 
-Obtain fresh explicit approval for version 0.2. Only then may a fresh bounded worker execute it. A hosted workflow run, independent validation, and Central reconciliation are separate later gates.
+Obtain fresh explicit approval for version 0.4. Only then may a fresh bounded worker execute it. After the normal user-owned commit/push cycle, a green hosted Windows workflow run, independent validation, and Central reconciliation remain separate later gates.

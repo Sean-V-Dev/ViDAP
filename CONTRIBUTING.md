@@ -64,10 +64,11 @@ updates may be grouped. Major and security updates remain individually
 reviewable. UV bot updates, auto-merge, and bot trust bypasses are not used.
 
 See [dependency controls](docs/dependency-controls.md) and accepted [Decision
-Record 0003](docs/decisions/0003-ep06-locked-license-disposition.md) for the
-allowed, review-required, prohibited, and literal-catalog license treatment;
-advisory triage; temporary audit-output rules; the no-SBOM deferral; and the
-no-auto-fix policy. Continue
+Record 0003](docs/decisions/0003-ep06-locked-license-disposition.md) and
+[Decision Record 0004](docs/decisions/0004-ep06-generic-license-metadata-disposition.md)
+for the allowed, review-required, prohibited, and literal-catalog license
+treatment; advisory triage; temporary audit-output rules; the no-SBOM deferral;
+and the no-auto-fix policy. Continue
 to report suspected vulnerabilities through the private route in
 [SECURITY.md](SECURITY.md).
 

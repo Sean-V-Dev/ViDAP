@@ -70,9 +70,10 @@ npm.cmd run deps:audit
 
 They provide inventory, fail-closed license review, and advisory evidence; the
 only reviewed exceptions are the literal entries in [Decision Record
-0003](docs/decisions/0003-ep06-locked-license-disposition.md). They do not
-auto-fix dependencies, resolve a floating graph, create an SBOM, or make legal
-or exploitability conclusions. See [dependency controls](docs/dependency-controls.md)
+0003](docs/decisions/0003-ep06-locked-license-disposition.md) and [Decision
+Record 0004](docs/decisions/0004-ep06-generic-license-metadata-disposition.md).
+They do not auto-fix dependencies, resolve a floating graph, create an SBOM, or
+make legal or exploitability conclusions. See [dependency controls](docs/dependency-controls.md)
 for the license policy, temporary-output guardrails, triage expectations, and
 weekly update posture.
 

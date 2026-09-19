@@ -41,18 +41,21 @@ multi-license, platform-binary, material-notice, generated, and native cases
 are review-required and also fail closed unless an exact accepted catalog entry
 applies.
 
-[Decision Record 0003](decisions/0003-ep06-locked-license-disposition.md)
-amends D0.6 only for its literal package/version/license catalog. The control
-prints the record ID, limited role, and distribution re-review trigger for
-every catalog match. A changed version, license string, package role, or any
-unlisted package still fails closed; the catalog does not use ranges, prefixes,
-wildcards, or inferred roles.
+[Decision Record 0003](decisions/0003-ep06-locked-license-disposition.md) and
+[Decision Record 0004](decisions/0004-ep06-generic-license-metadata-disposition.md)
+amend D0.6 only for their literal package/version/license-or-gate-value
+catalogs. The control prints the record ID, limited role, and distribution
+re-review trigger for every catalog match. A changed version, license string,
+gate value, package role, or any unlisted package still fails closed; the
+catalogs do not use ranges, prefixes, wildcards, inferred roles, or package-name
+normalization.
 
 For Python metadata, the control uses the first populated declaration field in
 this fixed order: SPDX expression, package metadata, then classifier. It never
 searches later fields for an allowed alternative. A generic label or a
 non-SPDX full-text claim therefore remains an unapproved finding unless the
-selected package/version/license is an exact record-0003 catalog entry.
+selected package/version/license-or-gate-value is an exact Record 0003 or 0004
+catalog entry.
 
 Tool metadata and scanner output begin review; they do not decide legal
 compatibility or exploitability. A Central decision is required before a
