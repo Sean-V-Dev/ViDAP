@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Approved for bounded execution |
+| Status | Complete — accepted by Central |
 | Packet version | 0.4 |
 | Parent phase plan | `ViDAP_Phase_0_Plan.md` version 1.0 |
 | Prerequisites | P0-EP01 through P0-EP05 - Complete |
@@ -32,8 +32,9 @@ paths, implement the literal Record 0004 catalog beside the existing Record
 0003 catalog, update the related public guidance, run the local controls, and
 update the implementation report. This amendment must not alter a manifest,
 lock, workflow, Dependabot policy, or any other existing control behavior.
-Independent validation and Central reconciliation remain required before
-P0-EP06 is `Complete`.
+Independent validation and Central reconciliation were completed on
+2026-09-19 in `ViDAP_P0_EP06_Validation_and_Reconciliation.md`. P0-EP06 is
+`Complete`.
 
 Approval would not authorize repository-settings changes, branch protection, required-check enforcement, Secrets, remote workflow dispatches, commits, pushes, releases, fixtures, a shell, browser automation, server/process startup, APIs, workflow semantics, data/ML behavior, Dependabot UV updates, auto-merge, or P0-EP07 and later work.
 
@@ -348,4 +349,6 @@ The validation report must return one verdict (`Accept`, `Revise`, or `Blocked`)
 
 ## 16. Next Action
 
-Obtain fresh explicit approval for version 0.4. Only then may a fresh bounded worker execute it. After the normal user-owned commit/push cycle, a green hosted Windows workflow run, independent validation, and Central reconciliation remain separate later gates.
+P0-EP06 is complete. The next permitted planning action is to draft P0-EP07;
+that separate packet must receive its own explicit approval before any worker
+may execute it.

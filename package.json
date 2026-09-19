@@ -18,7 +18,9 @@
     "test:unit": "vitest run --config apps/web/vitest.config.ts && uv --directory python run --locked pytest -m unit",
     "test:integration": "uv --directory python run --locked pytest -m integration",
     "coverage": "vitest run --coverage --config apps/web/vitest.config.ts && uv --directory python run --locked coverage run -m pytest && uv --directory python run --locked coverage report",
-    "check": "npm.cmd run format:check && npm.cmd run lint && npm.cmd run typecheck && npm.cmd run test:unit && npm.cmd run build && npm.cmd run test:integration",
+    "launch": "node scripts/vidap-process-harness.mjs launch",
+    "smoke": "node scripts/vidap-process-harness.mjs smoke",
+    "check": "npm.cmd run format:check && npm.cmd run lint && npm.cmd run typecheck && npm.cmd run test:unit && npm.cmd run build && npm.cmd run test:integration && npm.cmd run smoke",
     "deps:inventory": "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/dependency-controls.ps1 -Mode inventory",
     "license:check": "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/dependency-controls.ps1 -Mode license",
     "deps:audit": "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/dependency-controls.ps1 -Mode audit"

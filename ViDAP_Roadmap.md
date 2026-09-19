@@ -37,9 +37,9 @@ Detailed work is planned one phase at a time. Roadmap changes may clarify sequen
 | Product specification | Governing source | `ViDAP_Overview.txt` |
 | Phased Plan Spine | Approved, amended | Version 1.1, approved 2026-09-17 and amended 2026-09-18 |
 | Roadmap | Approved, amended | Version 1.1, approved 2026-09-17 and amended 2026-09-18 |
-| Phase 0 | Active | P0-EP01 through P0-EP05 complete; P0-EP06 approved for bounded execution |
+| Phase 0 | Active | P0-EP01 through P0-EP06 complete; P0-EP07 ready to draft |
 | Phases 1-11 | Sequenced only | Remain at roadmap resolution until predecessor reconciliation |
-| Execution packets | Five complete; one approved | P0-EP01 through P0-EP05 complete; P0-EP06 awaits bounded execution, hosted evidence, validation, and Central reconciliation |
+| Execution packets | Six complete; next packet ready to draft | P0-EP01 through P0-EP06 complete; P0-EP07 has no draft or execution approval yet |
 | Product implementation | Not started | No implementation is authorized by this roadmap |
 
 No percentage-complete values are used. A phase moves state only when its named gate and evidence support the change.
@@ -100,7 +100,7 @@ H3 is the first target that demonstrates the core product promise end to end. H4
 - **Visible demonstration:** A new environment can follow documented setup, run checks, and launch the shell without undocumented local state.
 - **Architectural checkpoint A0:** Application shape, component boundaries, repository organization, supported development environment, and dependency policy are explicit and proportionate.
 - **Decisions due in the phase plan:** Application/frontend/backend shape; packaging and local runtime expectations; language/runtime versions; testing layers; CI policy; dependency/license workflow; decision-record format; fixture rules.
-- **Status:** Active; P0-EP01 through P0-EP05 complete, with D0.1-D0.7, the repository baseline, reproducible scaffold, and quality/test harness accepted. P0-EP05 v0.1 was blocked before implementation by a frontend quality-tool compatibility conflict; decision record 0001 selected a compatible TypeScript 6.x line and deferred JSX-a11y, and P0-EP05 v0.2 was accepted after independent validation. P0-EP06 is approved for bounded execution.
+- **Status:** Active; P0-EP01 through P0-EP06 complete, with D0.1-D0.7, the repository baseline, reproducible scaffold, quality/test harness, and CI/dependency/license controls accepted. P0-EP05 v0.1 was blocked before implementation by a frontend quality-tool compatibility conflict; decision record 0001 selected a compatible TypeScript 6.x line and deferred JSX-a11y, and P0-EP05 v0.2 was accepted after independent validation. P0-EP06 v0.4 was accepted after a green hosted Windows run and independent validation. P0-EP07 is ready to draft.
 
 ### P1 - Canonical Workflow and Node Contract Kernel
 
@@ -335,4 +335,4 @@ Calendar estimates may be added after Phase 0 establishes the repository baselin
 
 ## 12. Next Action
 
-Execute approved `ViDAP_P0_EP06.md` version 0.1 through one fresh bounded worker, then obtain a user-authorized hosted Windows workflow run, independent validation, and Central reconciliation. Fixtures, shell startup, remote changes, product implementation, and P0-EP07 remain unauthorized to the worker.
+Draft P0-EP07 — Controlled Fixture and Minimal Runnable Shell. It must define the smallest controlled fixture, recognizable shell, cross-boundary health/status behavior only if the accepted architecture requires multiple processes, and smoke-test boundaries without implementing Phase 1 semantics. Drafting does not authorize execution; P0-EP07 requires its own explicit approval before a fresh bounded worker may act.

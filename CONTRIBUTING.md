@@ -1,10 +1,10 @@
 # Contributing to ViDAP
 
-Thank you for helping shape ViDAP. The repository has a bounded foundation
-scaffold that is awaiting independent validation. It builds an intentionally
-empty web entry point, not a runnable product application. Contributions should
-make approved work clearer, safer, or more verifiable without implying that a
-planned capability already exists.
+Thank you for helping shape ViDAP. The repository has a bounded Phase 0
+foundation that is awaiting independent validation. It includes a small local
+shell, not a runnable product application. Contributions should make approved
+work clearer, safer, or more verifiable without implying that a planned
+capability already exists.
 
 ## Supported setup and build commands
 
@@ -23,8 +23,33 @@ npm.cmd run build
 ignored web build output. Do not replace or casually regenerate
 `package-lock.json` or `python/uv.lock`.
 
-There is no `dev`, `launch`, or `smoke` task. Cross-process smoke work remains
-owned by a later approved packet.
+## Local foundation tasks
+
+Use these additional root tasks only after locked setup:
+
+```powershell
+npm.cmd run launch
+npm.cmd run smoke
+```
+
+`launch` starts the known Python and Vite children on fixed loopback IPv4 ports
+`127.0.0.1:8000` and `127.0.0.1:5173`, waits for the direct and proxied static
+status response, then remains active. It does not open a browser; manually
+open the printed `127.0.0.1:5173` URL and press Ctrl+C in that terminal to
+stop its child process trees. `smoke` performs the same readiness proof and
+automatic cleanup. It must never select a different port, bind publicly, write
+a log/PID file, or terminate a process it did not start.
+
+The shell may display only its Phase 0 limitation and the local host status.
+`GET /api/status` is the sole static, input-free cross-boundary response; it is
+not a health/product API or a generic contract. Workflow, graph, data, model,
+experiment, export, persistence, browser E2E, hosting, and desktop work remain
+deferred.
+
+`fixtures/p0-ep07-foundation-status.json` is the one synthetic ≤1 KiB EP07
+fixture. It records expected static status evidence and required provenance,
+terms, consumer, privacy, and review metadata. Only the EP07 harness/tests may
+consume it; do not serve it, treat it as input, or add dataset-like fixtures.
 
 ## Local quality evidence
 
@@ -40,8 +65,8 @@ npm.cmd run coverage
 npm.cmd run check
 ```
 
-`check` is the ordered non-mutating aggregate. `coverage` produces ignored V8
-and coverage.py reports without a percentage requirement. `format:write` and
+`check` is the ordered non-mutating aggregate and runs `smoke` last. `coverage`
+produces ignored V8 and coverage.py reports without a percentage requirement. `format:write` and
 `lint:fix` are explicit repair actions and must not be folded into normal
 checks. The current lint layer intentionally covers TypeScript-aware rules and
 React Hooks; JSX accessibility linting is deferred under decision record 0001,
@@ -117,7 +142,8 @@ Every proposed change should say:
 - the linked governing requirement, decision, or approved packet.
 
 Tests and documentation are delivery work, not cleanup. Do not invent public
-project commands beyond the approved setup/build scaffold.
+project commands beyond the approved bounded setup, build, launch, and smoke
+tasks.
 
 ## Dependencies, data, and durable decisions
 

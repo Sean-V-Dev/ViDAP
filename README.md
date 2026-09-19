@@ -6,9 +6,8 @@ transform data, train and evaluate established machine-learning libraries,
 compare experiments, understand results in practical language, and export
 conventional Python or Jupyter artifacts.
 
-> **Foundation scaffold is implemented and awaiting independent validation.** It
-> builds an intentionally empty web entry point only; no runnable application
-> shell or product behavior exists.
+> **Phase 0 foundation is implemented and awaiting independent validation.** It
+> is a deliberately small runnable shell, not a product application.
 
 ## Intended architecture and prerequisites
 
@@ -33,9 +32,35 @@ npm.cmd run build
 ```
 
 `setup` performs only locked npm installation and locked uv synchronization.
-`build` produces only the ignored `apps/web/dist/` output from the empty web
-entry point. Both committed lockfiles are authoritative and must not be
-casually regenerated or replaced.
+`build` produces only the ignored `apps/web/dist/` output. Both committed
+lockfiles are authoritative and must not be casually regenerated or replaced.
+
+## Launch and smoke
+
+The supported runnable foundation is loopback-only. It starts the Python host
+on `http://127.0.0.1:8000` and the Vite development server on
+`http://127.0.0.1:5173`; the web server proxies only `/api` to the Python host.
+Neither command opens a browser or exposes a LAN/public listener.
+
+```powershell
+npm.cmd run launch
+npm.cmd run smoke
+```
+
+`launch` waits for the static local status seam, prints the web loopback URL,
+and leaves both local processes running. Open the printed URL manually, then
+press Ctrl+C in the launch terminal to stop its known child process trees.
+`smoke` starts the same two processes, verifies the direct and Vite-proxied
+`GET /api/status` response, validates the controlled fixture, and stops its
+own children automatically. It has a finite 15-second startup timeout and does
+not write logs, PID files, or application state.
+
+The sole status body is
+`{"application":"ViDAP","scope":"phase-0-foundation","status":"ready"}`.
+It takes no input and reads no fixture, data, or state. The static fixture at
+[`fixtures/p0-ep07-foundation-status.json`](fixtures/p0-ep07-foundation-status.json)
+is synthetic metadata and an expected-result oracle for the EP07 harness and
+tests only; it is not application data and is not served by the web shell.
 
 ## Local quality commands
 
@@ -51,8 +76,8 @@ npm.cmd run coverage
 npm.cmd run check
 ```
 
-`check` runs formatting, linting, types, unit tests, build, and in-process
-integration tests in that order. `coverage` writes ignored Vitest V8 and
+`check` runs formatting, linting, types, unit tests, build, in-process
+integration tests, and `smoke` last. `coverage` writes ignored Vitest V8 and
 coverage.py reports only; no Phase 0 coverage percentage is an acceptance
 threshold. `format:write` and `lint:fix` are explicit opt-in repair commands
 and never run through `check`.
@@ -84,13 +109,14 @@ GitHub Actions updates; it neither updates uv nor auto-merges anything.
 
 ## Scope today
 
-Phase 0 is establishing project policy and reproducible foundations. There is
-no `dev`, `launch`, or `smoke` command, application shell, workflow schema,
-API, dataset, model, hosted service, authentication, deployment, or
-cross-platform support claim. Windows remains the only supported platform
-until other environments are independently validated. JSX accessibility linting
-is intentionally deferred by decision record 0001 until a maintained compatible
-peer set and meaningful visible JSX exist.
+Phase 0 establishes project policy and reproducible foundations. The bounded
+shell has no workflow schema, graph, dataset, data loader, model, experiment,
+export, authentication, persistence, telemetry, hosted service, deployment,
+or desktop-wrapper capability. `/api/status` is the sole local foundation seam;
+automatic OpenAPI and documentation endpoints are disabled. Windows remains
+the only supported platform until other environments are independently
+validated. JSX accessibility linting is intentionally deferred by decision
+record 0001 until a maintained compatible peer set and meaningful JSX exist.
 
 ## Authority and navigation
 
