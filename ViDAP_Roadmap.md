@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Status | Approved, amended |
-| Version | 1.9 |
+| Version | 2.1 |
 | Approved | 2026-09-17 |
 | Last updated | 2026-09-19 |
 | Parent | `ViDAP_Phased_Plan_Spine.md` version 1.2 |
@@ -36,11 +36,11 @@ Detailed work is planned one phase at a time. Roadmap changes may clarify sequen
 |---|---|---|
 | Product specification | Governing source | `ViDAP_Overview.txt` |
 | Phased Plan Spine | Approved, amended | Version 1.2, approved 2026-09-17 and amended 2026-09-19 |
-| Roadmap | Approved, amended | Version 1.9, approved 2026-09-17 and updated 2026-09-19 |
+| Roadmap | Approved, amended | Version 2.1, approved 2026-09-17 and updated 2026-09-20 |
 | Phase 0 | Complete | P0-EP01 through P0-EP08 accepted and centrally reconciled |
-| Phase 1 | Ready for detailed planning | Phase 0 evidence reconciled; Phase 1 plan may be drafted |
+| Phase 1 | First decision packet approved | `ViDAP_Phase_1_Plan.md` v1.0 and `ViDAP_P1_EP01.md` v0.1 are approved; only bounded decision research is authorized |
 | Phases 2-11 | Sequenced only | Remain at roadmap resolution until predecessor reconciliation |
-| Execution packets | Eight complete | P0-EP01 through P0-EP08 complete; no Phase 1 packet drafted |
+| Execution packets | Eight complete; one approved | P0-EP01 through P0-EP08 complete; P1-EP01 is approved for decision-report work only |
 | Product implementation | Not started | No implementation is authorized by this roadmap |
 
 No percentage-complete values are used. A phase moves state only when its named gate and evidence support the change.
@@ -110,7 +110,7 @@ H3 is the first target that demonstrates the core product promise end to end. H4
 - **Visible demonstration:** Valid, invalid, branched, and versioned example workflows can be inspected and round-tripped; invalid connections explain why they fail.
 - **Architectural checkpoint A1:** Workflow semantics are independent of visual layout; typed node contracts and compatibility rules are testable without the UI.
 - **Decisions due in the phase plan:** Serialization encoding; schema evolution and migration policy; node identity; type-system depth; contract registration and discovery.
-- **Status:** Sequenced; not ready for detailed planning.
+- **Status:** Phase 1 plan v1.0 and P1-EP01 v0.1 are approved. P1-EP01 authorizes decision-report work only; no Phase 1 implementation is authorized.
 
 ### P2 - Deterministic Execution and Run Foundations
 
@@ -336,4 +336,4 @@ Calendar estimates may be added after Phase 0 establishes the repository baselin
 
 ## 12. Next Action
 
-Draft the Phase 1 plan — Canonical Workflow and Node Contract Kernel. It must select and bound the workflow representation, node-contract model, validation behavior, serialization/evolution approach, and Phase 1 evidence without authorizing implementation or preempting Phase 2 execution decisions.
+Run `ViDAP_P1_EP01.md` v0.1 with a fresh bounded worker. It may perform only the packet's research and create its one decision report. Afterwards, obtain independent validation before Central considers D1.1–D1.7; workflow-model implementation and Phase 2 execution remain unauthorized.
