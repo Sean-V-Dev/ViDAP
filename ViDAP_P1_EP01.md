@@ -2,15 +2,17 @@
 
 | Field | Value |
 |---|---|
-| Status | Approved for execution |
+| Status | Complete — accepted by Central |
 | Packet version | 0.1 |
 | Execution approved | 2026-09-20 by explicit user direction |
+| Completed | 2026-09-20 |
 | Packet type | Research and decision; documentation-only repository change |
 | Parent phase plan | `ViDAP_Phase_1_Plan.md` version 1.0 |
 | Prerequisite | Phase 0 complete through P0-EP08 reconciliation |
 | Workstream | WS1.1 — Decision records |
 | Decisions covered | D1.1 through D1.7 |
 | Authorized worker output | `ViDAP_P1_EP01_Decision_Report.md` |
+| Central reconciliation | `ViDAP_P1_EP01_Validation_and_Reconciliation.md` |
 | Created | 2026-09-20 |
 | Owner | Central |
 
@@ -435,7 +437,8 @@ The worker must return:
 
 ## 16. Next Action
 
-P1-EP01 is approved for bounded execution. A fresh worker may create only the
-decision report. Its completion still requires independent validation and
-Central acceptance of D1.1–D1.7; neither outcome authorizes workflow-model
+P1-EP01 is complete. Independent validation returned `Accept`, and Central
+accepted D1.1–D1.7 in `ViDAP_P1_EP01_Validation_and_Reconciliation.md` on
+2026-09-20. Central may now draft P1-EP02 as a separate bounded packet. This
+completion does not authorize P1-EP02 execution or workflow-model
 implementation.
