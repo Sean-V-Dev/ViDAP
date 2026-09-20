@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Status | Approved, amended |
-| Version | 1.8 |
+| Version | 1.9 |
 | Approved | 2026-09-17 |
 | Last updated | 2026-09-19 |
 | Parent | `ViDAP_Phased_Plan_Spine.md` version 1.2 |
@@ -36,10 +36,11 @@ Detailed work is planned one phase at a time. Roadmap changes may clarify sequen
 |---|---|---|
 | Product specification | Governing source | `ViDAP_Overview.txt` |
 | Phased Plan Spine | Approved, amended | Version 1.2, approved 2026-09-17 and amended 2026-09-19 |
-| Roadmap | Approved, amended | Version 1.8, approved 2026-09-17 and updated 2026-09-19 |
-| Phase 0 | Active | P0-EP01 through P0-EP07 complete; P0-EP08 v0.4 approved for documentation-only delta closeout |
-| Phases 1-11 | Sequenced only | Remain at roadmap resolution until predecessor reconciliation |
-| Execution packets | Seven complete; one active packet | P0-EP01 through P0-EP07 complete; P0-EP08 version 0.4 is approved for documentation-only delta closeout |
+| Roadmap | Approved, amended | Version 1.9, approved 2026-09-17 and updated 2026-09-19 |
+| Phase 0 | Complete | P0-EP01 through P0-EP08 accepted and centrally reconciled |
+| Phase 1 | Ready for detailed planning | Phase 0 evidence reconciled; Phase 1 plan may be drafted |
+| Phases 2-11 | Sequenced only | Remain at roadmap resolution until predecessor reconciliation |
+| Execution packets | Eight complete | P0-EP01 through P0-EP08 complete; no Phase 1 packet drafted |
 | Product implementation | Not started | No implementation is authorized by this roadmap |
 
 No percentage-complete values are used. A phase moves state only when its named gate and evidence support the change.
@@ -100,7 +101,7 @@ H3 is the first target that demonstrates the core product promise end to end. H4
 - **Visible demonstration:** A new environment can follow documented setup, run checks, and launch the shell without undocumented local state.
 - **Architectural checkpoint A0:** Application shape, component boundaries, repository organization, supported development environment, and dependency policy are explicit and proportionate.
 - **Decisions due in the phase plan:** Application/frontend/backend shape; packaging and local runtime expectations; language/runtime versions; testing layers; CI policy; dependency/license workflow; decision-record format; fixture rules.
-- **Status:** Active; P0-EP01 through P0-EP07 complete, with D0.1-D0.7, the repository baseline, reproducible scaffold, quality/test harness, CI/dependency/license controls, and the bounded minimal shell accepted. P0-EP05 v0.1 was blocked before implementation by a frontend quality-tool compatibility conflict; decision record 0001 selected a compatible TypeScript 6.x line and deferred JSX-a11y, and P0-EP05 v0.2 was accepted after independent validation. P0-EP06 v0.4 was accepted after a green hosted Windows run and independent validation. P0-EP07 v0.1 was accepted after independent validation of final commit 9a85dca1, including a green hosted Windows check run whose final task is smoke. EP08 v0.1 used a nonconforming audit temporary-directory override, v0.2 used a non-reproducible hidden-console Ctrl+C observation, and v0.3 found only a historical absolute path in the committed plan. Approved v0.4 verifies the documentation-only delta without repeating unchanged functional proof.
+- **Status:** Complete. P0-EP01 through P0-EP08, D0.1-D0.7, the repository baseline, reproducible scaffold, quality/test harness, CI/dependency/license controls, bounded minimal shell, and documentation-only closeout are accepted and centrally reconciled. EP08 v0.1 used a nonconforming audit temporary-directory override, v0.2 used a non-reproducible hidden-console Ctrl+C observation, and v0.3 found only a historical absolute path in the committed plan. EP08 v0.4 independently verified the documentation-only delta, preserving the earlier unchanged functional proof and resolving the hygiene condition.
 
 ### P1 - Canonical Workflow and Node Contract Kernel
 
@@ -335,4 +336,4 @@ Calendar estimates may be added after Phase 0 establishes the repository baselin
 
 ## 12. Next Action
 
-Execute approved P0-EP08 version 0.4 with one documentation-only delta-closeout worker. It verifies the committed documentation correction and the unchanged functional baseline without rerunning setup, tests, smoke, or audit. Independent validation and Central reconciliation remain required before Phase 0 can be complete.
+Draft the Phase 1 plan — Canonical Workflow and Node Contract Kernel. It must select and bound the workflow representation, node-contract model, validation behavior, serialization/evolution approach, and Phase 1 evidence without authorizing implementation or preempting Phase 2 execution decisions.

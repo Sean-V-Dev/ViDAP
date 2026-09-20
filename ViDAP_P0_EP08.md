@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Approved for bounded execution |
+| Status | Complete — accepted by Central |
 | Packet version | 0.4 |
 | Parent phase plan | ViDAP_Phase_0_Plan.md version 1.8 |
 | Prerequisites | P0-EP01 through P0-EP07 — Complete |
@@ -12,6 +12,7 @@
 | Created | 2026-09-19 |
 | Revised | 2026-09-19 |
 | Approved | 2026-09-19, explicit user pre-approval for this documentation-only amendment |
+| Central acceptance | 2026-09-19 |
 | Owner | Central |
 
 ---
@@ -216,6 +217,5 @@ remote/system state, or begin Phase 1.
 
 ## 13. Next action
 
-Version 0.4 is approved for one documentation-only delta-closeout worker.
-Independent validation and Central Phase 0 reconciliation remain separate later
-gates.
+Version 0.4 is complete following independent validation and Central
+reconciliation. Phase 1 detailed planning is now the next permitted artifact.
