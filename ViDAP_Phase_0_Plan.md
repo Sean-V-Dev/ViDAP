@@ -3,10 +3,10 @@
 | Field | Value |
 |---|---|
 | Status | Approved, amended |
-| Version | 1.7 |
+| Version | 1.8 |
 | Approved | 2026-09-17 |
 | Last updated | 2026-09-19 |
-| Parent | `ViDAP_Roadmap.md` version 1.7 |
+| Parent | `ViDAP_Roadmap.md` version 1.8 |
 | Spine phase | P0 - Project Foundation and Delivery Baseline |
 | Product source | `ViDAP_Overview.txt` |
 | Created | 2026-09-17 |
@@ -470,4 +470,4 @@ Phase 0 may not define the workflow schema on Phase 1's behalf.
 
 ## 16. Next Action
 
-P0-EP01 through P0-EP07 are complete. D0.1-D0.7, the open-source/repository baseline, reproducible scaffold, quality/test harness, CI/dependency/license controls, and the bounded runnable-shell seam are accepted in their respective Central reconciliation records. P0-EP05 version 0.1 was blocked before implementation by a frontend quality-tool peer-compatibility conflict; decision record 0001 selected a maintained peer-compatible TypeScript 6.x line and deferred JSX-a11y, and P0-EP05 version 0.2 was accepted after independent validation. P0-EP06 version 0.4 was accepted after locked local controls, a green user-authorized Windows hosted run, independent validation, and Central reconciliation. P0-EP07 version 0.1 was accepted after independent validation of final commit 9a85dca1, including a green hosted Windows smoke path. P0-EP08 version 0.1 used a nonconforming audit temporary-directory override, and version 0.2 used a non-reproducible hidden-console Ctrl+C observation; corrected version 0.3 is approved for one fresh read-only evidence worker. Independent validation and Central reconciliation remain required before Phase 0 can be complete.
+P0-EP01 through P0-EP07 are complete. D0.1-D0.7, the open-source/repository baseline, reproducible scaffold, quality/test harness, CI/dependency/license controls, and the bounded runnable-shell seam are accepted in their respective Central reconciliation records. P0-EP05 version 0.1 was blocked before implementation by a frontend quality-tool peer-compatibility conflict; decision record 0001 selected a maintained peer-compatible TypeScript 6.x line and deferred JSX-a11y, and P0-EP05 version 0.2 was accepted after independent validation. P0-EP06 version 0.4 was accepted after locked local controls, a green user-authorized Windows hosted run, independent validation, and Central reconciliation. P0-EP07 version 0.1 was accepted after independent validation of final commit 9a85dca1, including a green hosted Windows smoke path. EP08 version 0.1 used a nonconforming audit temporary-directory override, v0.2 used a non-reproducible hidden-console Ctrl+C observation, and v0.3 found only a historical absolute path in the committed plan. Version 0.4 is approved for documentation-only delta closeout; it retains the passed v0.3 functional evidence only after proving no behavior-affecting path changed. Independent validation and Central reconciliation remain required before Phase 0 can be complete.
