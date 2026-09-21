@@ -3,14 +3,14 @@
 | Field | Value |
 |---|---|
 | Status | Approved |
-| Version | 1.3 |
-| Parent | ViDAP_Roadmap.md version 2.4 |
+| Version | 1.4 |
+| Parent | ViDAP_Roadmap.md version 2.5 |
 | Spine phase | Phase 1 — Canonical Workflow and Node Contract Kernel |
 | Product source | ViDAP_Overview.txt |
 | Prerequisite | Phase 0 complete through P0-EP08 reconciliation |
 | Created | 2026-09-19 |
 | Approved | 2026-09-20 by explicit user direction |
-| Last updated | 2026-09-20 after P1-EP02 reconciliation |
+| Last updated | 2026-09-20 after P1-EP03 draft |
 | Owner | Central |
 
 ---
@@ -181,7 +181,7 @@ untrusted code.
 |---|---|---|---|
 | WS1.1 Decision records | Resolve D1.1-D1.7 with evidence and durable tradeoffs | Phase 0 reconciliation | Complete: P1-EP01 reconciliation accepts D1.1-D1.7 |
 | WS1.2 Canonical document kernel | Implement the selected workflow document, identities, edges, and semantic/layout boundary | D1.1-D1.2 | Complete: P1-EP02 accepted document kernel |
-| WS1.3 Contracts and registry | Implement selected node definitions, ports, parameter contracts, and registration rules | D1.3-D1.4, WS1.2 | P1-EP03: node-contract registry |
+| WS1.3 Contracts and registry | Implement selected node definitions, ports, parameter contracts, and registration rules | D1.3-D1.4, WS1.2 | P1-EP03 draft awaiting approval |
 | WS1.4 Semantic validation | Implement deterministic structural/semantic validation and diagnostics | D1.5, WS1.2-WS1.3 | P1-EP04: validation and diagnostics |
 | WS1.5 Compatibility proof | Implement selected version handling and controlled fixtures/examples | D1.6-D1.7, WS1.2-WS1.4 | P1-EP05: versioning and representative workflows |
 | WS1.6 Closeout | Independently reproduce Phase 1 evidence and reconcile the outcome | WS1.1-WS1.5 | P1-EP06: validation and reconciliation evidence |
@@ -327,6 +327,6 @@ semantics remain undecided.
 P1-EP01 and P1-EP02 are complete. D1.1-D1.7 are accepted in
 `ViDAP_P1_EP01_Validation_and_Reconciliation.md`, and the bounded document
 kernel is accepted in `ViDAP_P1_EP02_Validation_and_Reconciliation.md`.
-Central may draft P1-EP03 — Node-Contract Registry. Each P1 packet requires
-its own explicit approval before execution; P1-EP03 is not yet drafted or
-authorized.
+P1-EP03 — Node-Contract Registry is drafted and awaits Central approval. Each
+P1 packet requires its own explicit approval before execution; no P1-EP03
+implementation is authorized by this plan update.
