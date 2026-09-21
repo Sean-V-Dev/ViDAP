@@ -1,0 +1,65 @@
+{
+  "fixtureManifestVersion": "1.0",
+  "fixtures": [
+    {
+      "id": "p1-ep05-valid-branched-v1",
+      "schemaVersion": "1.0",
+      "path": "fixtures/p1-ep05/valid-branched-v1.json",
+      "byteSize": 3378,
+      "sha256": "11D3D5FCBBC66C2A5D038AF1A52A32DF7381AD33D3F143BDF2E18D23BB3C7299",
+      "provenance": "Synthetic workflow text authored for P1-EP05 controlled-fixture evidence.",
+      "terms": "MIT",
+      "creationMethod": "Manually authored UTF-8 JSON using accepted non-operational contract specimens.",
+      "expectedResult": {"diagnosticCodes": [], "roundTrip": "deterministic"},
+      "permittedConsumers": ["P1-EP05 tests", "Phase 1 validation and closeout evidence"],
+      "privacyAttestation": "Contains no personal, sensitive, credential, path, network, telemetry, proprietary, or dataset content.",
+      "centralReviewer": "Central",
+      "reviewDate": "2026-09-21"
+    },
+    {
+      "id": "p1-ep05-invalid-unknown-node-v1",
+      "schemaVersion": "1.0",
+      "path": "fixtures/p1-ep05/invalid-unknown-node-v1.json",
+      "byteSize": 217,
+      "sha256": "D89B09B97F7E3B4D0BE569EAAB8ACEF3A01245AB67F19E1A95ED8601A19C1DE8",
+      "provenance": "Synthetic workflow text authored for P1-EP05 controlled-fixture evidence.",
+      "terms": "MIT",
+      "creationMethod": "Manually authored UTF-8 JSON using an intentionally unregistered node type.",
+      "expectedResult": {"diagnosticCodes": ["VIDAP-UNKNOWN-NODE-TYPE"]},
+      "permittedConsumers": ["P1-EP05 tests", "Phase 1 validation and closeout evidence"],
+      "privacyAttestation": "Contains no personal, sensitive, credential, path, network, telemetry, proprietary, or dataset content.",
+      "centralReviewer": "Central",
+      "reviewDate": "2026-09-21"
+    },
+    {
+      "id": "p1-ep05-invalid-unknown-core-field-v1",
+      "schemaVersion": "1.0",
+      "path": "fixtures/p1-ep05/invalid-unknown-core-field-v1.json",
+      "byteSize": 153,
+      "sha256": "3F5B2FF6E535006C457B4EF6B4A190EC9DBD0D498582A5108A7F9BEAD379380D",
+      "provenance": "Synthetic workflow text authored for P1-EP05 controlled-fixture evidence.",
+      "terms": "MIT",
+      "creationMethod": "Manually authored UTF-8 JSON with one rejected core field.",
+      "expectedResult": {"diagnosticCodes": ["VIDAP-UNKNOWN-CORE-FIELD"]},
+      "permittedConsumers": ["P1-EP05 tests", "Phase 1 validation and closeout evidence"],
+      "privacyAttestation": "Contains no personal, sensitive, credential, path, network, telemetry, proprietary, or dataset content.",
+      "centralReviewer": "Central",
+      "reviewDate": "2026-09-21"
+    },
+    {
+      "id": "p1-ep05-unsupported-schema-version-v2",
+      "schemaVersion": "2.0",
+      "path": "fixtures/p1-ep05/unsupported-schema-version-v2.json",
+      "byteSize": 124,
+      "sha256": "8B49BD802C3A9E48E831D47850A905AD6B5F4D1A5F0131BA32787E06872F2B1D",
+      "provenance": "Synthetic workflow text authored for P1-EP05 controlled-fixture evidence.",
+      "terms": "MIT",
+      "creationMethod": "Manually authored UTF-8 JSON with a future schema version.",
+      "expectedResult": {"diagnosticCodes": ["VIDAP-UNSUPPORTED-VERSION"]},
+      "permittedConsumers": ["P1-EP05 tests", "Phase 1 validation and closeout evidence"],
+      "privacyAttestation": "Contains no personal, sensitive, credential, path, network, telemetry, proprietary, or dataset content.",
+      "centralReviewer": "Central",
+      "reviewDate": "2026-09-21"
+    }
+  ]
+}

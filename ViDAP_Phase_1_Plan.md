@@ -2,15 +2,15 @@
 
 | Field | Value |
 |---|---|
-| Status | Approved |
-| Version | 1.4 |
-| Parent | ViDAP_Roadmap.md version 2.5 |
+| Status | Complete — centrally reconciled |
+| Version | 2.3 |
+| Parent | ViDAP_Roadmap.md version 3.4 |
 | Spine phase | Phase 1 — Canonical Workflow and Node Contract Kernel |
 | Product source | ViDAP_Overview.txt |
 | Prerequisite | Phase 0 complete through P0-EP08 reconciliation |
 | Created | 2026-09-19 |
 | Approved | 2026-09-20 by explicit user direction |
-| Last updated | 2026-09-20 after P1-EP03 draft |
+| Last updated | 2026-09-21 after P1-EP06 acceptance and Phase 1 reconciliation |
 | Owner | Central |
 
 ---
@@ -68,7 +68,7 @@ The Phase 1 plan and every child packet must read:
 3. ViDAP_Phased_Plan_Spine.md version 1.2, especially Phase 1, the canonical
    workflow invariant, typed contracts, layer separation, and validation
    scaling.
-4. ViDAP_Roadmap.md version 2.0, especially P1 and checkpoint A1.
+4. ViDAP_Roadmap.md version 3.4, especially P1 and checkpoint A1.
 5. ViDAP_Phase_0_Plan.md version 1.9 and
    ViDAP_P0_EP08_Validation_and_Reconciliation.md.
 6. The accepted P0 decision/reconciliation records, particularly D0.1-D0.3
@@ -181,10 +181,10 @@ untrusted code.
 |---|---|---|---|
 | WS1.1 Decision records | Resolve D1.1-D1.7 with evidence and durable tradeoffs | Phase 0 reconciliation | Complete: P1-EP01 reconciliation accepts D1.1-D1.7 |
 | WS1.2 Canonical document kernel | Implement the selected workflow document, identities, edges, and semantic/layout boundary | D1.1-D1.2 | Complete: P1-EP02 accepted document kernel |
-| WS1.3 Contracts and registry | Implement selected node definitions, ports, parameter contracts, and registration rules | D1.3-D1.4, WS1.2 | P1-EP03 draft awaiting approval |
-| WS1.4 Semantic validation | Implement deterministic structural/semantic validation and diagnostics | D1.5, WS1.2-WS1.3 | P1-EP04: validation and diagnostics |
-| WS1.5 Compatibility proof | Implement selected version handling and controlled fixtures/examples | D1.6-D1.7, WS1.2-WS1.4 | P1-EP05: versioning and representative workflows |
-| WS1.6 Closeout | Independently reproduce Phase 1 evidence and reconcile the outcome | WS1.1-WS1.5 | P1-EP06: validation and reconciliation evidence |
+| WS1.3 Contracts and registry | Implement selected node definitions, ports, parameter contracts, and registration rules | D1.3-D1.4, WS1.2 | Complete: P1-EP03 accepted contracts and static registry |
+| WS1.4 Semantic validation | Implement deterministic structural/semantic validation and diagnostics | D1.5, WS1.2-WS1.3 | Complete: P1-EP04 accepted validation/diagnostics |
+| WS1.5 Compatibility proof | Implement selected version handling and controlled fixtures/examples | D1.6-D1.7, WS1.2-WS1.4 | Complete: P1-EP05 accepted compatibility proof |
+| WS1.6 Closeout | Independently reproduce Phase 1 evidence and reconcile the outcome | WS1.1-WS1.5 | Complete: P1-EP06 accepted and Phase 1 reconciled |
 
 These are proposed boundaries, not approved packets. Central may split a
 packet further if a decision or implementation unit is not independently
@@ -327,6 +327,8 @@ semantics remain undecided.
 P1-EP01 and P1-EP02 are complete. D1.1-D1.7 are accepted in
 `ViDAP_P1_EP01_Validation_and_Reconciliation.md`, and the bounded document
 kernel is accepted in `ViDAP_P1_EP02_Validation_and_Reconciliation.md`.
-P1-EP03 — Node-Contract Registry is drafted and awaits Central approval. Each
-P1 packet requires its own explicit approval before execution; no P1-EP03
-implementation is authorized by this plan update.
+P1-EP01 through P1-EP06 are complete. Phase 1 is reconciled in
+`ViDAP_P1_EP06_Validation_and_Reconciliation.md`. Central may now draft the
+Phase 2 plan — Deterministic Execution and Run Foundations. A Phase 2 plan
+would require its own approval before any P2 execution packet is drafted or
+implemented.

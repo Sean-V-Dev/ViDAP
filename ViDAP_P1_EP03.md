@@ -2,15 +2,17 @@
 
 | Field | Value |
 |---|---|
-| Status | Approved for execution |
+| Status | Complete — accepted by Central |
 | Packet version | 0.1 |
 | Execution approved | 2026-09-20 by explicit user direction |
+| Completed | 2026-09-20 |
 | Packet type | Bounded Python contract and static-registry implementation |
 | Parent phase plan | `ViDAP_Phase_1_Plan.md` version 1.4 |
 | Prerequisites | P1-EP01 and P1-EP02 complete |
 | Prerequisite reconciliations | `ViDAP_P1_EP01_Validation_and_Reconciliation.md`; `ViDAP_P1_EP02_Validation_and_Reconciliation.md` |
 | Workstream | WS1.3 — Contracts and registry |
 | Authorized worker report | `ViDAP_P1_EP03_Implementation_Report.md` |
+| Central reconciliation | `ViDAP_P1_EP03_Validation_and_Reconciliation.md` |
 | Created | 2026-09-20 |
 | Owner | Central |
 
@@ -358,6 +360,7 @@ begin P1-EP04.
 
 ## 13. Next Action
 
-P1-EP03 is approved for bounded execution. Its completion still requires fresh
-independent validation and Central acceptance; neither outcome authorizes
-P1-EP04 or any later implementation.
+P1-EP03 is complete. Independent validation returned `Accept`, and Central
+accepted the result in `ViDAP_P1_EP03_Validation_and_Reconciliation.md` on
+2026-09-20. Central may now draft P1-EP04 as a separate bounded packet. This
+completion does not authorize P1-EP04 execution or later implementation.

@@ -24,6 +24,23 @@ type JsonObject = dict[str, object]
 class WorkflowDecodeError(ValueError):
     """Signals malformed JSON or a malformed basic workflow-document envelope."""
 
+    def __init__(
+        self,
+        message: str,
+        *,
+        code: str = "VIDAP-MALFORMED-ENVELOPE",
+        category: str = "structural",
+        field: str = "root",
+        remedy: str = "Supply a complete workflow document with the required shape.",
+        detail: str | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.code = code
+        self.category = category
+        self.field = field
+        self.remedy = remedy
+        self.detail = detail
+
 
 def serialize_document(document: WorkflowDocument) -> str:
     """Encode a full document as UTF-8 JSON text with two-space indent and one newline."""
@@ -45,7 +62,12 @@ def deserialize_document(text: str) -> WorkflowDocument:
     """
 
     if not isinstance(text, str):
-        raise WorkflowDecodeError("Workflow JSON must be text.")
+        raise WorkflowDecodeError(
+            "Workflow JSON must be text.",
+            code="VIDAP-MALFORMED-JSON",
+            field="text",
+            remedy="Supply UTF-8 JSON text for the workflow document.",
+        )
     try:
         decoded = json.loads(
             text,
@@ -53,11 +75,14 @@ def deserialize_document(text: str) -> WorkflowDocument:
             parse_constant=_reject_non_json_constant,
         )
         return _decode_document(_expect_object(decoded, "root"))
-    except (json.JSONDecodeError, RecursionError, TypeError, ValueError) as error:
-        if isinstance(error, WorkflowDecodeError):
-            raise
+    except WorkflowDecodeError:
+        raise
+    except json.JSONDecodeError, RecursionError, TypeError, ValueError:
         raise WorkflowDecodeError(
-            "Workflow JSON has an invalid basic envelope."
+            "Workflow JSON is malformed.",
+            code="VIDAP-MALFORMED-JSON",
+            field="text",
+            remedy="Correct the JSON syntax and submit one complete JSON value.",
         ) from None
 
 
@@ -79,7 +104,10 @@ def _unique_object(pairs: list[tuple[str, object]]) -> JsonObject:
     for key, value in pairs:
         if key in result:
             raise WorkflowDecodeError(
-                "Workflow JSON must not contain duplicate object names."
+                "Workflow JSON must not contain duplicate object names.",
+                code="VIDAP-DUPLICATE-OBJECT-NAME",
+                field="root",
+                remedy="Keep one value for each object name.",
             )
         result[key] = value
     return result
@@ -91,7 +119,18 @@ def _reject_non_json_constant(value: str) -> None:
 
 def _expect_object(value: object, name: str) -> JsonObject:
     if not isinstance(value, dict):
-        raise WorkflowDecodeError(f"{name} must be an object.")
+        raise WorkflowDecodeError(
+            f"{name} must be an object.",
+            code=(
+                "VIDAP-NONOBJECT-ROOT" if name == "root" else "VIDAP-MALFORMED-ENVELOPE"
+            ),
+            field=name,
+            remedy=(
+                "Supply one JSON object as the workflow root."
+                if name == "root"
+                else "Supply the required object value for this workflow field."
+            ),
+        )
     return value
 
 
@@ -120,15 +159,41 @@ def _expect_string(value: object, name: str) -> str:
 
 
 def _decode_document(value: JsonObject) -> WorkflowDocument:
-    _expect_exact_keys(
-        value,
-        name="root",
-        required={"format", "schemaVersion", "workflowId", "nodes", "edges"},
-        optional={"layout"},
-    )
-    if value["format"] != "vidap.workflow" or value["schemaVersion"] != "1.0":
+    for field, expected in (("format", "vidap.workflow"), ("schemaVersion", "1.0")):
+        if field not in value or value[field] != expected:
+            raise WorkflowDecodeError(
+                f"Workflow {field} is not supported.",
+                code="VIDAP-UNSUPPORTED-VERSION",
+                category="unsupported",
+                field=field,
+                remedy="Use format 'vidap.workflow' with schemaVersion '1.0'.",
+                detail=f"Expected {field}={expected!r}.",
+            )
+    allowed = {"format", "schemaVersion", "workflowId", "nodes", "edges", "layout"}
+    unknown = set(value) - allowed
+    if "extensions" in unknown:
         raise WorkflowDecodeError(
-            "Workflow JSON has an unsupported format or schema version."
+            "Workflow extensions are not supported by schemaVersion '1.0'.",
+            code="VIDAP-UNSUPPORTED-EXTENSION",
+            category="unsupported",
+            field="extensions",
+            remedy="Remove extension content or use a future reader that explicitly supports it.",
+        )
+    if unknown:
+        fields = ", ".join(sorted(unknown))
+        raise WorkflowDecodeError(
+            f"Workflow JSON has unknown core field(s): {fields}.",
+            code="VIDAP-UNKNOWN-CORE-FIELD",
+            field=fields,
+            remedy="Remove fields that are not part of the supported 1.0 envelope.",
+        )
+    required = {"format", "schemaVersion", "workflowId", "nodes", "edges"}
+    if not required.issubset(value):
+        raise WorkflowDecodeError(
+            "Workflow JSON is missing required envelope fields.",
+            code="VIDAP-MALFORMED-ENVELOPE",
+            field="root",
+            remedy="Supply format, schemaVersion, workflowId, nodes, and edges.",
         )
     try:
         layout = _decode_layout(value["layout"]) if "layout" in value else None
@@ -142,8 +207,15 @@ def _decode_document(value: JsonObject) -> WorkflowDocument:
             ),
             layout=layout,
         )
+    except WorkflowDecodeError:
+        raise
     except ValueError:
-        raise WorkflowDecodeError("Workflow JSON has malformed basic values.") from None
+        raise WorkflowDecodeError(
+            "Workflow JSON has malformed basic values.",
+            code="VIDAP-MALFORMED-ENVELOPE",
+            field="root",
+            remedy="Correct the affected envelope value and use the supported 1.0 shape.",
+        ) from None
 
 
 def _decode_node(value: object) -> WorkflowNode:

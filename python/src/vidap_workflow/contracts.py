@@ -37,6 +37,21 @@ PARAMETER_VALUE_KINDS = (
 )
 """The JSON-compatible declared value kinds for parameter metadata."""
 
+PARAMETER_CONSTRAINT_KEYS = (
+    "allowedValues",
+    "minimum",
+    "maximum",
+    "minLength",
+    "maxLength",
+    "pattern",
+    "minItems",
+    "maxItems",
+    "uniqueItems",
+    "requiredKeys",
+    "nullable",
+)
+"""The complete initial declarative parameter-constraint vocabulary."""
+
 _TYPE_ID_PATTERN = re.compile(r"^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)+$")
 
 type JsonScalar = str | int | float | bool | None

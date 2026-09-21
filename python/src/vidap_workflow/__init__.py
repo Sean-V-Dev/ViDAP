@@ -24,6 +24,7 @@ from .contracts import (
 from .contracts import (
     PortDefinition as PortDefinition,
 )
+from .diagnostics import Diagnostic as Diagnostic
 from .document import (
     Edge,
     Endpoint,
@@ -45,6 +46,8 @@ from .serialization import (
     serialize_document,
     serialize_semantic_document,
 )
+from .validation import validate_workflow as validate_workflow
+from .validation import validate_workflow_text as validate_workflow_text
 
 __all__ = (
     "Edge",
