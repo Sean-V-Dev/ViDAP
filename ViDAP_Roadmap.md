@@ -3,10 +3,10 @@
 | Field | Value |
 |---|---|
 | Status | Approved, amended |
-| Version | 3.5 |
+| Version | 3.7 |
 | Approved | 2026-09-17 |
 | Last updated | 2026-09-21 |
-| Parent | `ViDAP_Phased_Plan_Spine.md` version 1.2 |
+| Parent | `ViDAP_Phased_Plan_Spine.md` version 1.3 |
 | Product source | `ViDAP_Overview.txt` |
 | Created | 2026-09-17 |
 | Owner | Central |
@@ -35,12 +35,13 @@ Detailed work is planned one phase at a time. Roadmap changes may clarify sequen
 | Artifact or scope | Status | Evidence or next gate |
 |---|---|---|
 | Product specification | Governing source | `ViDAP_Overview.txt` |
-| Phased Plan Spine | Approved, amended | Version 1.2, approved 2026-09-17 and amended 2026-09-19 |
-| Roadmap | Approved, amended | Version 3.5, approved 2026-09-17 and updated 2026-09-21 |
+| Phased Plan Spine | Approved, amended | Version 1.3, approved 2026-09-17 and amended 2026-09-19 and 2026-09-21 |
+| Roadmap | Approved, amended | Version 3.7, approved 2026-09-17 and updated 2026-09-21 |
 | Phase 0 | Complete | P0-EP01 through P0-EP08 accepted and centrally reconciled |
 | Phase 1 | Complete | `ViDAP_P1_EP06_Validation_and_Reconciliation.md` accepts P1-EP06 and reconciles P1-AC12 |
-| Phase 2 | Plan draft awaiting approval | `ViDAP_Phase_2_Plan.md` v0.1 is ready for Central review; no P2 execution packet is authorized |
+| Phase 2 | Decision packet ready to draft | `ViDAP_Phase_2_Plan.md` v1.0 is approved; P2-EP01 may now be drafted but is not authorized for execution |
 | Phases 3-11 | Sequenced only | Remain at roadmap resolution until predecessor reconciliation |
+| Visual workflow interaction direction | Approved cross-phase direction | `UX refinement.txt` is incorporated into Spine v1.3 and the Phase 3–8 roadmap boundaries; it does not change current Phase 2 planning/execution status |
 | Execution packets | Fourteen complete | P0-EP01 through P0-EP08 and P1-EP01 through P1-EP06 complete; Phase 2 execution remains unauthorized |
 | Product implementation | Phase 1 workflow kernel complete | Accepted document, static contracts, validation, and compatibility proof only; no UI, execution, data/ML, persistence, or export behavior |
 
@@ -70,6 +71,35 @@ P0 Foundation
 This order protects the canonical workflow and deterministic runtime from being shaped around UI convenience, a single model family, or one validation dataset.
 
 Parallel work is allowed only inside an approved phase plan when workstreams have explicit interfaces, separate ownership, compatible file scope, and a shared integration gate. Later phases may receive research or decision preparation when useful, but not detailed implementation planning or execution that assumes unvalidated earlier architecture.
+
+### Visual workflow interaction direction
+
+The approved visual direction is an inspectable experimental workspace, not an
+unrestricted canvas that mechanically exposes every library call. Future UI
+work must preserve four linked principles:
+
+1. **At-a-glance structure:** represent meaningful responsibilities and major
+   experimental decisions visibly; use composite/compact nodes and progressive
+   disclosure for routine detail.
+2. **Semantic regions, not semantic rewrites:** Phase 3 will test vertically
+   organized responsibility regions, user-resizable gutters, and local
+   left-to-right flow. Region placement and width are presentation state; node
+   contracts and the canonical graph alone decide workflow validity.
+3. **Clean by default, traceable on demand:** long cross-region dependencies
+   may render as named boundary exports/imports rather than persistent wires,
+   but their canonical source and consumers must be discoverable through
+   selection, hover, or an equivalent connection trace.
+4. **Experimentation without disorientation:** changing an implementation
+   should preserve a stable conceptual responsibility and compatible graph
+   context where possible. Later phases add data state, model controls/results,
+   experiment lineage, and editable AutoML workflows in that same spatially
+   intelligible model.
+
+`UX refinement.txt` is the detailed design reference. It does not alter the
+completed Phase 1 kernel or current Phase 2 plan. If a later visual packet
+demonstrates a concrete incompatibility, Central must address that specific
+interface through normal change control rather than reopening a completed phase
+generically.
 
 ---
 
@@ -120,22 +150,23 @@ H3 is the first target that demonstrates the core product promise end to end. H4
 - **Visible demonstration:** A branched workflow executes headlessly in dependency order, reproduces deterministic results where expected, and rejects stale cache reuse.
 - **Architectural checkpoint A2:** Runtime dispatch, intermediate representation, run metadata, artifact ownership, caching, and error envelopes remain separate from UI presentation.
 - **Decisions due in the phase plan:** Execution isolation; local scheduling model; artifact and metadata persistence; seed policy; cache keys and invalidation; cancellation and failure propagation boundaries.
-- **Status:** Phase 2 plan v0.1 is drafted and awaits Central approval. No P2
-  execution packet or implementation is authorized.
+- **Status:** Phase 2 plan v1.0 is approved. P2-EP01 — execution/run
+  foundation decisions — may now be drafted; no P2 execution packet or
+  implementation is authorized.
 
 ### P3 - First Visual End-to-End Slice
 
 - **Depends on:** Reconciled P2 evidence.
-- **Roadmap contribution:** Proves that a visual graph can edit and execute the same canonical workflow without duplicating backend semantics.
-- **Visible demonstration:** A user visually assembles, validates, saves, reloads, and executes one deliberately narrow real workflow, including one actionable failure path.
-- **Architectural checkpoint A3:** Forms derive from node contracts; connection rules come from workflow types; displayed results come from recorded execution results.
-- **Decisions due in the phase plan:** Minimal vertical-slice operations; essential graph interactions; result and error presentation; accessibility baseline; UI/runtime integration contract; concise visual design system or equivalent; current maintained design/UX support mechanism; representative screen/state set; and proportionate visual/UX validation method.
+- **Roadmap contribution:** Proves that a visual graph can edit and execute the same canonical workflow without duplicating backend semantics, while keeping an experiment's major shape understandable at a glance.
+- **Visible demonstration:** A user visually assembles, validates, saves, reloads, and executes one deliberately narrow real workflow, including one actionable failure path, multiple semantic regions, a cross-region dependency that skips a neighboring region, a shared branch, user-resizable gutters, compact/expanded nodes, and on-demand dependency tracing.
+- **Architectural checkpoint A3:** Forms derive from node contracts; connection rules come from workflow types; displayed results come from recorded execution results; semantic regions and boundary interfaces render canonical dependencies without becoming a second graph or hidden global state.
+- **Decisions due in the phase plan:** Minimal vertical-slice operations; semantic-region taxonomy and presentation-state ownership; resizable-gutter and boundary-interface behavior; dependency trace/X-ray behavior; compact/expanded/focus node interaction; local connection/layout assistance; result and error presentation; accessibility baseline; UI/runtime integration contract; concise visual design system or equivalent; current maintained design/UX support mechanism; representative screen/state set; and proportionate visual/UX validation method.
 - **Status:** Sequenced; not ready for detailed planning.
 
 ### P4 - Data Intake, Profiling, and Preparation
 
 - **Depends on:** Reconciled P3 evidence.
-- **Roadmap contribution:** Makes real tabular data understandable and deliberately transformable without silent mutation.
+- **Roadmap contribution:** Makes real tabular data understandable and deliberately transformable without silent mutation, including legible data-state summaries in the visual workflow.
 - **Visible demonstration:** Titanic data is loaded, profiled, explicitly prepared, saved, and rerun; a data-quality finding leads to an appropriate corrective node.
 - **Architectural checkpoint A4:** Inference is distinguishable from user-approved transformation; column/schema provenance survives each supported operation.
 - **Decisions due in the phase plan:** Initial formats and size limits; type inference policy; profiling thresholds; bounded preparation and feature operations; preview and sampling rules; fixture provenance.
@@ -144,16 +175,16 @@ H3 is the first target that demonstrates the core product promise end to end. H4
 ### P5 - Baseline Supervised Modeling and Evaluation
 
 - **Depends on:** Reconciled P4 evidence.
-- **Roadmap contribution:** Delivers the first useful visual data-science product across data, preparation, training, evaluation, and interpretation.
+- **Roadmap contribution:** Delivers the first useful visual data-science product across data, preparation, training, evaluation, and interpretation, using stable conceptual model responsibilities rather than a sprawling implementation-specific node catalog.
 - **Visible demonstration:** An approved Titanic workflow uses real libraries to train and compare at least the approved baseline path, with practical metrics and reproducible outputs.
 - **Architectural checkpoint A5:** Target, split, preprocessing, model parameters, and metrics flow through explicit contracts and are verified at the library boundary.
-- **Decisions due in the phase plan:** Initial task type or types; model families; split and validation policy; leakage checks; metrics; interpretation rules; model-artifact expectations.
+- **Decisions due in the phase plan:** Initial task type or types; model families; split and validation policy; leakage checks; metrics; interpretation rules; model-artifact expectations; implementation-selection behavior; and generic versus curated parameter-presentation boundaries.
 - **Status:** Sequenced; not ready for detailed planning.
 
 ### P6 - Experiment Branching, Comparison, and Reasoning
 
 - **Depends on:** Reconciled P5 evidence.
-- **Roadmap contribution:** Makes experiments durable, comparable, explainable records of changed hypotheses and outcomes.
+- **Roadmap contribution:** Makes experiments durable, comparable, explainable records of changed hypotheses and outcomes, with an intelligible visible lineage/history model.
 - **Visible demonstration:** A user branches a baseline, changes a feature or model parameter, reruns it, sees an accurate configuration/outcome diff, and inspects the earlier state.
 - **Architectural checkpoint A6:** Workflow versions, run records, artifacts, hypotheses, and comparisons have clear identities and lineage without duplicating source-of-truth state.
 - **Decisions due in the phase plan:** Experiment identity; snapshot and restoration semantics; retention; comparison dimensions; shared-upstream reuse; reasoning-note structure.
@@ -171,7 +202,7 @@ H3 is the first target that demonstrates the core product promise end to end. H4
 ### P8 - Extended Tabular Modeling and Inspectable Automation
 
 - **Depends on:** Reconciled P7 evidence.
-- **Roadmap contribution:** Adds stronger modeling and optimization while preserving editable workflows, bounded resources, and visible decisions.
+- **Roadmap contribution:** Adds stronger modeling and optimization while preserving editable, visible starting workflows, bounded resources, and inspectable decisions.
 - **Visible demonstration:** An automated baseline or search exposes preprocessing, validation, model families, parameters, and metrics, then materializes a result as an editable graph.
 - **Architectural checkpoint A8:** Automation composes approved node contracts and run infrastructure rather than creating a separate opaque execution path.
 - **Decisions due in the phase plan:** Boosting libraries; optimizer/AutoML approach; search-space ownership; budgets and cancellation; imbalance handling; grouped/temporal validation subset; ensemble scope.
@@ -235,7 +266,7 @@ These tracks run through every applicable phase but do not become separate featu
 | Security and data responsibility | Bounded file/data handling, safe defaults, fixture provenance, and no unnecessary sensitive data |
 | Performance and resources | Phase-appropriate size envelope, measured bottlenecks, cancellation where needed, and honest limitations |
 | Compatibility and migration | Workflow/schema versions, backward-compatibility policy, migration tests where persistence becomes durable |
-| Visual design, accessibility, and usability | Approved design-system alignment for substantial UI; clear hierarchy, readable information density, progressive disclosure, keyboard/accessibility expectations, understandable validation, representative interaction states, and independent proportionate visual/UX acceptance |
+| Visual design, accessibility, and usability | Approved design-system and visual-workflow-interaction alignment for substantial UI; at-a-glance responsibility structure, readable information density, semantic regions as presentation state, traceable boundary dependencies, progressive disclosure, explicit layout assistance, keyboard/accessibility expectations, understandable validation, representative interaction states, and independent proportionate visual/UX acceptance |
 
 No phase can defer a cross-cutting obligation when omitting it would make the delivered capability materially misleading, irreproducible, unsafe, or unmaintainable.
 
@@ -338,6 +369,6 @@ Calendar estimates may be added after Phase 0 establishes the repository baselin
 
 ## 12. Next Action
 
-Review and, if appropriate, approve `ViDAP_Phase_2_Plan.md` v0.1 —
-Deterministic Execution and Run Foundations. Approval would authorize only
-drafting P2-EP01 decision work; it would not authorize Phase 2 implementation.
+Draft P2-EP01 — execution/run foundation decisions. It must evaluate and
+select the Phase 2 decision set D2.1–D2.8 before any execution-foundation
+implementation packet is drafted. It may not authorize implementation itself.

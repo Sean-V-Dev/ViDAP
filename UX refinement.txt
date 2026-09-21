@@ -1,0 +1,1195 @@
+Yes. At this point I’d make this a **real design amendment**, because we have moved beyond a handful of aesthetic preferences. There is now a coherent interaction model that Phase 3 and later planners need to preserve.
+
+The biggest thing I would emphasize to Central is that **P1 and P2 are already complete**. None of this should automatically trigger reopening them. Most of what we have defined is presentation over the canonical graph and existing execution model. If a later phase discovers a concrete contract incompatibility, Central can address that narrowly then.
+
+Here is the document I would give it.
+
+---
+
+# ViDAP Visual Workflow and Interaction Model Amendment
+
+## Status and Purpose
+
+This amendment defines the intended visual interaction model for ViDAP beginning with the first substantial graphical workflow implementation.
+
+It refines **how the existing workflow, node, execution, experiment, and result concepts should be presented to users**. It does not replace the canonical workflow model or execution architecture.
+
+Phase 1 and Phase 2 are already complete. They should **not be reopened merely to accommodate this amendment**. Future phases should implement these requirements using the existing contracts wherever possible. If implementation discovers a specific incompatibility with an existing contract, that incompatibility should be demonstrated and addressed narrowly rather than reopening completed phases generically.
+
+The purpose of this amendment is to prevent ViDAP from degenerating into a conventional unrestricted node canvas containing hundreds of primitive node types and long crossing connections.
+
+The intended experience is instead:
+
+> **A visually structured, inspectable ML workspace where users can see the major shape of an experiment at a glance, expand details where needed, change implementations without unnecessary rewiring, and experiment without losing orientation.**
+
+---
+
+# 1. Core Visual Principle
+
+ViDAP should visualize the **structure of an experiment**, not mechanically reproduce every Python function call as a separate box.
+
+A visible node should normally correspond to a **coherent responsibility or meaningful experimental decision**.
+
+Examples:
+
+```text
+Data
+Prepare
+Feature Engineering
+Split / Validation
+Model
+Evaluate
+Compare
+Visualize
+Export
+```
+
+A low-level implementation operation does not automatically deserve its own permanently visible node.
+
+For example, standard preparation may internally perform:
+
+```text
+Impute missing values
+Encode categories
+Scale numeric values
+Drop selected columns
+```
+
+but the default human-facing representation may simply be:
+
+```text
+[ Prepare Data ]
+```
+
+The internal operations remain real, inspectable, exportable, auditable, and available to agents. The visual abstraction does not erase execution semantics.
+
+This is analogous to source code using a function:
+
+```python
+prepared = prepare_data(raw_data)
+```
+
+rather than requiring every internal line of `prepare_data()` to appear at the calling site.
+
+---
+
+# 2. Semantic Regions
+
+## 2.1 Concept
+
+The primary canvas should be divided into **vertical semantic regions**, similar in some respects to a Kanban board combined with a node graph.
+
+Candidate regions may include:
+
+```text
+DATA
+PREPARE
+FEATURES
+VALIDATE / SPLIT
+MODEL
+EVALUATE / COMPARE
+OUTPUT
+```
+
+The exact taxonomy may evolve based on representative workflows. These are **responsibility zones**, not mandatory execution stages.
+
+A workflow is not invalid merely because it skips a region.
+
+For example:
+
+```text
+Data → Explore
+```
+
+may bypass preparation.
+
+Likewise:
+
+```text
+Prepared Data → Export
+```
+
+may bypass modeling entirely.
+
+Node contracts and workflow semantics determine validity. Region placement exists to improve human comprehension.
+
+## 2.2 Orientation
+
+The initial design should use:
+
+> **Vertical regions with overall left-to-right workflow progression.**
+
+This preserves the natural reading direction:
+
+```text
+information → transformation → modeling → result
+```
+
+Local computation inside each region should also generally read left-to-right where practical.
+
+Do not rotate the primary application into a top-to-bottom flow merely to distinguish region boundaries.
+
+---
+
+# 3. Resizable Regions and Gutters
+
+Each adjacent pair of regions should be separated by a visible **gutter**.
+
+The gutter is not decorative whitespace. It represents a semantic/module boundary.
+
+Example:
+
+```text
+┌────── DATA ──────┐    ┌───── PREPARE ─────┐    ┌────── MODEL ──────┐
+│                  │    │                    │    │                   │
+│   local nodes    │    │    local nodes     │    │    local nodes    │
+│                  │    │                    │    │                   │
+└──────────────────┘    └────────────────────┘    └───────────────────┘
+                    ↑                          ↑
+                  gutter                    gutter
+```
+
+### Required gutter behavior
+
+The user must be able to:
+
+```text
+grab gutter
+↔ drag left/right
+resize neighboring regions
+```
+
+Region width should therefore belong to user-controlled workspace state.
+
+ViDAP should not constantly rearrange node positions simply because one region becomes wider or narrower.
+
+This is an important property of the design:
+
+> **The user owns spatial arrangement inside a region. ViDAP should assist organization without continuously taking control of layout.**
+
+Possible conveniences such as alignment, distribute, tidy-region, or auto-arrange-branch may exist, but they should generally be explicit actions rather than constant automatic repositioning.
+
+---
+
+# 4. Cross-Region Connections as Interfaces
+
+## 4.1 Problem Being Solved
+
+Traditional node editors render the real graph literally.
+
+For example:
+
+```text
+Features --------------------------------------→ Random Forest
+Features --------------------------------------→ XGBoost
+Features --------------------------------------→ Logistic Regression
+```
+
+As graphs become more complex, these long-distance connections:
+
+* cross unrelated nodes;
+* pass beneath nodes;
+* require users to reposition nodes merely to make wires readable;
+* cause unrelated branches to influence canvas layout;
+* produce visual spaghetti even when the underlying computation is conceptually simple.
+
+ViDAP should test a different representation.
+
+## 4.2 Boundary Export / Import Model
+
+Connections that remain inside one semantic region may use ordinary short node-to-node wires.
+
+When information crosses a region boundary, the persistent long-distance wire should normally terminate at the region's boundary interface.
+
+Conceptually:
+
+```text
+PREPARE
+
+[Prepare Data]
+      │
+      └────→ FeatureTable OUT
+```
+
+Then elsewhere:
+
+```text
+MODEL
+
+FeatureTable IN
+      │
+      ├────→ Random Forest
+      ├────→ XGBoost
+      └────→ Logistic Regression
+```
+
+The canonical graph still contains the real dependency:
+
+```text
+PrepareData.output
+→ RandomForest.input
+
+PrepareData.output
+→ XGBoost.input
+
+PrepareData.output
+→ LogisticRegression.input
+```
+
+Only the **visual rendering** changes.
+
+The region boundary behaves similarly to a software module interface:
+
+```python
+# module A
+export feature_table
+```
+
+and:
+
+```python
+# module D
+import feature_table
+```
+
+The dependency remains explicit without requiring a physical wire to cross every intervening region.
+
+## 4.3 Boundary Rails
+
+Each region should provide visually clear input/output boundary areas or rails.
+
+For example:
+
+```text
+PREPARE
+┌───────────────────────────────┐
+│                               │
+│      [Prepare Data]           │
+│                               │
+│                    OUTPUTS    │
+│                    ● Features │
+│                    ◆ Target   │
+│                    ■ Table    │
+└───────────────────────────────┘
+```
+
+and:
+
+```text
+MODEL
+┌───────────────────────────────┐
+│ INPUTS                        │
+│ ● Features                    │
+│ ◆ Target                      │
+│                               │
+│       [Model]                 │
+│                               │
+└───────────────────────────────┘
+```
+
+The exact visual styling is a Phase 3 design decision, but the conceptual behavior should remain.
+
+## 4.4 Do Not Depend on Positional Alignment
+
+An output on one region boundary does **not** need to be vertically aligned with the corresponding input elsewhere.
+
+This is deliberate.
+
+The semantic identity determines the connection:
+
+```text
+FeatureTable OUT
+```
+
+corresponds to:
+
+```text
+FeatureTable IN
+```
+
+because they represent the same canonical dependency, not because they occupy the same Y coordinate.
+
+This removes one of the primary reasons users have to rearrange unrelated nodes.
+
+## 4.5 Gutters Must Visually Break the Wire
+
+Do not render:
+
+```text
+────● ●────
+```
+
+in a way that makes the user interpret it as one wire with a tiny gap.
+
+The interface should visually communicate:
+
+```text
+────→ FeatureTable OUT
+
+        gutter
+
+FeatureTable IN ────→
+```
+
+The user should read this as:
+
+> “A value leaves one responsibility boundary and is consumed elsewhere.”
+
+rather than:
+
+> “This wire happens to disappear briefly.”
+
+---
+
+# 5. Inspectability of Boundary Connections
+
+Boundary abstraction must never turn dependencies into hidden global state.
+
+Every import should remain traceable to its source.
+
+Selecting or hovering a boundary value should be able to reveal information such as:
+
+```text
+FeatureTable
+
+Produced by:
+PREPARE / Prepare Data
+
+Consumed by:
+MODEL / Random Forest
+MODEL / XGBoost
+MODEL / Logistic Regression
+```
+
+ViDAP should also consider an on-demand **connection X-ray** behavior.
+
+For example:
+
+```text
+click / hover boundary connection
+↓
+dim unrelated graph
+↓
+temporarily reveal actual canonical path(s)
+```
+
+This preserves:
+
+> **clean by default, explicit on demand.**
+
+The boundary system is a visualization of dependencies, not a mechanism for hiding dependencies.
+
+---
+
+# 6. Local Connections
+
+The boundary model primarily solves **long-distance spaghetti**.
+
+Inside a region, ordinary local wires remain appropriate.
+
+Example:
+
+```text
+Feature A ─┐
+Feature B ─┼→ Combine
+Feature C ─┘
+```
+
+Local anti-spaghetti techniques may still include:
+
+* reroute/knot points;
+* connection highlighting;
+* dimming unrelated wires;
+* snap-to-grid;
+* alignment/distribution commands;
+* small local grouping;
+* explicit tidy/arrange actions.
+
+These should support the region system rather than replace it.
+
+---
+
+# 7. Three Forms of Complexity
+
+ViDAP should distinguish three different graph-complexity problems.
+
+### Long-distance spaghetti
+
+Example:
+
+```text
+A ----------------------------------------------→ Q
+```
+
+Primary solution:
+
+> semantic region boundaries and named cross-region imports/exports.
+
+### Local spaghetti
+
+Example:
+
+```text
+A ──┬→ B
+    ├→ C
+    ├→ D
+    └→ E
+```
+
+Primary solutions:
+
+> local rerouting, alignment, highlighting, sensible placement.
+
+### Conceptual spaghetti
+
+Example:
+
+```text
+37 perfectly arranged nodes
+```
+
+Even a clean graph can become cognitively overwhelming.
+
+Primary solutions:
+
+> composite nodes, progressive disclosure, collapsing, summaries, and semantic grouping.
+
+---
+
+# 8. Composite Nodes
+
+## 8.1 Default Abstraction
+
+Common collections of related implementation operations should often appear as a single conceptual node.
+
+For example:
+
+```text
+[ Prepare Data ]
+```
+
+may internally represent:
+
+```text
+Impute
+Encode
+Scale
+Column filtering
+Basic normalization
+```
+
+Likewise:
+
+```text
+[ Model ]
+```
+
+represents a model responsibility rather than requiring every algorithm to be a separate canvas concept.
+
+The key rule is:
+
+> **Routine implementation detail may be composite. Meaningful experimental decisions should remain visible.**
+
+For example, a generic imputation strategy may remain inside `Prepare Data`.
+
+But a domain-specific feature:
+
+```text
+Create ProviderRiskScore
+```
+
+may deserve its own visible node because adding/removing it is itself a hypothesis being tested.
+
+---
+
+# 9. Node Expansion
+
+ViDAP should prefer node-local progressive disclosure over a permanently open global inspector.
+
+A node should normally support at least:
+
+```text
+compact
+↓
+expanded
+↓
+optional focused editing
+```
+
+## 9.1 Compact State
+
+The normal canvas view should prioritize:
+
+* node responsibility;
+* selected implementation;
+* important state/result;
+* important input/output types;
+* a few high-value parameters where useful.
+
+Example:
+
+```text
+┌──────────────────────┐
+│ MODEL                │
+│ XGBoost              │
+│ F1: 0.84             │
+│ depth 6 · trees 300  │
+└──────────────────────┘
+```
+
+## 9.2 Expanded State
+
+Double-clicking or an equivalent action should expand the node in place.
+
+Example:
+
+```text
+┌─────────────────────────────┐
+│ MODEL — XGBoost             │
+│                             │
+│ Trees          [300]        │
+│ Max depth      [6]          │
+│ Learning rate [0.05]        │
+│ Subsample      [0.8]        │
+│                             │
+│ ▸ Advanced                  │
+└─────────────────────────────┘
+```
+
+This preserves spatial context:
+
+> The thing being edited remains the thing the user is looking at.
+
+## 9.3 Bounded Expansion and Internal Scrolling
+
+An expanded node must not grow without limit.
+
+Once it reaches a reasonable maximum size relative to the viewport, the node should remain bounded and its internal content should become scrollable.
+
+Conceptually:
+
+```text
+┌─────────────────────────────┐
+│ MODEL — XGBoost             │
+│                             │
+│ Common parameters           │
+│ ...                         │
+│                             │ ↑
+│ Advanced parameters         │ █
+│ ...                         │ █ internal scroll
+│                             │ ↓
+└─────────────────────────────┘
+```
+
+Scrolling inside the node should not unexpectedly pan or zoom the canvas.
+
+Input behavior must clearly distinguish:
+
+* scrolling node content;
+* moving the node;
+* moving sliders;
+* editing controls;
+* panning canvas;
+* zooming canvas.
+
+## 9.4 Optional Focus Mode
+
+For unusually complex nodes, an optional temporary focus mode may enlarge that same node over the canvas.
+
+The surrounding canvas may dim but should remain contextually visible.
+
+This is preferable to turning a complex node into an unrelated separate application screen.
+
+Focus mode is an escape hatch, not the default interaction.
+
+---
+
+# 10. No Permanent Inspector Requirement
+
+A persistent right-hand inspector is **not required as the primary interaction model**.
+
+The initial design should test whether:
+
+```text
+compact node
+→ expand locally
+→ scroll if necessary
+→ collapse
+```
+
+provides a more coherent interaction flow.
+
+A sidebar may later exist for specialized purposes if validated by usability testing, but the product should not assume that configuration must be spatially separated from the node being configured.
+
+---
+
+# 11. Generic Conceptual Nodes Instead of Huge Node Catalogs
+
+ViDAP should avoid treating every underlying Python implementation as a distinct top-level visual concept.
+
+For example, instead of requiring:
+
+```text
+Random Forest node
+XGBoost node
+Logistic Regression node
+CatBoost node
+LightGBM node
+```
+
+the canvas may expose:
+
+```text
+[ Model ]
+```
+
+with a selected implementation:
+
+```text
+Implementation:
+XGBoost
+```
+
+Changing:
+
+```text
+XGBoost → Random Forest
+```
+
+should ideally preserve:
+
+* node location;
+* incoming compatible connections;
+* downstream compatible connections;
+* experiment lineage;
+* surrounding graph structure.
+
+The implementation changes. The conceptual responsibility does not.
+
+This produces a far better experimentation experience than deleting/replacing/rewiring a node merely to try another algorithm.
+
+---
+
+# 12. Underlying Library Introspection
+
+ViDAP should derive implementation information from the actual computational libraries wherever practical rather than manually duplicating entire APIs.
+
+Possible sources include:
+
+* Python callable/class signatures;
+* type annotations;
+* estimator APIs such as `get_params()`;
+* structured validation metadata;
+* documented defaults;
+* library documentation/docstrings;
+* bounded ViDAP-specific metadata when necessary.
+
+Generic mapping may include:
+
+```text
+bool
+→ toggle
+
+known enum / literal
+→ dropdown
+
+integer
+→ numeric field
+
+float
+→ numeric field
+
+optional numeric
+→ numeric field + Auto/None
+
+string
+→ text field
+
+list
+→ list/multi-entry control
+```
+
+The system should not maintain a redundant handwritten copy of information that the source library already exposes reliably.
+
+---
+
+# 13. Curated First-Class Implementations
+
+Pure introspection will not always produce the best UX.
+
+Therefore ViDAP should support a hybrid model.
+
+## First-class / curated implementations
+
+Any model that ViDAP's own AutoML system is permitted to recommend should normally receive a curated presentation definition.
+
+The product rule should be:
+
+> **If ViDAP automatically recommends an implementation, ViDAP must know how to present that implementation well.**
+
+Curation may define:
+
+* human-friendly parameter labels;
+* useful ranges;
+* slider vs numeric input;
+* linear vs logarithmic control behavior;
+* common vs advanced parameters;
+* conditional parameter relationships;
+* short explanations;
+* recommended visual ordering.
+
+This metadata does **not** reimplement the algorithm.
+
+The real model continues to come from sklearn, XGBoost, or another underlying library.
+
+## Generic / uncurated implementations
+
+Less common implementations may be loaded through introspection and rendered using generic control rules.
+
+The user may receive a small indication such as:
+
+```text
+Generic parameter interface
+```
+
+to communicate that the model works but has not received hand-tuned ViDAP controls.
+
+This allows extensibility without requiring ViDAP to maintain hundreds or thousands of bespoke visible nodes.
+
+---
+
+# 14. Expandable Internal Detail
+
+Composite nodes should remain inspectable.
+
+For example:
+
+```text
+[ Prepare Data ]
+```
+
+may expose:
+
+```text
+Missing values
+Encoding
+Scaling
+Column handling
+Advanced
+```
+
+An advanced user may eventually be able to request:
+
+```text
+Expand to primitive operations
+```
+
+and see:
+
+```text
+Impute → Encode → Scale → Filter
+```
+
+if that level of graph manipulation is useful.
+
+The default UX should not require this level of implementation granularity.
+
+---
+
+# 15. Always-Visible Results
+
+When modeling/evaluation functionality exists, the primary result of the current experiment should remain visible while the user changes the workflow.
+
+The intended interaction is:
+
+```text
+change
+↓
+see consequence
+```
+
+rather than:
+
+```text
+change
+↓
+run
+↓
+open result
+↓
+find chart
+↓
+remember previous state
+```
+
+Representative visible outputs may include:
+
+* scatter plots;
+* confusion matrices;
+* metrics;
+* residual plots;
+* feature importance;
+* class balance;
+* other task-appropriate visualizations.
+
+The precise layout may evolve, but **the feedback loop should remain spatially persistent**.
+
+---
+
+# 16. Preview vs Full Evidence
+
+Interactive experimentation may use representative preview data to preserve responsiveness.
+
+Preview results must be unmistakably labeled.
+
+Example:
+
+```text
+PREVIEW
+1,500 / 48,000 rows
+```
+
+Preview is for:
+
+```text
+exploration
+direction
+hypothesis generation
+interactive play
+```
+
+Full runs are for:
+
+```text
+recorded evidence
+formal comparison
+final evaluation
+```
+
+Do not present a preview AutoML result as universally “the best model.”
+
+Prefer language equivalent to:
+
+> **Strong starting configuration found for the current preview objective.**
+
+---
+
+# 17. AutoML as Starting Point, Not Endpoint
+
+AutoML remains appropriate for its planned later phase.
+
+The intended eventual interaction is:
+
+```text
+drop dataset
+↓
+profile
+↓
+create representative preview
+↓
+bounded AutoML search
+↓
+materialize selected workflow visibly
+↓
+user begins experimenting
+```
+
+AutoML should create an editable graph, not an opaque result.
+
+The user should be able to understand:
+
+* which model was chosen;
+* which preprocessing was chosen;
+* which metric/objective drove the choice;
+* which alternatives were tried;
+* what the preview result means.
+
+The default generated workflow becomes a starting hypothesis.
+
+---
+
+# 18. Human + Agent Interaction
+
+ViDAP should remain naturally compatible with external coding agents.
+
+The canonical workflow remains the shared source of truth.
+
+Therefore:
+
+```text
+Human edits graph
+→ canonical workflow changes
+→ agent can inspect new state
+```
+
+and:
+
+```text
+Agent mutates workflow
+→ ViDAP detects valid change
+→ graph reflects new state
+```
+
+The agent does not need to manipulate the visual interface.
+
+It can operate on the underlying structured representation and/or supported local API.
+
+This allows the user to mix:
+
+* direct slider/control experimentation;
+* visual graph manipulation;
+* agent-generated suggestions;
+* agent-made transformations;
+* AutoML-created defaults.
+
+When an agent changes the workflow, ViDAP should make the mutation visible rather than merely allowing outputs to mysteriously change.
+
+For example:
+
+```text
+Agent changed:
+
+Model
+XGBoost → Random Forest
+
+max_depth
+6 → 8
+
+Removed feature
+provider_state
+```
+
+The general rule should be:
+
+> **Fast and convenient, but never magical.**
+
+---
+
+# 19. Experiment Safety and Reversibility
+
+Experimentation should be cheap to attempt and cheap to undo.
+
+Users should be able to:
+
+* branch experiments;
+* compare runs;
+* identify what changed;
+* restore prior states;
+* move forward without fear of destroying a good result.
+
+The exact UI need not be permanently specified as a bottom “timeline rail,” but Phase 6 should provide a clear visual model for experiment history and branching.
+
+Example conceptual lineage:
+
+```text
+Baseline
+   ↓
++ FamilySize
+   ↓
+RF → XGBoost
+   ↓
+depth 6 → 8
+```
+
+with metrics/results attached to those experiment states.
+
+---
+
+# 20. Anti-Spaghetti Priority
+
+Anti-spaghetti behavior is a core usability requirement, not cosmetic polish.
+
+The user should not have to continually rearrange nodes merely because a distant dependency creates an ugly connection.
+
+Primary tools should include:
+
+* semantic vertical regions;
+* named cross-region boundary imports/exports;
+* resizable gutters;
+* short local wires;
+* local reroute points where needed;
+* connection highlighting/dimming;
+* compact composite nodes;
+* expandable detail;
+* optional grouping/collapse;
+* explicit layout assistance rather than constant forced auto-layout.
+
+The design goal is:
+
+> **Preserve user orientation as the experiment grows.**
+
+---
+
+# 21. Phase Placement
+
+### Phase 3 — Primary ownership
+
+Phase 3 should establish the core visual interaction language:
+
+* vertical semantic regions;
+* resizable gutters;
+* region boundary interface concept;
+* compact and expandable node behavior;
+* local connection behavior;
+* typed visual ports;
+* design system;
+* basic anti-spaghetti interaction rules;
+* proof that canonical dependencies can be represented without persistent cross-canvas wires.
+
+This should be treated as a major UX validation point.
+
+### Phase 4
+
+Add meaningful data-state representation to nodes and regions:
+
+* dataset summaries;
+* missingness;
+* transformation state;
+* before/after preparation summaries;
+* data thumbnails where useful.
+
+### Phase 5
+
+Extend the system to modeling/evaluation:
+
+* generic Model node;
+* implementation selection;
+* curated first-class parameter schemas;
+* generic introspection fallback;
+* persistent live-result presentation;
+* model/evaluation previews;
+* plain-English interpretation.
+
+### Phase 6
+
+Add:
+
+* experiment branching;
+* comparison;
+* restoration;
+* visible lineage/history.
+
+### Phase 8
+
+Add:
+
+* bounded AutoML;
+* starter-workflow generation;
+* inspectable automated choices;
+* stronger guided suggestions where appropriate.
+
+Ghost/suggested nodes may remain an optional design exploration rather than a required core feature.
+
+---
+
+# 22. Completed Phase Constraint
+
+Phase 1 and Phase 2 are complete.
+
+This amendment should **not** be interpreted as justification for reopening them unless Phase 3 or later produces a demonstrated incompatibility.
+
+In particular:
+
+* The semantic-region system is primarily a rendering/presentation layer over the canonical graph.
+* Composite nodes may present existing detailed semantics at a higher human abstraction level.
+* Generic/curated parameter rendering should consume existing structured node/model capabilities where possible.
+* Cross-region interface rendering does not change the actual dependency graph.
+
+If future interactive preview performance would benefit from incremental execution or cached intermediate results, implementation should first measure actual representative latency.
+
+Do not reopen Phase 2 merely to introduce speculative optimization.
+
+The requirement is only that future implementation should not unnecessarily prevent such optimization if it becomes justified.
+
+---
+
+# 23. Prototype Validation Requirement
+
+Because the semantic-region/boundary-interface model is intentionally different from conventional node editors, Phase 3 should treat it as a design hypothesis that must be tested.
+
+A representative prototype should include at least:
+
+```text
+multiple semantic regions
+multiple nodes within a region
+a connection that skips a neighboring region
+one output consumed by multiple later nodes
+a branched model comparison
+resizing region gutters
+expanded and collapsed complex nodes
+boundary hover/trace behavior
+```
+
+The prototype should answer:
+
+> Can a user understand where information came from and where it goes without persistent long-distance wires?
+
+and:
+
+> Does the region system actually reduce visual management effort compared with an unrestricted canvas?
+
+If the answer is no, the presentation may be revised without altering the canonical workflow architecture.
+
+---
+
+# 24. North-Star Interaction Test
+
+For a representative workflow, a user looking at the normal canvas should be able to understand:
+
+```text
+where the data entered
+what major things happened to it
+which model/approach is currently being used
+where important branches exist
+what the current outcome looks like
+```
+
+without opening every node individually.
+
+Deeper technical detail should remain available through progressive disclosure.
+
+The goal is not to display everything simultaneously.
+
+The goal is:
+
+> **show enough structure and state that the experiment is understandable at a glance, while keeping implementation depth immediately available when requested.**
+
+---
+
+I think the **regions/gutters section deserves this much explanation** because you're right: it isn't simply “copy Blueprints” or “copy ComfyUI.” It's effectively combining a semantic swimlane/Kanban organization model with a real node graph and then treating lane boundaries like software module interfaces.
+
+That is novel enough that if Central only receives:
+
+> “Use regions and make wires stop at the edge”
+
+a later planner could easily implement something superficially similar while completely missing *why* we're doing it.
+
+The other thing I would preserve in detail is the **few conceptual nodes / many implementations** rule. That could have a huge effect on what ViDAP eventually feels like. If it gets forgotten, someone can very easily implement P5 as:
+
+```text
+RandomForestNode.tsx
+XGBoostNode.tsx
+LogisticRegressionNode.tsx
+CatBoostNode.tsx
+...
+```
+
+and suddenly you're on the road to the 1,000-node catalog we specifically decided we don't want.
+
+The intended direction is much closer to:
+
+```text
+ModelNode
+    ↓
+selected implementation
+    ↓
+real library introspection
+    +
+optional curated UX metadata
+    ↓
+generated controls
+```
+
+which is a fundamentally different product shape.
+
+I think this amendment captures enough of the **reasoning** that Central can preserve the idea even if some exact visual details change once Phase 3 is actually on screen.

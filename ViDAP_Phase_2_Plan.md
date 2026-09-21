@@ -2,23 +2,24 @@
 
 | Field | Value |
 |---|---|
-| Status | Draft — approval required |
-| Version | 0.1 |
-| Parent | `ViDAP_Roadmap.md` version 3.5 |
+| Status | Approved |
+| Version | 1.0 |
+| Parent | `ViDAP_Roadmap.md` version 3.7 |
 | Spine phase | Phase 2 — Deterministic Execution and Run Foundations |
 | Product source | `ViDAP_Overview.txt` |
 | Prerequisite | Phase 1 complete through P1-EP06 reconciliation |
 | Created | 2026-09-21 |
+| Approved | 2026-09-21 by explicit user direction |
 | Owner | Central |
 
 ---
 
 ## 1. Authorization and Boundary
 
-This is a draft phase plan. It is not an execution packet and does not
-authorize source changes, dependencies, runtime behavior, persistence, or a
-Phase 2 worker. Its approval would authorize Central only to prepare the first
-bounded Phase 2 decision packet.
+This approved phase plan is not an execution packet and does not authorize
+source changes, dependencies, runtime behavior, persistence, or a Phase 2
+worker. Its approval authorizes Central only to prepare the first bounded Phase
+2 decision packet.
 
 Phase 2 turns a validated, UI-independent workflow description into a
 deterministic headless execution foundation. It owns runtime planning and the
@@ -66,7 +67,7 @@ Every Phase 2 packet must read:
 3. `ViDAP_Phased_Plan_Spine.md` version 1.2, especially invariants 1–14,
    Phase 2, execution-isolation/artifact-persistence decision requirements,
    and strong validation scaling.
-4. `ViDAP_Roadmap.md` version 3.5, especially P2 and checkpoint A2.
+4. `ViDAP_Roadmap.md` version 3.7, especially P2 and checkpoint A2.
 5. `ViDAP_Phase_1_Plan.md` version 2.3 and
    `ViDAP_P1_EP06_Validation_and_Reconciliation.md`.
 6. The accepted P1 reconciliation records and their decisions D1.1–D1.7.
@@ -326,6 +327,6 @@ and modeling policy remain undecided.
 
 ## 13. Next Action
 
-This Phase 2 plan is a draft. It needs Central's explicit approval before a
-fresh P2-EP01 decision packet may be drafted. Approval of this plan would not
-authorize P2-EP01 execution or any Phase 2 implementation.
+This Phase 2 plan is approved. Central may now draft P2-EP01 — execution/run
+foundation decisions. P2-EP01 requires separate approval before execution, and
+no Phase 2 implementation is authorized by this plan approval.
