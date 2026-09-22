@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | Status | Approved, amended |
-| Version | 3.7 |
+| Version | 4.1 |
 | Approved | 2026-09-17 |
-| Last updated | 2026-09-21 |
+| Last updated | 2026-09-22 |
 | Parent | `ViDAP_Phased_Plan_Spine.md` version 1.3 |
 | Product source | `ViDAP_Overview.txt` |
 | Created | 2026-09-17 |
@@ -36,14 +36,14 @@ Detailed work is planned one phase at a time. Roadmap changes may clarify sequen
 |---|---|---|
 | Product specification | Governing source | `ViDAP_Overview.txt` |
 | Phased Plan Spine | Approved, amended | Version 1.3, approved 2026-09-17 and amended 2026-09-19 and 2026-09-21 |
-| Roadmap | Approved, amended | Version 3.7, approved 2026-09-17 and updated 2026-09-21 |
+| Roadmap | Approved, amended | Version 4.1, approved 2026-09-17 and updated 2026-09-22 |
 | Phase 0 | Complete | P0-EP01 through P0-EP08 accepted and centrally reconciled |
 | Phase 1 | Complete | `ViDAP_P1_EP06_Validation_and_Reconciliation.md` accepts P1-EP06 and reconciles P1-AC12 |
-| Phase 2 | Decision packet ready to draft | `ViDAP_Phase_2_Plan.md` v1.0 is approved; P2-EP01 may now be drafted but is not authorized for execution |
+| Phase 2 | Planner/dispatcher packet approved for bounded worker execution | `ViDAP_P2_EP02_Validation_and_Reconciliation.md` accepts the v0.2 bridge; `ViDAP_P2_EP03.md` v0.1 is approved and awaits its worker report |
 | Phases 3-11 | Sequenced only | Remain at roadmap resolution until predecessor reconciliation |
 | Visual workflow interaction direction | Approved cross-phase direction | `UX refinement.txt` is incorporated into Spine v1.3 and the Phase 3–8 roadmap boundaries; it does not change current Phase 2 planning/execution status |
-| Execution packets | Fourteen complete | P0-EP01 through P0-EP08 and P1-EP01 through P1-EP06 complete; Phase 2 execution remains unauthorized |
-| Product implementation | Phase 1 workflow kernel complete | Accepted document, static contracts, validation, and compatibility proof only; no UI, execution, data/ML, persistence, or export behavior |
+| Execution packets | Sixteen complete; one approved | P0-EP01 through P0-EP08, P1-EP01 through P1-EP06, and P2-EP01 through P2-EP02 complete; P2-EP03 v0.1 is approved for bounded worker execution |
+| Product implementation | Phase 1 kernel plus Phase 2 representation bridge | Accepted canonical document, static contracts/validation, immutable execution representation, and static binding metadata; no operation execution, UI, data/ML, persistence, or export behavior |
 
 No percentage-complete values are used. A phase moves state only when its named gate and evidence support the change.
 
@@ -141,7 +141,7 @@ H3 is the first target that demonstrates the core product promise end to end. H4
 - **Visible demonstration:** Valid, invalid, branched, and versioned example workflows can be inspected and round-tripped; invalid connections explain why they fail.
 - **Architectural checkpoint A1:** Workflow semantics are independent of visual layout; typed node contracts and compatibility rules are testable without the UI.
 - **Decisions due in the phase plan:** Serialization encoding; schema evolution and migration policy; node identity; type-system depth; contract registration and discovery.
-- **Status:** Phase 1 is complete and reconciled in `ViDAP_P1_EP06_Validation_and_Reconciliation.md`. The accepted kernel comprises D1.1-D1.7, the document model, static contract registry, validation/diagnostics, and strict compatibility proof. Phase 2 detailed planning may now be drafted; no Phase 2 execution work is authorized.
+- **Status:** Phase 1 is complete and reconciled in `ViDAP_P1_EP06_Validation_and_Reconciliation.md`. The accepted kernel comprises D1.1-D1.7, the document model, static contract registry, validation/diagnostics, and strict compatibility proof. That reconciliation opened Phase 2 planning; the current Phase 2 execution status is recorded below.
 
 ### P2 - Deterministic Execution and Run Foundations
 
@@ -150,9 +150,12 @@ H3 is the first target that demonstrates the core product promise end to end. H4
 - **Visible demonstration:** A branched workflow executes headlessly in dependency order, reproduces deterministic results where expected, and rejects stale cache reuse.
 - **Architectural checkpoint A2:** Runtime dispatch, intermediate representation, run metadata, artifact ownership, caching, and error envelopes remain separate from UI presentation.
 - **Decisions due in the phase plan:** Execution isolation; local scheduling model; artifact and metadata persistence; seed policy; cache keys and invalidation; cancellation and failure propagation boundaries.
-- **Status:** Phase 2 plan v1.0 is approved. P2-EP01 — execution/run
-  foundation decisions — may now be drafted; no P2 execution packet or
-  implementation is authorized.
+- **Status:** Phase 2 plan v1.4 is approved. D2.1–D2.8 are accepted in
+  `ViDAP_P2_EP01_Validation_and_Reconciliation.md`; P2-EP02 — execution
+  representation and contract bridge — passed independent validation at v0.2
+  and is centrally accepted in `ViDAP_P2_EP02_Validation_and_Reconciliation.md`.
+  P2-EP03 v0.1 is approved for bounded worker execution; independent
+  validation and Central acceptance remain pending.
 
 ### P3 - First Visual End-to-End Slice
 
@@ -369,6 +372,8 @@ Calendar estimates may be added after Phase 0 establishes the repository baselin
 
 ## 12. Next Action
 
-Draft P2-EP01 — execution/run foundation decisions. It must evaluate and
-select the Phase 2 decision set D2.1–D2.8 before any execution-foundation
-implementation packet is drafted. It may not authorize implementation itself.
+Execute approved P2-EP03 v0.1 — deterministic planner and reference
+dispatcher — through the bounded worker, then obtain fresh independent
+validation. The canonical workflow, immutable representation, and static
+binding authority remain governing inputs; Central acceptance follows
+validation as a separate gate.

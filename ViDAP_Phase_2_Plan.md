@@ -2,24 +2,25 @@
 
 | Field | Value |
 |---|---|
-| Status | Approved |
-| Version | 1.0 |
-| Parent | `ViDAP_Roadmap.md` version 3.7 |
+| Status | Approved, amended |
+| Version | 1.4 |
+| Parent | `ViDAP_Roadmap.md` version 4.1 |
 | Spine phase | Phase 2 — Deterministic Execution and Run Foundations |
 | Product source | `ViDAP_Overview.txt` |
 | Prerequisite | Phase 1 complete through P1-EP06 reconciliation |
 | Created | 2026-09-21 |
 | Approved | 2026-09-21 by explicit user direction |
+| Last updated | 2026-09-22 after P2-EP03 approval |
 | Owner | Central |
 
 ---
 
 ## 1. Authorization and Boundary
 
-This approved phase plan is not an execution packet and does not authorize
-source changes, dependencies, runtime behavior, persistence, or a Phase 2
-worker. Its approval authorizes Central only to prepare the first bounded Phase
-2 decision packet.
+This approved phase plan is not an execution packet. Its approval alone does
+not authorize source changes, dependencies, runtime behavior, persistence, or
+a Phase 2 worker. Each bounded implementation packet requires its own explicit
+Central approval.
 
 Phase 2 turns a validated, UI-independent workflow description into a
 deterministic headless execution foundation. It owns runtime planning and the
@@ -64,10 +65,10 @@ Every Phase 2 packet must read:
 
 1. Current explicit user direction.
 2. `ViDAP_Overview.txt`, especially OV §§12, 16–19, 21–23, and 25–30.
-3. `ViDAP_Phased_Plan_Spine.md` version 1.2, especially invariants 1–14,
+3. `ViDAP_Phased_Plan_Spine.md` version 1.3, especially invariants 1–18,
    Phase 2, execution-isolation/artifact-persistence decision requirements,
    and strong validation scaling.
-4. `ViDAP_Roadmap.md` version 3.7, especially P2 and checkpoint A2.
+4. `ViDAP_Roadmap.md` version 4.1, especially P2 and checkpoint A2.
 5. `ViDAP_Phase_1_Plan.md` version 2.3 and
    `ViDAP_P1_EP06_Validation_and_Reconciliation.md`.
 6. The accepted P1 reconciliation records and their decisions D1.1–D1.7.
@@ -183,9 +184,9 @@ maintenance, provenance, privacy, size, and package-control decisions.
 
 | Workstream | Objective | Depends on | Proposed bounded packets |
 |---|---|---|---|
-| WS2.1 Decisions | Resolve D2.1–D2.8 with evidence and durable tradeoffs | P1 reconciliation | P2-EP01 — execution/run foundation decisions |
-| WS2.2 Execution representation | Implement the selected layout-independent plan and runtime binding boundary | D2.1–D2.2 | P2-EP02 — execution representation and contract bridge |
-| WS2.3 Planner and dispatcher | Implement deterministic dependency planning, dispatch, branching, and failure flow | D2.2–D2.3, WS2.2 | P2-EP03 — deterministic planner and reference dispatcher |
+| WS2.1 Decisions | Resolve D2.1–D2.8 with evidence and durable tradeoffs | P1 reconciliation | Complete: P2-EP01 accepted D2.1–D2.8 |
+| WS2.2 Execution representation | Implement the selected layout-independent plan and runtime binding boundary | D2.1–D2.2 | Complete: P2-EP02 v0.2 independently accepted and centrally reconciled |
+| WS2.3 Planner and dispatcher | Implement deterministic dependency planning, dispatch, branching, and failure flow | D2.2–D2.3, WS2.2 | P2-EP03 v0.1 approved for bounded worker execution |
 | WS2.4 Runs, artifacts, and cache | Implement selected run record, artifact ownership, error envelope, and explicit cache rules | D2.4–D2.7, WS2.3 | P2-EP04 — run provenance, artifacts, cache, and runtime diagnostics |
 | WS2.5 Reference proof | Prove deterministic successful/failed/branched runs and cache correctness through controlled workflows | D2.8, WS2.2–WS2.4 | P2-EP05 — headless reference-workflow evidence |
 | WS2.6 Closeout | Independently reproduce Phase 2 evidence and reconcile the outcome | WS2.1–WS2.5 | P2-EP06 — validation and reconciliation evidence |
@@ -327,6 +328,9 @@ and modeling policy remain undecided.
 
 ## 13. Next Action
 
-This Phase 2 plan is approved. Central may now draft P2-EP01 — execution/run
-foundation decisions. P2-EP01 requires separate approval before execution, and
-no Phase 2 implementation is authorized by this plan approval.
+This Phase 2 plan is approved. D2.1–D2.8 are accepted in
+`ViDAP_P2_EP01_Validation_and_Reconciliation.md`. P2-EP02 v0.2 is complete
+and centrally accepted in `ViDAP_P2_EP02_Validation_and_Reconciliation.md`.
+P2-EP03 v0.1 — deterministic planner and reference dispatcher — is approved
+for bounded worker execution. The worker must stop with its report for fresh
+independent validation; P2-EP04 remains unauthorized.
