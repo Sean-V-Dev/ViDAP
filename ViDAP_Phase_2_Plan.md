@@ -10,7 +10,7 @@
 | Prerequisite | Phase 1 complete through P1-EP06 reconciliation |
 | Created | 2026-09-21 |
 | Approved | 2026-09-21 by explicit user direction |
-| Last updated | 2026-09-22 after P2-EP03 approval |
+| Last updated | 2026-09-22 after P2-EP03 acceptance |
 | Owner | Central |
 
 ---
@@ -186,8 +186,8 @@ maintenance, provenance, privacy, size, and package-control decisions.
 |---|---|---|---|
 | WS2.1 Decisions | Resolve D2.1–D2.8 with evidence and durable tradeoffs | P1 reconciliation | Complete: P2-EP01 accepted D2.1–D2.8 |
 | WS2.2 Execution representation | Implement the selected layout-independent plan and runtime binding boundary | D2.1–D2.2 | Complete: P2-EP02 v0.2 independently accepted and centrally reconciled |
-| WS2.3 Planner and dispatcher | Implement deterministic dependency planning, dispatch, branching, and failure flow | D2.2–D2.3, WS2.2 | P2-EP03 v0.1 approved for bounded worker execution |
-| WS2.4 Runs, artifacts, and cache | Implement selected run record, artifact ownership, error envelope, and explicit cache rules | D2.4–D2.7, WS2.3 | P2-EP04 — run provenance, artifacts, cache, and runtime diagnostics |
+| WS2.3 Planner and dispatcher | Implement deterministic dependency planning, dispatch, branching, and failure flow | D2.2–D2.3, WS2.2 | Complete: P2-EP03 v0.1 independently accepted and centrally reconciled |
+| WS2.4 Runs, artifacts, and cache | Implement selected run record, artifact ownership, error envelope, and explicit cache rules | D2.4–D2.7, WS2.3 | P2-EP04 ready to draft — run provenance, artifacts, cache, and runtime diagnostics |
 | WS2.5 Reference proof | Prove deterministic successful/failed/branched runs and cache correctness through controlled workflows | D2.8, WS2.2–WS2.4 | P2-EP05 — headless reference-workflow evidence |
 | WS2.6 Closeout | Independently reproduce Phase 2 evidence and reconcile the outcome | WS2.1–WS2.5 | P2-EP06 — validation and reconciliation evidence |
 
@@ -331,6 +331,7 @@ and modeling policy remain undecided.
 This Phase 2 plan is approved. D2.1–D2.8 are accepted in
 `ViDAP_P2_EP01_Validation_and_Reconciliation.md`. P2-EP02 v0.2 is complete
 and centrally accepted in `ViDAP_P2_EP02_Validation_and_Reconciliation.md`.
-P2-EP03 v0.1 — deterministic planner and reference dispatcher — is approved
-for bounded worker execution. The worker must stop with its report for fresh
-independent validation; P2-EP04 remains unauthorized.
+P2-EP03 v0.1 is complete and centrally accepted in
+`ViDAP_P2_EP03_Validation_and_Reconciliation.md`. Central may now draft
+P2-EP04 — run provenance, artifacts, cache, and runtime diagnostics. That
+draft requires separate approval before worker execution.

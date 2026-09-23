@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Approved — authorized for bounded worker execution |
+| Status | Complete — accepted by Central |
 | Packet version | 0.1 |
 | Packet type | Bounded headless planning and dispatch-control implementation |
 | Parent phase plan | `ViDAP_Phase_2_Plan.md` version 1.4, WS2.3 |
@@ -11,6 +11,8 @@
 | Authorized worker report | `ViDAP_P2_EP03_Implementation_Report.md` |
 | Created | 2026-09-22 |
 | Approved | 2026-09-22 by explicit user direction |
+| Central reconciliation | `ViDAP_P2_EP03_Validation_and_Reconciliation.md` |
+| Completed | 2026-09-22 after independent `Accept` and Central reconciliation |
 | Owner | Central |
 
 ---
@@ -18,6 +20,8 @@
 ## 1. Authorization Boundary
 
 Central approved this exact packet version on 2026-09-22.
+The worker completed it, independent validation returned `Accept`, and Central
+accepted it in the reconciliation record above.
 
 Approval authorizes one bounded worker to derive a deterministic plan
 from the accepted P2-EP02 representation and implement the in-process,
@@ -304,6 +308,5 @@ Central, alter remote state, or begin P2-EP04.
 
 ## 14. Next Action
 
-The bounded EP03 worker may execute this approved v0.1 packet and stop with
-its implementation report for fresh independent validation. Central
-acceptance of the implementation remains a separate later gate.
+P2-EP03 is complete. Central may draft P2-EP04 under WS2.4; that packet
+requires separate approval before worker execution.
