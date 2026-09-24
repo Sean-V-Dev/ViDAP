@@ -5,10 +5,15 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from types import MappingProxyType
+from typing import TYPE_CHECKING
 
 from .bindings import StaticBinding
+from .diagnostics import TechnicalContext, capture_exception
 from .planner import ExecutionPlan
 from .representation import ExecutionNode
+
+if TYPE_CHECKING:
+    from .reuse import AttemptLedger
 
 
 @dataclass(frozen=True, slots=True)
@@ -68,6 +73,8 @@ class StopReason:
     node_id: str
     operation_key: str
     technical_type: str | None = None
+    port_key: str | None = None
+    technical: TechnicalContext | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -108,6 +115,12 @@ def _handlers(
     return found
 
 
+def preflight_dispatch(plan: ExecutionPlan, table: RuntimeTable) -> None:
+    """Expose the dispatcher's existing whole-table refusal before allocation."""
+
+    _handlers(plan, table)
+
+
 def _failure(
     plan: ExecutionPlan,
     completed: list[str],
@@ -115,6 +128,8 @@ def _failure(
     code: str,
     results: dict[tuple[str, str], object],
     technical_type: str | None = None,
+    port_key: str | None = None,
+    technical: TechnicalContext | None = None,
 ) -> DispatchResult:
     successors: dict[str, set[str]] = {
         node.node_id: set() for node in plan.representation.nodes
@@ -137,13 +152,21 @@ def _failure(
         blocked_node_ids=tuple(sorted(blocked)),
         unrelated_unstarted_node_ids=tuple(sorted(unstarted - blocked)),
         stop_reason=StopReason(
-            "execution", code, failed.node_id, failed.operation_key, technical_type
+            "execution",
+            code,
+            failed.node_id,
+            failed.operation_key,
+            technical_type,
+            port_key,
+            technical,
         ),
         port_results=results,
     )
 
 
-def dispatch(plan: ExecutionPlan, table: RuntimeTable) -> DispatchResult:
+def dispatch(
+    plan: ExecutionPlan, table: RuntimeTable, *, observer: AttemptLedger | None = None
+) -> DispatchResult:
     """Preflight all handlers, then run each scheduled node at most once."""
 
     handlers = _handlers(plan, table)
@@ -166,13 +189,23 @@ def dispatch(plan: ExecutionPlan, table: RuntimeTable) -> DispatchResult:
             )
             for edge in plan.incoming_edges[node_id]
         )
+        if observer is not None:
+            for item in incoming:
+                observer.on_consume(item)
         try:
             output = handlers[(node.operation_key, node.binding_revision)](
                 node.parameters, incoming
             )
         except Exception as error:  # noqa: BLE001 - handlers are the failure boundary
+            technical = capture_exception(error)
             return _failure(
-                plan, completed, node, "handler-failed", results, type(error).__name__
+                plan,
+                completed,
+                node,
+                "handler-failed",
+                results,
+                technical.type,
+                technical=technical,
             )
         try:
             if not isinstance(output, Mapping):
@@ -181,16 +214,35 @@ def dispatch(plan: ExecutionPlan, table: RuntimeTable) -> DispatchResult:
             if not all(isinstance(key, str) and key for key in staged):
                 raise TypeError("handler output keys must be non-empty text")
         except Exception as error:  # noqa: BLE001 - output mappings are untrusted
+            technical = capture_exception(error)
             return _failure(
                 plan,
                 completed,
                 node,
                 "invalid-handler-output",
                 results,
-                type(error).__name__,
+                technical.type,
+                technical=technical,
             )
-        if any(port not in staged for port in outgoing[node_id]):
-            return _failure(plan, completed, node, "missing-output", results)
+        missing = sorted(port for port in outgoing[node_id] if port not in staged)
+        if missing:
+            return _failure(
+                plan, completed, node, "missing-output", results, port_key=missing[0]
+            )
+        if observer is not None:
+            try:
+                staged = observer.on_outputs(node_id, staged)
+            except Exception as error:  # noqa: BLE001 - reference boundary
+                technical = capture_exception(error)
+                return _failure(
+                    plan,
+                    completed,
+                    node,
+                    "unreferenced-output",
+                    results,
+                    technical.type,
+                    technical=technical,
+                )
         for port, value in staged.items():
             results[(node_id, port)] = value
         completed.append(node_id)

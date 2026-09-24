@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | Status | Approved, amended |
-| Version | 4.1 |
+| Version | 4.3 |
 | Approved | 2026-09-17 |
-| Last updated | 2026-09-22 |
+| Last updated | 2026-09-24 |
 | Parent | `ViDAP_Phased_Plan_Spine.md` version 1.3 |
 | Product source | `ViDAP_Overview.txt` |
 | Created | 2026-09-17 |
@@ -36,14 +36,14 @@ Detailed work is planned one phase at a time. Roadmap changes may clarify sequen
 |---|---|---|
 | Product specification | Governing source | `ViDAP_Overview.txt` |
 | Phased Plan Spine | Approved, amended | Version 1.3, approved 2026-09-17 and amended 2026-09-19 and 2026-09-21 |
-| Roadmap | Approved, amended | Version 4.1, approved 2026-09-17 and updated 2026-09-22 |
+| Roadmap | Approved, amended | Version 4.3, approved 2026-09-17 and updated 2026-09-24 |
 | Phase 0 | Complete | P0-EP01 through P0-EP08 accepted and centrally reconciled |
 | Phase 1 | Complete | `ViDAP_P1_EP06_Validation_and_Reconciliation.md` accepts P1-EP06 and reconciles P1-AC12 |
-| Phase 2 | Run/provenance packet ready to draft | `ViDAP_P2_EP03_Validation_and_Reconciliation.md` accepts the v0.1 planner and dispatch control; P2-EP04 may be drafted |
+| Phase 2 | Reference-operation packet ready to draft | `ViDAP_P2_EP04_Validation_and_Reconciliation.md` accepts the v0.1 run foundation; P2-EP05 may be drafted |
 | Phases 3-11 | Sequenced only | Remain at roadmap resolution until predecessor reconciliation |
 | Visual workflow interaction direction | Approved cross-phase direction | `UX refinement.txt` is incorporated into Spine v1.3 and the Phase 3–8 roadmap boundaries; it does not change current Phase 2 planning/execution status |
-| Execution packets | Seventeen complete | P0-EP01 through P0-EP08, P1-EP01 through P1-EP06, and P2-EP01 through P2-EP03 complete; P2-EP04 may be drafted |
-| Product implementation | Phase 1 kernel plus Phase 2 planner/dispatch control | Accepted canonical document, static contracts/validation, immutable execution representation, deterministic planner, and test-proven dispatch control; no approved product operation family, run record, UI, data/ML, persistence, or export behavior |
+| Execution packets | Eighteen complete | P0-EP01 through P0-EP08, P1-EP01 through P1-EP06, and P2-EP01 through P2-EP04 complete; P2-EP05 may be drafted |
+| Product implementation | Phase 1 kernel plus Phase 2 run foundation | Accepted canonical document, static contracts/validation, immutable execution representation, deterministic planner/dispatcher, bounded attempt record, owned metadata-first local artifacts, attempt-local reuse, and sanitized runtime diagnostics; no approved product operation family, UI, data/ML, export, or cross-run cache |
 
 No percentage-complete values are used. A phase moves state only when its named gate and evidence support the change.
 
@@ -150,12 +150,14 @@ H3 is the first target that demonstrates the core product promise end to end. H4
 - **Visible demonstration:** A branched workflow executes headlessly in dependency order, reproduces deterministic results where expected, and rejects stale cache reuse.
 - **Architectural checkpoint A2:** Runtime dispatch, intermediate representation, run metadata, artifact ownership, caching, and error envelopes remain separate from UI presentation.
 - **Decisions due in the phase plan:** Execution isolation; local scheduling model; artifact and metadata persistence; seed policy; cache keys and invalidation; cancellation and failure propagation boundaries.
-- **Status:** Phase 2 plan v1.4 is approved. D2.1–D2.8 are accepted in
+- **Status:** Phase 2 plan v1.6 is approved. D2.1–D2.8 are accepted in
   `ViDAP_P2_EP01_Validation_and_Reconciliation.md`; P2-EP02 — execution
   representation and contract bridge — passed independent validation at v0.2
   and is centrally accepted in `ViDAP_P2_EP02_Validation_and_Reconciliation.md`.
   P2-EP03 v0.1 passed independent validation and is centrally accepted in
-  `ViDAP_P2_EP03_Validation_and_Reconciliation.md`. P2-EP04 may now be
+  `ViDAP_P2_EP03_Validation_and_Reconciliation.md`. P2-EP04 v0.1 passed
+  independent validation and is centrally accepted in
+  `ViDAP_P2_EP04_Validation_and_Reconciliation.md`. P2-EP05 may now be
   drafted; it is not authorized for implementation.
 
 ### P3 - First Visual End-to-End Slice
@@ -373,7 +375,8 @@ Calendar estimates may be added after Phase 0 establishes the repository baselin
 
 ## 12. Next Action
 
-Draft P2-EP04 — run provenance, artifacts, cache, and runtime diagnostics —
-under accepted D2.4–D2.7. Preserve the accepted canonical workflow,
-execution representation, planner, and dispatch-control boundaries. The
-draft requires separate Central approval before worker execution.
+Draft P2-EP05 — the actual deterministic scalar reference operation and
+headless workflow proof — under accepted D2.8 and the P2-EP04 run foundation.
+Preserve the Phase 1, representation, planner, artifact, reuse, and runtime
+diagnostic boundaries. The draft requires separate approval before worker
+execution; Phase 2 completion and P2-EP06 remain closed.
