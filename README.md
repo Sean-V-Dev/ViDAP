@@ -6,15 +6,17 @@ transform data, train and evaluate established machine-learning libraries,
 compare experiments, understand results in practical language, and export
 conventional Python or Jupyter artifacts.
 
-> **Phase 0 foundation is implemented and awaiting independent validation.** It
-> is a deliberately small runnable shell, not a product application.
+> **The Phase 0 foundation and Phase 1 workflow kernel are accepted.** Phase 2
+> has an accepted headless execution foundation. Its controlled scalar reference
+> proof is implemented for independent validation; Phase 2 acceptance is pending.
 
 ## Intended architecture and prerequisites
 
 The accepted direction is a TypeScript/React local web UI and a separate local
 CPython/FastAPI host. The browser remains a visual editing and presentation
 layer; future workflow and execution semantics are outside browser-only state.
-This describes intended architecture, not implementation.
+The local shell and headless workflow kernel implement only bounded parts of
+this direction; the visual workflow product remains future work.
 
 Windows is the only currently supported development environment. Prerequisites
 are Git, Node.js 24 LTS with its bundled npm, and uv. CPython 3.14.7 is pinned
@@ -109,10 +111,15 @@ GitHub Actions updates; it neither updates uv nor auto-merges anything.
 
 ## Scope today
 
-Phase 0 establishes project policy and reproducible foundations. The bounded
-shell has no workflow schema, graph, dataset, data loader, model, experiment,
-export, authentication, persistence, telemetry, hosted service, deployment,
-or desktop-wrapper capability. `/api/status` is the sole local foundation seam;
+Phase 0 establishes project policy and reproducible foundations. Phase 1 adds
+the canonical `vidap.workflow`/`1.0` document, static node contracts, and
+validation. The accepted Phase 2 kernel prepares, plans, dispatches, and
+records headless attempts. The P2-EP05 reference proof uses four fixed
+checked-integer operations and two synthetic workflows; successful runs write
+one versioned scalar value in an owned local proof slot. It has no workflow
+API, product editor, data loader, model, export, authentication, telemetry,
+hosted service, deployment, or desktop-wrapper capability. `launch` and
+`/api/status` remain the foundation shell only;
 automatic OpenAPI and documentation endpoints are disabled. Windows remains
 the only supported platform until other environments are independently
 validated. JSX accessibility linting is intentionally deferred by decision
@@ -124,6 +131,10 @@ record 0001 until a maintained compatible peer set and meaningful JSX exist.
 - [Phased Plan Spine](ViDAP_Phased_Plan_Spine.md)
 - [Roadmap](ViDAP_Roadmap.md)
 - [Phase 0 plan](ViDAP_Phase_0_Plan.md)
+- [Phase 1 reconciliation](ViDAP_P1_EP06_Validation_and_Reconciliation.md)
+- [Phase 2 plan](ViDAP_Phase_2_Plan.md)
+- [Accepted Phase 2 run foundation](ViDAP_P2_EP04_Validation_and_Reconciliation.md)
+- [P2-EP05 reference proof packet](ViDAP_P2_EP05.md)
 - [P0-EP01 reconciliation](ViDAP_P0_EP01_Validation_and_Reconciliation.md)
 - [P0-EP02 reconciliation](ViDAP_P0_EP02_Validation_and_Reconciliation.md)
 - [Contribution guide](CONTRIBUTING.md)
@@ -140,8 +151,10 @@ vulnerabilities only through the private route in [SECURITY.md](SECURITY.md).
 
 ## Local and generated state
 
-`.vidap-local/` is reserved for untracked developer or runtime state only when
-a later packet names a legitimate use. Build, test, coverage, environment,
+`.vidap-local/runs/` holds explicitly owned local headless attempt records and
+the selected proof output. Removal is by validated attempt ID; intermediate
+values are not stored by default, and there is no cross-run cache promise.
+Build, test, coverage, environment,
 package-cache, and downloaded-data paths are untracked under `.gitignore`.
 Approved tracked fixture content is permitted only under accepted D0.7 policy;
 generated and local fixture subareas remain ignored. New mutable or generated

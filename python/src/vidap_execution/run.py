@@ -22,12 +22,15 @@ else:
 from .artifacts import (
     ArtifactRefusal,
     begin_attempt,
+    inspect_reference_publication,
     publish_terminal,
     rollback_unpublished,
+    write_proof_slot,
 )
 from .bindings import BindingMap
 from .diagnostics import RuntimeDiagnostic, diagnostic
 from .dispatch import DispatchResult, RuntimeTable, dispatch, preflight_dispatch
+from .output import PROOF_SLOT, ReferenceOutputRefusal, emit_node_id, selected_bytes
 from .planner import plan_execution
 from .reuse import AttemptLedger, ReuseEvent
 
@@ -38,6 +41,14 @@ _CHECKOUT = Path(__file__).resolve().parents[3]
 
 class AttemptRefusal(ValueError):
     """A valid workflow uses values outside this controlled scalar proof."""
+
+
+class PublicationIndeterminate(ArtifactRefusal):
+    """The durable state of one validated attempt could not be verified."""
+
+    def __init__(self, attempt_id: str) -> None:
+        self.attempt_id = attempt_id
+        super().__init__(f"publication-indeterminate for attempt {attempt_id}")
 
 
 def _freeze(value: object) -> object:
@@ -136,11 +147,28 @@ def run_attempt(
     table: RuntimeTable,
     *,
     seed: int | None = None,
+    _reference_output: bool = False,
 ) -> AttemptResult:
     """Refuse before allocation; dispatch once after publishing pending ownership."""
 
+    if _reference_output:
+        from .reference import (
+            REFERENCE_BINDINGS,
+            REFERENCE_REGISTRY,
+            REFERENCE_RUNTIME_TABLE,
+        )
+
+        if (
+            registry is not REFERENCE_REGISTRY
+            or bindings is not REFERENCE_BINDINGS
+            or table is not REFERENCE_RUNTIME_TABLE
+        ):
+            raise AttemptRefusal(
+                "reference output requires fixed first-party authorities"
+            )
     plan = plan_execution(document, registry, bindings)
     preflight_dispatch(plan, table)
+    selected_emit = emit_node_id(plan) if _reference_output else None
     if seed is not None and (type(seed) is not int or not -(2**63) <= seed < 2**63):
         raise AttemptRefusal("seed must be an optional signed 64-bit integer")
     for node in plan.representation.nodes:
@@ -161,6 +189,15 @@ def run_attempt(
     result = None if allocation_failed else dispatch(plan, table, observer=ledger)
     reason = result.stop_reason if result is not None else None
     diagnostics: list[RuntimeDiagnostic] = []
+    output_failed = False
+    output_bytes: bytes | None = None
+    if selected_emit is not None and result is not None and reason is None:
+        try:
+            output_bytes = selected_bytes(plan, result, selected_emit)
+            write_proof_slot(attempt_id, output_bytes)
+        except ReferenceOutputRefusal, ArtifactRefusal, OSError, ValueError:
+            output_failed = True
+            diagnostics.append(diagnostic("publication-failed", attempt_id))
     if allocation_failed:
         diagnostics.append(diagnostic("publication-failed", attempt_id))
     if reason is not None:
@@ -207,7 +244,11 @@ def run_attempt(
                 "status": status,
             }
         )
-    outcome = "failed" if reason is not None or allocation_failed else "succeeded"
+    outcome = (
+        "failed"
+        if reason is not None or allocation_failed or output_failed
+        else "succeeded"
+    )
     record: dict[str, Any] = {
         "format": RECORD_FORMAT,
         "revision": RECORD_REVISION,
@@ -244,21 +285,43 @@ def run_attempt(
                 "proof-output.bin.tmp",
             )
         ),
-        "artifacts": [] if allocation_failed else ["record.json"],
+        "artifacts": []
+        if allocation_failed
+        else ["record.json", PROOF_SLOT]
+        if selected_emit is not None and outcome == "succeeded"
+        else ["record.json"],
     }
     if not allocation_failed:
+        if output_failed:
+            try:
+                rollback_unpublished(attempt_id)
+            except ArtifactRefusal, OSError:
+                record["publication"] = "failed-cleanup-incomplete"
+                record["artifacts"] = []
+                return AttemptResult(AttemptRecord(record), result)
         try:
             publish_terminal(attempt_id, record)
         except ArtifactRefusal, OSError:
+            if selected_emit is not None:
+                try:
+                    publication_state = inspect_reference_publication(
+                        attempt_id,
+                        record,
+                        output_bytes if outcome == "succeeded" else None,
+                    )
+                except ArtifactRefusal, OSError, ValueError:
+                    raise PublicationIndeterminate(attempt_id) from None
+                if publication_state == "committed":
+                    return AttemptResult(AttemptRecord(record), result)
             record["state"] = "failed"
             record["outcome"] = "failed"
             record["publication"] = "failed-pending"
             record["diagnostics"].append(
                 _diagnostic(diagnostic("publication-failed", attempt_id))
             )
+            record["artifacts"] = []
             try:
                 rollback_unpublished(attempt_id)
             except ArtifactRefusal, OSError:
                 record["publication"] = "failed-cleanup-incomplete"
-            record["artifacts"] = []
     return AttemptResult(AttemptRecord(record), result)

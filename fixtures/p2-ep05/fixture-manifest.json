@@ -1,0 +1,39 @@
+{
+  "fixtureManifestVersion": "1.0",
+  "fixtures": [
+    {
+      "id": "p2-ep05-branched-success-v1",
+      "schemaVersion": "1.0",
+      "path": "fixtures/p2-ep05/branched-success-v1.json",
+      "byteSize": 1780,
+      "sha256": "F2079F1A4BDADB073792BD19A26B43F2D5F7A8F5B81781715D180B95B78687D1",
+      "provenance": "Synthetic workflow manually authored for the approved P2-EP05 reference proof.",
+      "terms": "MIT",
+      "creationMethod": "Manually authored UTF-8 JSON from the packet's fixed graph and IDs.",
+      "expectedResult": {"outcome": "succeeded", "value": 15, "completedNodes": 5, "edgeConsumptions": 5},
+      "permittedConsumers": ["P2-EP05 tests", "later Phase 2 validation and closeout"],
+      "privacyClassification": "synthetic non-sensitive",
+      "privacyAttestation": "Contains no personal, sensitive, credential, path, network, telemetry, proprietary, or dataset content.",
+      "centralReviewer": "Central approved the fixed design; byte-level review pending",
+      "reviewDate": "2026-09-25",
+      "byteReviewStatus": "pending independent validation and Central reconciliation"
+    },
+    {
+      "id": "p2-ep05-checked-overflow-v1",
+      "schemaVersion": "1.0",
+      "path": "fixtures/p2-ep05/checked-overflow-v1.json",
+      "byteSize": 1362,
+      "sha256": "06F04CFF6D8F2642AADF28784C96AEF04DE4E41EAAD005F2079D6EEA695E7ED1",
+      "provenance": "Synthetic workflow manually authored for the approved P2-EP05 reference proof.",
+      "terms": "MIT",
+      "creationMethod": "Manually authored UTF-8 JSON from the packet's fixed graph and IDs.",
+      "expectedResult": {"outcome": "failed", "code": "handler-failed", "technicalType": "OverflowError", "completedNodes": 2, "failedNodes": 1, "blockedNodes": 1, "unrelatedNodes": 1},
+      "permittedConsumers": ["P2-EP05 tests", "later Phase 2 validation and closeout"],
+      "privacyClassification": "synthetic non-sensitive",
+      "privacyAttestation": "Contains no personal, sensitive, credential, path, network, telemetry, proprietary, or dataset content.",
+      "centralReviewer": "Central approved the fixed design; byte-level review pending",
+      "reviewDate": "2026-09-25",
+      "byteReviewStatus": "pending independent validation and Central reconciliation"
+    }
+  ]
+}

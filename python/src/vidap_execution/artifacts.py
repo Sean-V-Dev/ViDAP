@@ -188,7 +188,7 @@ def begin_attempt(attempt_id: str) -> None:
 
 
 def write_proof_slot(attempt_id: str, data: bytes) -> None:
-    """Synthetic evidence slot; no product output format is implied."""
+    """Fixed bounded proof slot; reference policy supplies its versioned bytes."""
 
     if not isinstance(data, bytes):
         raise ArtifactRefusal("proof slot requires opaque bytes")
@@ -255,6 +255,43 @@ def rollback_unpublished(attempt_id: str) -> None:
             _no_reparse(path)
             if path.exists():
                 path.unlink()
+
+
+def inspect_reference_publication(
+    attempt_id: str, expected_record: dict[str, Any], expected_proof: bytes | None
+) -> str:
+    """Read back exact fixed slots without changing an uncertain publication."""
+
+    with _pinned_attempt(attempt_id) as (directory, _, _):
+        record_path = directory / "record.json"
+        proof_path = directory / "proof-output.bin"
+        _no_reparse(record_path)
+        _no_reparse(proof_path)
+        if not record_path.is_file() or record_path.stat().st_size > _MAX_RECORD:
+            raise ArtifactRefusal("reference ownership record is unreadable")
+        recorded = record_path.read_bytes()
+        if expected_proof is None:
+            if proof_path.exists():
+                raise ArtifactRefusal("unexpected reference proof slot")
+        else:
+            if (
+                not proof_path.is_file()
+                or proof_path.stat().st_size > _MAX_PROOF
+                or proof_path.read_bytes() != expected_proof
+            ):
+                raise ArtifactRefusal("reference proof slot does not match")
+        pending = {
+            "format": "vidap.attempt-ownership/1.0",
+            "attemptId": attempt_id,
+            "state": "pending",
+            "ownedSlots": sorted(_SLOTS),
+            "artifacts": [],
+        }
+        if recorded == _encoded_record(expected_record):
+            return "committed"
+        if recorded == _encoded_record(pending):
+            return "pending"
+        raise ArtifactRefusal("reference publication cannot be classified")
 
 
 def _windows_api() -> Any:

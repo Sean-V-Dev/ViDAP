@@ -5,6 +5,7 @@ from .bindings import StaticBinding as StaticBinding
 from .planner import ExecutionPlan as ExecutionPlan
 from .planner import PlanningFailure as PlanningFailure
 from .planner import plan_execution as plan_execution
+from .reference import run_reference_attempt as run_reference_attempt
 from .representation import ExecutionEdge as ExecutionEdge
 from .representation import ExecutionNode as ExecutionNode
 from .representation import ExecutionRepresentation as ExecutionRepresentation

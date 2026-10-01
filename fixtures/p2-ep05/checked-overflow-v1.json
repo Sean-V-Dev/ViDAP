@@ -1,0 +1,17 @@
+{
+  "format": "vidap.workflow",
+  "schemaVersion": "1.0",
+  "workflowId": "30000000-0000-4000-8000-000000000002",
+  "nodes": [
+    {"id": "33000000-0000-4000-8000-000000000001", "type": "vidap.reference.literal", "parameters": {"value": 9223372036854775807}},
+    {"id": "33000000-0000-4000-8000-000000000002", "type": "vidap.reference.literal", "parameters": {"value": 1}},
+    {"id": "33000000-0000-4000-8000-000000000003", "type": "vidap.reference.add", "parameters": {}},
+    {"id": "33000000-0000-4000-8000-000000000004", "type": "vidap.reference.emit", "parameters": {}},
+    {"id": "33000000-0000-4000-8000-000000000005", "type": "vidap.reference.literal", "parameters": {"value": 7}}
+  ],
+  "edges": [
+    {"id": "34000000-0000-4000-8000-000000000001", "source": {"nodeId": "33000000-0000-4000-8000-000000000001", "portKey": "value"}, "target": {"nodeId": "33000000-0000-4000-8000-000000000003", "portKey": "left"}},
+    {"id": "34000000-0000-4000-8000-000000000002", "source": {"nodeId": "33000000-0000-4000-8000-000000000002", "portKey": "value"}, "target": {"nodeId": "33000000-0000-4000-8000-000000000003", "portKey": "right"}},
+    {"id": "34000000-0000-4000-8000-000000000003", "source": {"nodeId": "33000000-0000-4000-8000-000000000003", "portKey": "value"}, "target": {"nodeId": "33000000-0000-4000-8000-000000000004", "portKey": "input"}}
+  ]
+}

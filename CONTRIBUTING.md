@@ -23,6 +23,28 @@ npm.cmd run build
 ignored web build output. Do not replace or casually regenerate
 `package-lock.json` or `python/uv.lock`.
 
+### When your shell cannot run the Windows commands
+
+Some agents and tools run in a non-Windows shell (for example, a Linux shell
+that can see this folder). If a packet or this guide requires an `npm.cmd` or
+`powershell.exe` command and your shell cannot run it, that is not a blocker
+by itself. Use this workaround instead of breaking the environment:
+
+1. Do not run `setup`, `npm ci`, `npm install`, or `uv sync` against this
+   checkout from that shell. The ignored `node_modules/` and `python/.venv/`
+   are Windows installations and would be replaced.
+2. Do not substitute `npm`, a different Node version, or a Linux equivalent
+   and report it as the required check.
+3. Do everything else from your shell: reading, authorized edits, and
+   read-only checks such as hashes, Git scope, and fixture bytes. Any
+   non-Windows probe runs only in a disposable copy outside the checkout and
+   OneDrive, with its own caches, and is labeled as non-Windows evidence.
+4. Give the user the exact ordered commands to run from the repository root
+   in Windows PowerShell, and ask them to paste the output back.
+5. Record that output in the report as a user-executed Windows run, claiming
+   only the results and counts it actually shows. If the output cannot be
+   obtained, stop as `Blocked` rather than inferring a pass.
+
 ## Local foundation tasks
 
 Use these additional root tasks only after locked setup:

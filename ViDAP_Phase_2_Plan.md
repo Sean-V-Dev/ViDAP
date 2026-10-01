@@ -2,15 +2,16 @@
 
 | Field | Value |
 |---|---|
-| Status | Approved, amended |
-| Version | 1.6 |
-| Parent | `ViDAP_Roadmap.md` version 4.3 |
+| Status | Complete — independently validated and centrally reconciled |
+| Version | 1.8 |
+| Parent | `ViDAP_Roadmap.md` version 4.5 |
 | Spine phase | Phase 2 — Deterministic Execution and Run Foundations |
 | Product source | `ViDAP_Overview.txt` |
 | Prerequisite | Phase 1 complete through P1-EP06 reconciliation |
 | Created | 2026-09-21 |
 | Approved | 2026-09-21 by explicit user direction |
-| Last updated | 2026-09-24 after P2-EP04 acceptance |
+| Last updated | 2026-10-01 after P2-EP06 acceptance and Phase 2 reconciliation |
+| Completed | 2026-10-01 in `ViDAP_P2_EP06_Validation_and_Reconciliation.md` |
 | Owner | Central |
 
 ---
@@ -68,7 +69,7 @@ Every Phase 2 packet must read:
 3. `ViDAP_Phased_Plan_Spine.md` version 1.3, especially invariants 1–18,
    Phase 2, execution-isolation/artifact-persistence decision requirements,
    and strong validation scaling.
-4. `ViDAP_Roadmap.md` version 4.3, especially P2 and checkpoint A2.
+4. `ViDAP_Roadmap.md` version 4.5, especially P2 and checkpoint A2.
 5. `ViDAP_Phase_1_Plan.md` version 2.3 and
    `ViDAP_P1_EP06_Validation_and_Reconciliation.md`.
 6. The accepted P1 reconciliation records and their decisions D1.1–D1.7.
@@ -188,8 +189,8 @@ maintenance, provenance, privacy, size, and package-control decisions.
 | WS2.2 Execution representation | Implement the selected layout-independent plan and runtime binding boundary | D2.1–D2.2 | Complete: P2-EP02 v0.2 independently accepted and centrally reconciled |
 | WS2.3 Planner and dispatcher | Implement deterministic dependency planning, dispatch, branching, and failure flow | D2.2–D2.3, WS2.2 | Complete: P2-EP03 v0.1 independently accepted and centrally reconciled |
 | WS2.4 Runs, artifacts, and cache | Implement selected run record, artifact ownership, error envelope, and explicit cache rules | D2.4–D2.7, WS2.3 | Complete: P2-EP04 v0.1 independently accepted and centrally reconciled |
-| WS2.5 Reference proof | Prove deterministic successful/failed/branched runs and cache correctness through controlled workflows | D2.8, WS2.2–WS2.4 | P2-EP05 ready to draft — headless reference-workflow evidence |
-| WS2.6 Closeout | Independently reproduce Phase 2 evidence and reconcile the outcome | WS2.1–WS2.5 | P2-EP06 — validation and reconciliation evidence |
+| WS2.5 Reference proof | Prove deterministic successful/failed/branched runs and cache correctness through controlled workflows | D2.8, WS2.2–WS2.4 | Complete: P2-EP05 v0.3 independently accepted and centrally reconciled, including exact fixture bytes |
+| WS2.6 Closeout | Independently reproduce Phase 2 evidence and reconcile the outcome | WS2.1–WS2.5 | Complete: P2-EP06 v0.1 independently accepted; Central reconciled P2-AC01–P2-AC12 and completed Phase 2 |
 
 Each packet's stated status controls its authorization; the later packet
 boundaries remain proposed. Central may split a packet further when a
@@ -329,14 +330,25 @@ and modeling policy remain undecided.
 
 ## 13. Next Action
 
-This Phase 2 plan remains approved. Version 1.6 records P2-EP04 acceptance
-and the next drafting gate only; the phase outcome is unchanged.
+Phase 2 is complete. Version 1.8 records final acceptance and transition;
+the approved phase outcome and implementation boundaries are unchanged.
 D2.1–D2.8 are accepted in
 `ViDAP_P2_EP01_Validation_and_Reconciliation.md`. P2-EP02 v0.2 is complete
 and centrally accepted in `ViDAP_P2_EP02_Validation_and_Reconciliation.md`.
 P2-EP03 v0.1 is complete and centrally accepted in
 `ViDAP_P2_EP03_Validation_and_Reconciliation.md`. `ViDAP_P2_EP04.md` v0.1
 is complete and centrally accepted in
-`ViDAP_P2_EP04_Validation_and_Reconciliation.md`. Central may now draft
-P2-EP05 under D2.8. That packet requires separate approval before execution;
-Phase 2 completion remains closed.
+`ViDAP_P2_EP04_Validation_and_Reconciliation.md`. P2-EP05 v0.1 was approved
+on 2026-09-25 but its worker stopped on a contradictory binding revision.
+`ViDAP_P2_EP05.md` v0.2 corrected the binding revision and was approved, but
+independent validation found a High publication/recovery defect: a reported
+failure could coexist with a durable success record, and attempted repair
+would rewrite an immutable terminal record. The v0.3 repair preserved D2.4
+and EP04 terminal immutability, passed fresh independent validation, and is
+centrally accepted with its exact fixture bytes in
+`ViDAP_P2_EP05_Validation_and_Reconciliation.md`. P2-EP06 v0.1 passed fresh
+whole-phase independent validation; Central accepted it and reconciled
+P2-AC01–P2-AC12 in `ViDAP_P2_EP06_Validation_and_Reconciliation.md` on
+2026-10-01. Detailed Phase 3 planning is ready to draft from that accepted
+handoff and the spine/roadmap UX requirements. Phase 3 execution remains
+subject to a separately approved phase plan and bounded packets.
