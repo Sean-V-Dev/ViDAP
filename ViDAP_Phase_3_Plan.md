@@ -2,23 +2,25 @@
 
 | Field | Value |
 |---|---|
-| Status | Draft; awaiting explicit user approval |
-| Version | 0.1 |
+| Status | Approved, amended |
+| Version | 1.1 |
 | Parent | `ViDAP_Roadmap.md` version 4.5 |
 | Spine phase | Phase 3 — First Visual End-to-End Slice |
 | Product source | `ViDAP_Overview.txt` |
-| Interaction-model reference | `UX refinement.txt` (consultative; spine v1.3 holds its approved direction) |
+| Interaction-model basis | `UX refinement.txt` (basis for Phase 3 interaction decisions by user direction, 2026-10-01) |
 | Prerequisite | Phase 2 complete through P2-EP06 reconciliation (2026-10-01) |
 | Created | 2026-10-01 |
+| Approved | 2026-10-01 by explicit user direction |
+| Last updated | 2026-10-01 — v1.1 amendment strengthening the UX-refinement basis, approved by explicit user direction |
 | Owner | Central |
 
 ---
 
 ## 1. Authorization and Boundary
 
-This draft is not approved and authorizes nothing. Once approved, it still is
-not an execution packet: it does not authorize source changes, dependencies,
-UI, API, persistence, or a Phase 3 worker. Each bounded packet requires its own
+This approved phase plan is not an execution packet. Its approval alone does
+not authorize source changes, dependencies, UI, API, persistence, or a Phase 3
+worker. Each bounded packet requires its own
 explicit Central approval.
 
 Phase 3 proves that a person can build and run one narrow, real workflow
@@ -72,8 +74,10 @@ Every Phase 3 packet must read:
 3. `ViDAP_Phased_Plan_Spine.md` v1.3, especially invariants 1–18, Phase 3,
    the deferred-decision register, and validation scaling.
 4. `ViDAP_Roadmap.md` v4.5, especially P3 and checkpoint A3.
-5. `UX refinement.txt` as consultative detail behind the spine's approved
-   interaction direction; its phase-status statements are not authoritative.
+5. `UX refinement.txt` — by explicit user direction on 2026-10-01, the basis
+   for Phase 3 interaction and design decisions. Decisions trace to its
+   sections and record any deviation with a rationale. Its phase-status
+   statements are not authoritative.
 6. `ViDAP_P1_EP06_Validation_and_Reconciliation.md`,
    `ViDAP_P2_EP06_Validation_and_Reconciliation.md`, and the accepted
    decisions D1.1–D1.7 and D2.1–D2.8.
@@ -157,6 +161,14 @@ UI-set parameter that measurably changes the backend result, and one
 actionable failure. It must state explicitly which Phase 4/5 policies remain
 open and must not quietly settle them.
 
+Visible nodes represent coherent responsibilities or meaningful experimental
+decisions, not individual library calls (UX §§1, 8): routine steps may live
+inside a composite node such as Prepare, while remaining real, inspectable,
+and auditable. The slice's model step must be shaped as a model
+responsibility with a fixed implementation, not an implementation-named node
+type, so Phase 5's generic Model node and implementation selection
+(UX §§11–13) are not foreclosed or pre-empted.
+
 ### D3.2 — UI/runtime integration contract
 
 Define how the browser obtains contracts, submits a workflow for validation,
@@ -173,7 +185,9 @@ accepted lifecycle limits.
 Decide where a saved workflow lives, who writes it, overwrite and conflict
 behavior, and how load reuses Phase 1 deserialization and validation rather
 than a UI parser. A saved file must be the same canonical document the
-runtime reads.
+runtime reads. Because the file is shared with other tools and future agents
+(UX §18), the editor must detect a change made to the file outside the
+editor, show it, and never silently overwrite it.
 
 ### D3.4 — Presentation-state ownership and schema impact
 
@@ -192,7 +206,13 @@ left-to-right progression; gutter resize behavior; how a cross-region
 dependency renders as a named output and input rather than a persistent long
 wire; how the gutter visibly breaks the wire; and the on-demand trace/X-ray
 behavior that reveals producers and consumers. Regions are responsibility
-zones, not required stages; skipping a region must remain valid.
+zones, not required stages; skipping a region must remain valid (UX §§2–5).
+Specifically decide: region boundary rails for outputs and inputs; matching
+a boundary output to its inputs by semantic identity rather than vertical
+alignment; how selecting or hovering a boundary value shows what produced it
+and what consumes it; and how the design addresses the three complexity forms
+— long-distance, local, and conceptual — with local reroute, highlighting,
+and dimming kept as support for regions rather than replacements (UX §§6–7).
 
 ### D3.6 — Node interaction and local connection behavior
 
@@ -201,14 +221,20 @@ internal scrolling that never pans or zooms the canvas; contract-driven
 parameter controls with one canonical contract source; typed port and
 connection feedback derived from workflow types and backend validation; and
 explicit local layout assistance (align, tidy) instead of continuous
-automatic repositioning. Users own spatial arrangement.
+automatic repositioning. Users own spatial arrangement. A permanent side
+inspector is not the primary configuration model; in-place expansion is
+tested first (UX §§9–10). Input handling must clearly separate scrolling node
+content, moving a node, editing controls, panning, and zooming.
 
 ### D3.7 — Run controls, result, and error presentation
 
 Define run controls and statuses, how the recorded result is shown, and how
 Phase 1 validation diagnostics and Phase 2 runtime errors appear on the
 affected node with plain-English explanation, remedy, and expandable
-technical detail. Displayed values must come from recorded execution output.
+technical detail. Displayed values must come from recorded execution output. The primary
+result should stay visible while the user edits, so a change and its
+consequence stay spatially connected (UX §15), without designing Phase 5's
+modeling result views.
 
 ### D3.8 — Visual design system and design/UX support mechanism
 
@@ -236,15 +262,18 @@ screenshot-based state review, a fresh-user walkthrough, and an independent
 visual/UX review. Include the UX amendment's prototype questions: can a user
 tell where information comes from and goes without persistent long wires,
 and does the region system reduce layout effort compared with an
-unrestricted canvas?
+unrestricted canvas? It must also apply the north-star test (UX §24): from
+the normal canvas, can a user tell where the data entered, what major things
+happened to it, which approach is used, where branches are, and what the
+current outcome is, without opening every node?
 
 ## 6. Workstreams and Proposed Packet Boundaries
 
 | Workstream | Objective | Depends on | Proposed bounded packets |
 |---|---|---|---|
-| WS3.1 Slice and integration decisions | Resolve D3.1–D3.4 with evidence | Phase 2 reconciliation | P3-EP01 decision packet |
-| WS3.2 Design and interaction decisions | Resolve D3.5–D3.10, including the design system and a throwaway interaction prototype as evidence | WS3.1 (D3.4 at minimum) | P3-EP02 decision and design-system packet |
-| WS3.3 Backend slice | Implement the approved slice operations, fixtures, and the D3.2/D3.3 channel, headlessly tested | D3.1–D3.3 | P3-EP03 |
+| WS3.1 Slice and integration decisions | Resolve D3.1–D3.4 with evidence | Phase 2 reconciliation | Complete: P3-EP01 v0.1 accepted 2026-10-01 |
+| WS3.2 Design and interaction decisions | Resolve D3.5–D3.10, including the design system and a throwaway interaction prototype as evidence | WS3.1 (D3.4 at minimum) | Complete: P3-EP02 v0.1 accepted 2026-10-02 |
+| WS3.3 Backend slice | Implement the approved slice operations, fixtures, and the D3.2/D3.3 channel, headlessly tested | D3.1–D3.3 | Split: P3-EP03A dependency and license review (v0.1 drafted, awaiting approval); P3-EP03B implementation after Central's license decision |
 | WS3.4 Editor core | Canvas, regions, gutters, contract-driven nodes, typed connections, validation feedback, save/load | D3.4–D3.9, WS3.3 contracts | P3-EP04 |
 | WS3.5 Run, results, and trace | Run controls, status, recorded result and error presentation, boundary trace/X-ray | D3.5–D3.7, WS3.3–WS3.4 | P3-EP05 |
 | WS3.6 Closeout | Reproduce Phase 3 evidence, fresh-user walkthrough, independent visual/UX review, reconciliation | WS3.1–WS3.5 | P3-EP06 |
@@ -313,7 +342,8 @@ Phase 3 may be recommended complete only when:
   explanation, remedy, and technical detail on the affected node.
 - **P3-AC06:** The slice includes multiple regions, a cross-region dependency
   that skips a neighboring region, and a shared branch; cross-region
-  dependencies are traceable on demand without persistent long wires.
+  dependencies are traceable on demand without persistent long wires, and a
+  boundary value shows its producer and consumers.
 - **P3-AC07:** Gutters resize regions without forced repositioning; nodes
   support compact and bounded expanded states with internal scrolling that
   does not move the canvas.
@@ -321,10 +351,11 @@ Phase 3 may be recommended complete only when:
   change semantics, plan, or results.
 - **P3-AC09:** Independent visual/UX review confirms the approved design
   system, hierarchy, interaction, accessibility baseline, anti-spaghetti
-  behavior, and representative states.
-- **P3-AC10:** No Phase 4+ policy, broad node catalog, experiment UX, export,
-  AutoML, agent control, plugin, hosted, or unapproved runtime behavior is
-  introduced.
+  behavior, and representative states; the north-star test passes; and every
+  deviation from `UX refinement.txt` is recorded with its rationale.
+- **P3-AC10:** No Phase 4+ policy, broad or per-implementation node catalog,
+  experiment UX, export, AutoML, agent control, plugin, hosted, or unapproved
+  runtime behavior is introduced.
 - **P3-AC11:** Quality, dependency, license, fixture, artifact, hygiene, and
   documentation evidence remains current; every new dependency and fixture
   passed D0.6/D0.7 controls.
@@ -377,6 +408,13 @@ inference, profiling, and preparation policy remain undecided.
 
 ## 13. Next Action
 
-Review this draft. On explicit user approval, Central records it as approved,
-updates the roadmap status, and drafts P3-EP01 (D3.1–D3.4) for separate
-approval. No packet or implementation is authorized by this draft.
+This plan was approved on 2026-10-01 by explicit user direction. Version 1.1,
+approved the same day, makes `UX refinement.txt` the basis for Phase 3
+interaction decisions and adds its responsibility-node, boundary, inspector,
+visible-result, external-edit, and north-star requirements.
+`ViDAP_P3_EP01.md` v0.1 is complete: D3.1–D3.4 are accepted in
+`ViDAP_P3_EP01_Validation_and_Reconciliation.md`, with F1 and F6 accepted as
+narrow Phase 2 extensions and F2 as a P3-EP03 gate. `ViDAP_P3_EP02.md` v0.1
+is complete: D3.5–D3.10 and `DESIGN.md` v0.2 are accepted in
+`ViDAP_P3_EP02_Validation_and_Reconciliation.md`. P3-EP03 (backend slice) is
+ready to draft. No implementation is authorized.

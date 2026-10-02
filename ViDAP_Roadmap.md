@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Status | Approved, amended |
-| Version | 4.5 |
+| Version | 4.6 |
 | Approved | 2026-09-17 |
 | Last updated | 2026-10-01 |
 | Parent | `ViDAP_Phased_Plan_Spine.md` version 1.3 |
@@ -36,14 +36,14 @@ Detailed work is planned one phase at a time. Roadmap changes may clarify sequen
 |---|---|---|
 | Product specification | Governing source | `ViDAP_Overview.txt` |
 | Phased Plan Spine | Approved, amended | Version 1.3, approved 2026-09-17 and amended 2026-09-19 and 2026-09-21 |
-| Roadmap | Approved, amended | Version 4.5, approved 2026-09-17 and updated 2026-10-01 |
+| Roadmap | Approved, amended | Version 4.6, approved 2026-09-17 and updated 2026-10-01 |
 | Phase 0 | Complete | P0-EP01 through P0-EP08 accepted and centrally reconciled |
 | Phase 1 | Complete | `ViDAP_P1_EP06_Validation_and_Reconciliation.md` accepts P1-EP06 and reconciles P1-AC12 |
 | Phase 2 | Complete | `ViDAP_P2_EP06_Validation_and_Reconciliation.md` accepts EP06 and reconciles P2-AC01–P2-AC12 |
-| Phase 3 | Ready for detailed planning | Reconciled Phase 2 handoff and approved spine/roadmap UX direction; no Phase 3 plan or execution approved |
+| Phase 3 | Plan approved | `ViDAP_Phase_3_Plan.md` v1.1 approved 2026-10-01; P3-EP01 complete (D3.1–D3.4 accepted 2026-10-01); P3-EP02 complete (D3.5–D3.10 and `DESIGN.md` accepted 2026-10-02); P3-EP03A (dependency review) v0.1 drafted, awaiting approval |
 | Phases 4-11 | Sequenced only | Remain at roadmap resolution until predecessor reconciliation |
 | Visual workflow interaction direction | Approved cross-phase direction | `UX refinement.txt` is incorporated into Spine v1.3 and the Phase 3–8 roadmap boundaries and governs the next Phase 3 planning work |
-| Execution packets | Twenty complete | P0-EP01 through P0-EP08, P1-EP01 through P1-EP06, and P2-EP01 through P2-EP06 complete |
+| Execution packets | Twenty-two complete | P0-EP01 through P0-EP08, P1-EP01 through P1-EP06, P2-EP01 through P2-EP06, P3-EP01, and P3-EP02 complete |
 | Product implementation | Phase 1 kernel plus Phase 2 reference proof | Accepted canonical document, static contracts/validation, immutable execution representation, deterministic planner/dispatcher, bounded attempt record, owned metadata-first local artifacts, attempt-local reuse, sanitized runtime diagnostics, and one fixed scalar reference family; no product UI, data/ML, export, or cross-run cache |
 
 No percentage-complete values are used. A phase moves state only when its named gate and evidence support the change.
@@ -177,9 +177,10 @@ H3 is the first target that demonstrates the core product promise end to end. H4
 - **Visible demonstration:** A user visually assembles, validates, saves, reloads, and executes one deliberately narrow real workflow, including one actionable failure path, multiple semantic regions, a cross-region dependency that skips a neighboring region, a shared branch, user-resizable gutters, compact/expanded nodes, and on-demand dependency tracing.
 - **Architectural checkpoint A3:** Forms derive from node contracts; connection rules come from workflow types; displayed results come from recorded execution results; semantic regions and boundary interfaces render canonical dependencies without becoming a second graph or hidden global state.
 - **Decisions due in the phase plan:** Minimal vertical-slice operations; semantic-region taxonomy and presentation-state ownership; resizable-gutter and boundary-interface behavior; dependency trace/X-ray behavior; compact/expanded/focus node interaction; local connection/layout assistance; result and error presentation; accessibility baseline; UI/runtime integration contract; concise visual design system or equivalent; current maintained design/UX support mechanism; representative screen/state set; and proportionate visual/UX validation method.
-- **Status:** Ready for detailed planning after Phase 2 reconciliation. The
-  Phase 3 plan, vertical-slice capability/UX acceptance path, design system,
-  and subsequent bounded packets require separate approval before execution.
+- **Status:** Phase plan approved 2026-10-01 (`ViDAP_Phase_3_Plan.md` v1.1).
+  P3-EP01 (D3.1–D3.4) and P3-EP02 (D3.5–D3.10 and the `DESIGN.md` design
+  system) are complete and accepted. Every remaining bounded packet requires
+  separate approval before execution.
 
 ### P4 - Data Intake, Profiling, and Preparation
 
@@ -387,7 +388,7 @@ Calendar estimates may be added after Phase 0 establishes the repository baselin
 
 ## 12. Next Action
 
-Draft the detailed Phase 3 plan from
-`ViDAP_P2_EP06_Validation_and_Reconciliation.md`, the approved spine and UX
-direction, and the P3 capability/acceptance boundaries. Obtain its separate
-approval before drafting or executing bounded Phase 3 implementation packets.
+Obtain approval of `ViDAP_P3_EP03A.md` v0.1 (dependency and license review,
+the F2 gate). P3-EP03B (backend slice implementation) follows Central's
+license decision and needs its own approval. Later Phase 3 packets follow the approved Phase 3 plan and each require
+separate approval.

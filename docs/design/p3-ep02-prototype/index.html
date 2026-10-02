@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ViDAP P3-EP02 interaction prototype (illustrative)</title>
+<style>
+:root {
+  --canvas: #F4F5F7; --surface: #FFFFFF; --region: #FAFBFC; --gutter-bg: #E6E9EE;
+  --text: #1B1F24; --text-2: #4A5361; --muted: #5F6977;
+  --border: #D5DAE1; --border-strong: #7A8494;
+  --accent: #2457C5; --accent-bg: #E8EEFB;
+  --ok: #1E7A46; --ok-bg: #E7F4EC; --err: #B42318; --err-bg: #FDECEA;
+  --warn: #8A5A00; --warn-bg: #FFF4DB;
+  --t-table: #0E6A87; --t-split: #6E45B8; --t-model: #A84B0C; --t-metrics: #3D6B12;
+  --font: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  --mono: "Cascadia Mono", Consolas, ui-monospace, monospace;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s6: 24px;
+  --radius: 6px; --node-w: 168px; --rail-w: 96px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--canvas); color: var(--text); font: 13px/1.4 var(--font); }
+button, select, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Top bar */
+.topbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3); padding: var(--s2) var(--s4); background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 30; }
+.brand { font-weight: 600; font-size: 14px; }
+.proto-badge { font-size: 12px; color: var(--warn); background: var(--warn-bg); border: 1px solid var(--warn); border-radius: 999px; padding: 2px 8px; }
+.spacer { flex: 1; }
+.btn { min-height: 28px; padding: 4px 12px; border: 1px solid var(--border-strong); background: var(--surface); border-radius: var(--radius); cursor: pointer; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.btn[disabled] { opacity: .6; cursor: not-allowed; }
+.seg { display: inline-flex; border: 1px solid var(--border-strong); border-radius: var(--radius); overflow: hidden; }
+.seg button { border: 0; background: var(--surface); padding: 4px 10px; min-height: 28px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent-bg); color: var(--accent); font-weight: 600; }
+.result-pill { display: flex; gap: var(--s2); align-items: baseline; padding: 3px 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--region); min-height: 28px; }
+.result-pill .k { color: var(--text-2); font-size: 12px; }
+.result-pill .v { font-weight: 600; font-variant-numeric: tabular-nums; }
+.result-pill .note { color: var(--muted); font-size: 11px; }
+
+.banner { display: none; margin: var(--s2) var(--s4) 0; padding: var(--s2) var(--s3); border-radius: var(--radius); border: 1px solid; align-items: center; gap: var(--s3); }
+.banner.show { display: flex; }
+.banner.conflict { background: var(--warn-bg); border-color: var(--warn); }
+.banner.busy { background: var(--accent-bg); border-color: var(--accent); }
+.banner.trace { background: var(--accent-bg); border-color: var(--accent); }
+
+/* Workspace */
+.scroller { overflow: auto; padding: var(--s3) var(--s2) var(--s6); }
+.ws { position: relative; display: flex; align-items: stretch; width: max-content; min-height: 560px; }
+.region { position: relative; background: var(--region); border: 1px solid var(--border); border-radius: var(--radius); min-height: 560px; flex: none; }
+.region-head { display: flex; align-items: baseline; justify-content: space-between; padding: var(--s2) var(--s3); border-bottom: 1px solid var(--border); }
+.region-name { font-size: 12px; font-weight: 700; letter-spacing: .06em; color: var(--text-2); }
+.region-meta { font-size: 11px; color: var(--muted); }
+.region-body { position: relative; height: 520px; }
+.rail { position: absolute; top: 0; bottom: 0; width: var(--rail-w); padding: var(--s2) var(--s1); display: flex; flex-direction: column; gap: var(--s2); }
+.rail.in { left: 0; border-right: 1px dashed var(--border); }
+.rail.out { right: 0; border-left: 1px dashed var(--border); align-items: stretch; }
+.rail-label { font-size: 10px; font-weight: 700; letter-spacing: .06em; color: var(--muted); text-transform: uppercase; }
+.bval { position: absolute; left: 4px; right: 4px; width: auto !important; display: flex; align-items: center; gap: 4px; min-height: 28px; padding: 3px 6px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius); cursor: pointer; text-align: left; font-size: 11px; line-height: 1.2; width: 100%; }
+.bval .nm { font-weight: 600; }
+.bval .sub { color: var(--muted); display: block; font-size: 10px; }
+.bval.bad { border-color: var(--warn); background: var(--warn-bg); }
+.bval.bad .sub { color: var(--warn); }
+.bval .nm { display: block; }
+.bval[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-bg); }
+
+/* Gutter */
+.gutter { position: relative; flex: none; width: 24px; cursor: col-resize; display: flex; align-items: center; justify-content: center; }
+.gutter::before { content: ""; width: 4px; height: 56px; border-radius: 2px; background: var(--border-strong); }
+.gutter:hover::before, .gutter:focus-visible::before { background: var(--accent); }
+.gutter .gbtns { position: absolute; top: 4px; display: none; flex-direction: column; gap: 2px; z-index: 6; }
+.gutter:hover .gbtns, .gutter:focus-within .gbtns { display: flex; }
+.gbtn { width: 24px; height: 24px; padding: 0; border: 1px solid var(--border-strong); background: var(--surface); border-radius: 4px; cursor: pointer; font-size: 12px; line-height: 1; }
+
+/* Nodes */
+.node { position: absolute; width: var(--node-w); background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius); box-shadow: 0 1px 2px rgba(16,24,40,.06); z-index: 5; }
+.node:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.node.moving { outline: 2px dashed var(--accent); outline-offset: 3px; }
+.node.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.node.expanded { width: 290px; z-index: 12; }
+.node-head { display: flex; align-items: flex-start; gap: 4px; padding: 6px 8px 4px; cursor: grab; }
+.node-kicker { font-size: 10px; font-weight: 700; letter-spacing: .06em; color: var(--muted); text-transform: uppercase; }
+.node-title { font-weight: 600; font-size: 13px; line-height: 1.25; }
+.node-impl { font-size: 11px; color: var(--text-2); }
+.node-tools { margin-left: auto; display: flex; gap: 2px; }
+.icon-btn { width: 24px; height: 24px; padding: 0; border: 1px solid transparent; background: transparent; border-radius: 4px; cursor: pointer; color: var(--text-2); }
+.icon-btn:hover { border-color: var(--border); background: var(--region); }
+.node-sum { padding: 0 8px 6px; font-size: 11px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.node-foot { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px 6px; border-top: 1px solid var(--border); }
+.illus { font-size: 10px; color: var(--warn); }
+.status { white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 999px; border: 1px solid currentColor; }
+.st-notrun { color: var(--muted); } .st-running { color: var(--accent); } .st-completed { color: var(--ok); }
+.st-failed { color: var(--err); } .st-blocked { color: var(--muted); border-style: dashed; } .st-unrelated { color: var(--muted); border-style: dotted; }
+.node.failed { border-color: var(--err); box-shadow: 0 0 0 1px var(--err); }
+.node.invalid { border-color: var(--warn); box-shadow: 0 0 0 1px var(--warn); }
+.node-body { display: none; border-top: 1px solid var(--border); max-height: 230px; overflow: auto; overscroll-behavior: contain; padding: 8px; }
+.node.expanded .node-body { display: block; }
+.field { display: grid; grid-template-columns: 1fr 96px; gap: 6px; align-items: center; margin-bottom: 6px; }
+.field label { font-size: 12px; }
+.field input[type=number] { width: 96px; min-height: 26px; border: 1px solid var(--border-strong); border-radius: 4px; padding: 2px 6px; font-variant-numeric: tabular-nums; }
+.field .hint { grid-column: 1 / -1; font-size: 10px; color: var(--muted); margin-top: -4px; }
+.sect { font-size: 10px; font-weight: 700; letter-spacing: .06em; color: var(--muted); text-transform: uppercase; margin: 8px 0 4px; }
+.steps { margin: 0; padding-left: 16px; font-size: 12px; }
+.msg { margin: 0 8px 6px; padding: 6px 8px; border-radius: 4px; font-size: 11px; border: 1px solid; }
+.msg.err { color: var(--err); background: var(--err-bg); border-color: var(--err); }
+.msg.warn { color: var(--warn); background: var(--warn-bg); border-color: var(--warn); }
+.msg b { display: block; font-size: 12px; color: var(--text); margin-bottom: 2px; }
+.msg .mk { display: block; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.msg details { margin-top: 4px; color: var(--text); }
+.msg code { font-family: var(--mono); font-size: 10px; }
+
+/* Ports */
+.port.ok { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 50%; }
+.port.no { opacity: .35; }
+.port.no::after { content: "✕"; position: absolute; left: 14px; top: -3px; font-size: 10px; color: var(--text-2); }
+.port.in.no::after { left: auto; right: 14px; }
+.port.src { outline: 2px dashed var(--accent); outline-offset: 2px; border-radius: 50%; }
+.port { position: absolute; width: 12px; height: 12px; display: flex; align-items: center; justify-content: center; z-index: 7; }
+.port.in { left: -7px; } .port.out { right: -7px; }
+.glyph { width: 10px; height: 10px; background: currentColor; }
+.g-table { color: var(--t-table); border-radius: 50%; }
+.g-split { color: var(--t-split); transform: rotate(45deg) scale(.85); }
+.g-model { color: var(--t-model); }
+.g-metrics { color: var(--t-metrics); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+
+/* Wires overlay */
+svg.wires { position: absolute; inset: 0; pointer-events: none; z-index: 4; overflow: visible; }
+svg.wires path { fill: none; stroke: var(--border-strong); stroke-width: 1.5; }
+svg.wires path.hot { stroke: var(--accent); stroke-width: 2.5; }
+svg.wires path.xray { stroke: var(--accent); stroke-width: 2; stroke-dasharray: 6 4; }
+svg.wires path.bad { stroke: var(--warn); stroke-width: 2; stroke-dasharray: 4 3; }
+svg.wires path.long { stroke: #5F6977; stroke-width: 1.5; }
+
+/* Trace dimming */
+/* Dimming keeps text contrast: unrelated items lose emphasis (grey fill, light border), not legibility. */
+.tracing .node:not(.lit), .tracing .bval:not(.lit) { background: #EEF0F3; border-color: #C9CFD7; box-shadow: none; }
+.tracing .node.lit, .tracing .bval.lit { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.tracing svg.wires path:not(.hot):not(.xray) { stroke: #C9CFD7; }
+
+/* Tooltip */
+.tip { position: fixed; z-index: 40; max-width: 320px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius); box-shadow: 0 4px 16px rgba(16,24,40,.14); padding: 8px 10px; font-size: 12px; display: none; }
+.tip.show { display: block; }
+.tip h4 { margin: 0 0 4px; font-size: 12px; }
+.tip ul { margin: 2px 0 4px; padding-left: 16px; }
+.tip .k { color: var(--muted); font-size: 11px; }
+
+/* Focus mode */
+.scrim { position: fixed; inset: 0; background: rgba(27,31,36,.35); z-index: 20; display: none; }
+.scrim.show { display: block; }
+.node.focused { position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%); width: 520px; z-index: 25; }
+.node.focused .node-body { display: block; max-height: 60vh; }
+
+/* Free canvas comparison */
+.free .rail, .free .region-head .region-meta { display: none; }
+.free .region { background: transparent; border-color: transparent; }
+.free .region-head { visibility: hidden; }
+.free .gutter { visibility: hidden; }
+
+/* Empty state */
+.empty-hint { display: none; position: absolute; left: 50%; top: 40%; transform: translate(-50%,-50%); text-align: center; color: var(--text-2); width: 70%; }
+.empty .node, .empty .rail { display: none; }
+.empty .empty-hint { display: block; }
+
+.legend { display: flex; gap: var(--s3); align-items: center; font-size: 11px; color: var(--text-2); padding: 0 var(--s4); margin-top: var(--s2); flex-wrap: wrap; }
+.legend span { display: inline-flex; align-items: center; gap: 4px; }
+.footer-note { padding: 0 var(--s4) var(--s4); color: var(--muted); font-size: 11px; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <span class="brand">ViDAP</span>
+  <span class="proto-badge" title="Throwaway design evidence for P3-EP02. Not the product. No backend, no computation.">Prototype · illustrative values only</span>
+  <span class="seg" role="group" aria-label="View">
+    <button id="v-regions" aria-pressed="true">Regions</button>
+    <button id="v-free" aria-pressed="false">Free canvas (comparison)</button>
+  </span>
+  <span class="seg" role="group" aria-label="Zoom"><button data-z="1" aria-pressed="true">100%</button><button data-z="0.85" aria-pressed="false">85%</button><button data-z="0.7" aria-pressed="false">70%</button></span>
+  <label class="k" for="state-sel" style="font-size:12px;color:var(--text-2)">Illustrative state</label>
+  <select id="state-sel" class="btn" aria-label="Illustrative state">
+    <option value="idle">Valid slice, not run</option>
+    <option value="running">Running</option>
+    <option value="connecting">Connecting (port feedback)</option>
+    <option value="success">Success with metrics</option>
+    <option value="failure">Runtime failure on Model</option>
+    <option value="invalid">Validation error (connection)</option>
+    <option value="conflict">Save conflict</option>
+    <option value="busy">Running, and a second run requested (busy)</option>
+    <option value="empty">Empty canvas</option>
+  </select>
+  <span class="spacer"></span>
+  <div class="result-pill" aria-live="polite" id="result-pill"><span class="k">Primary result</span><span class="v" id="result-v">Not run</span><span class="note">illustrative</span></div>
+  <button class="btn primary" id="run-btn">Run</button>
+</header>
+<div class="banner conflict" id="b-conflict" role="status"><b>This workflow changed outside the editor.</b><span>Summary from the backend: 1 node added (Feature: age band), 1 parameter changed (Split · test fraction 0.25 → 0.3).</span><span class="spacer"></span><button class="btn">Reload from disk</button><button class="btn">Save under a new name</button></div>
+<div class="banner busy" id="b-busy" role="status"><b>Another run is in progress.</b><span>ViDAP runs one workflow at a time. Try again when it finishes.</span></div>
+<div class="banner busy" id="b-connect" role="status"><b>Connecting Train/Test Split.split.</b><span>Inputs that accept a split are outlined; others show ✕. The backend still validates the result. Esc to cancel.</span></div>
+<div class="banner trace" id="b-trace" role="status"><b id="trace-title">Tracing</b><span id="trace-desc"></span><span class="spacer"></span><button class="btn" id="trace-exit">Exit trace (Esc)</button></div>
+<div class="legend" aria-label="Port type legend">
+  <span><i class="glyph g-table"></i> table</span><span><i class="glyph g-split"></i> split</span><span><i class="glyph g-model"></i> model</span><span><i class="glyph g-metrics"></i> metrics</span>
+  <span>· Values crossing a gutter end at the region's rail and continue from the matching rail on the other side. Hover or focus a rail value to see producer and consumers; press Enter to trace. Keyboard: arrows move between connected nodes, M moves a node.</span>
+</div>
+<div class="scroller"><div class="ws" id="ws"></div></div>
+<p class="footer-note">Five nodes are the accepted P3-EP01 slice (Dataset, Prepare Data, Train/Test Split, Model, Evaluate). Feature, the second Model, the second Evaluate, and Compare are illustrative extras for the UX §23 prototype checks and are not part of the slice; Feature sits between Prepare Data and Split, where the slice connects them directly. The free-canvas comparison reuses the region layout's positions rather than a hand-arranged free layout, which may favor regions.</p>
+<div class="tip" id="tip" role="tooltip"></div>
+<div class="scrim" id="scrim"></div>
+<div class="sr" aria-live="polite" id="live"></div>
+
+<script>
+"use strict";
+const REGIONS = [
+  { id: "data", name: "DATA", short: "DATA", width: 298 },
+  { id: "prepare", name: "PREPARE", short: "PREPARE", width: 576 },
+  { id: "split", name: "VALIDATE / SPLIT", short: "SPLIT", width: 386 },
+  { id: "model", name: "MODEL", short: "MODEL", width: 386 },
+  { id: "evaluate", name: "EVALUATE / COMPARE", short: "EVALUATE", width: 483 }
+];
+const NODES = [
+  { id: "dataset", region: "data", x: 16, y: 70, kicker: "Data", title: "Dataset", impl: "Controlled CSV · passengers-v1", sum: "180 rows · 4 declared columns", slice: true,
+    ins: [], outs: [{ k: "table", t: "table" }], params: [], steps: ["Load the fixture by identity", "Parse each column by its declared type"] },
+  { id: "prepare", region: "prepare", x: 108, y: 50, kicker: "Prepare", title: "Prepare Data", impl: "Fill missing · Encode categories", sum: "missing fill 0.0", slice: true,
+    ins: [{ k: "table", t: "table" }], outs: [{ k: "table", t: "table" }],
+    params: [{ k: "missing_fill", label: "Missing value fill", v: 0.0, step: 0.5, hint: "Constant used for missing numbers. Nothing is learned from the rows." }],
+    steps: ["Fill missing numbers with the constant above", "One-hot encode cabin_class using its declared categories", "Keep the declared target column"] },
+  { id: "feature", region: "prepare", x: 298, y: 200, kicker: "Features", title: "Family size", impl: "Derived column", sum: "adds family_size", slice: false,
+    ins: [{ k: "table", t: "table" }], outs: [{ k: "table", t: "table" }], params: [], steps: ["family_size = siblings + parents + 1"] },
+  { id: "split", region: "split", x: 108, y: 110, kicker: "Validate / Split", title: "Train/Test Split", impl: "Single holdout", sum: "test 0.25 · seed 7", slice: true,
+    ins: [{ k: "table", t: "table" }], outs: [{ k: "split", t: "split" }],
+    params: [{ k: "test_fraction", label: "Test fraction", v: 0.25, step: 0.05, hint: "Share of rows held out for evaluation." }, { k: "seed", label: "Seed", v: 7, step: 1, hint: "The only seed that affects this workflow." }] },
+  { id: "modelA", region: "model", x: 108, y: 40, kicker: "Model", title: "Model 1", impl: "Logistic regression", sum: "regularization 1.0", slice: true,
+    ins: [{ k: "split", t: "split" }], outs: [{ k: "model", t: "model" }],
+    params: [{ k: "regularization", label: "Regularization (C)", v: 1.0, step: 0.1, hint: "Smaller values regularize more strongly." }],
+    advanced: [{ label: "Max iterations", v: 100, kind: "int" }, { label: "Tolerance", v: 0.0001, kind: "float" }, { label: "Class weight", v: "none", kind: "enum", opts: ["none", "balanced"] }, { label: "Fit intercept", v: true, kind: "bool" }, { label: "Solver", v: "lbfgs", kind: "fixed" }] },
+  { id: "modelB", region: "model", x: 108, y: 290, kicker: "Model", title: "Model 2", impl: "Decision tree (illustrative branch)", sum: "max depth 4", slice: false,
+    ins: [{ k: "split", t: "split" }], outs: [{ k: "model", t: "model" }],
+    params: [{ k: "max_depth", label: "Max depth", v: 4, step: 1, hint: "Illustrative only." }] },
+  { id: "evalA", region: "evaluate", x: 108, y: 40, kicker: "Evaluate", title: "Evaluate 1", impl: "Accuracy on test rows", sum: "—", slice: true, result: "0.81",
+    ins: [{ k: "model", t: "model" }, { k: "split", t: "split" }], outs: [{ k: "metrics", t: "metrics" }], params: [] },
+  { id: "evalB", region: "evaluate", x: 108, y: 290, kicker: "Evaluate", title: "Evaluate 2", impl: "Accuracy on test rows", sum: "—", slice: false, result: "0.78",
+    ins: [{ k: "model", t: "model" }, { k: "split", t: "split" }], outs: [{ k: "metrics", t: "metrics" }], params: [] },
+  { id: "compare", region: "evaluate", x: 300, y: 150, kicker: "Compare", title: "Compare", impl: "Side-by-side metrics", sum: "—", slice: false,
+    ins: [{ k: "a", t: "metrics" }, { k: "b", t: "metrics" }], outs: [], params: [] }
+];
+const EDGES = [
+  ["dataset", "table", "prepare", "table"], ["prepare", "table", "feature", "table"], ["feature", "table", "split", "table"],
+  ["split", "split", "modelA", "split"], ["split", "split", "modelB", "split"], ["split", "split", "evalA", "split"], ["split", "split", "evalB", "split"],
+  ["modelA", "model", "evalA", "model"], ["modelB", "model", "evalB", "model"], ["evalA", "metrics", "compare", "a"], ["evalB", "metrics", "compare", "b"]
+].map(([sn, sp, tn, tp], i) => ({ id: "e" + (i + 1), sn, sp, tn, tp }));
+
+const byId = Object.fromEntries(NODES.map(n => [n.id, n]));
+// Display names follow DESIGN.md: the node label, else the type label with an ordinal when several nodes share a type.
+const SHORT = { dataset: "Dataset", prepare: "Prepare Data", feature: "Family size", split: "Train/Test Split", modelA: "Model 1", modelB: "Model 2", evalA: "Evaluate 1", evalB: "Evaluate 2", compare: "Compare" };
+const qname = (sn, sp) => SHORT[sn] + "." + sp;
+const regionOf = id => byId[id].region;
+const regionName = r => REGIONS.find(x => x.id === r).name;
+const valueKey = (sn, sp) => sn + "." + sp;
+const valueName = (sn, sp) => SHORT[sn] + "." + sp;
+const typeOf = (nid, port, dir) => (dir === "out" ? byId[nid].outs : byId[nid].ins).find(p => p.k === port).t;
+
+let state = { zoom: 1, view: "regions", status: "idle", expanded: new Set(), focused: null, trace: null, selected: null };
+const ws = document.getElementById("ws");
+const live = document.getElementById("live");
+const say = t => { live.textContent = ""; setTimeout(() => (live.textContent = t), 30); };
+
+function nodeLabel(n) { return SHORT[n.id] + (n.kicker === "Model" ? " (" + n.impl + ")" : ""); }
+
+// Boundary values: one output entry per produced value; one input entry per consuming node port (walkthrough W2).
+function boundaryValues() {
+  const outs = new Map(), ins = new Map();
+  for (const e of EDGES) {
+    const sr = regionOf(e.sn), tr = regionOf(e.tn);
+    if (sr === tr) continue;
+    const key = valueKey(e.sn, e.sp);
+    if (!outs.has(key)) outs.set(key, { key, sn: e.sn, sp: e.sp, region: sr, consumers: [] });
+    outs.get(key).consumers.push(e);
+    ins.set(e.id, { key, sn: e.sn, sp: e.sp, region: tr, edge: e });
+  }
+  return { outs: [...outs.values()], ins: [...ins.values()] };
+}
+
+function build() {
+  ws.innerHTML = "";
+  const bv = boundaryValues();
+  REGIONS.forEach((r, idx) => {
+    const reg = document.createElement("section");
+    reg.className = "region"; reg.id = "region-" + r.id; reg.style.width = r.width + "px";
+    reg.setAttribute("aria-label", r.name + " region");
+    const nodesHere = NODES.filter(n => n.region === r.id);
+    reg.innerHTML = `<div class="region-head"><span class="region-name">${r.name}</span><span class="region-meta">${nodesHere.length} node${nodesHere.length === 1 ? "" : "s"}</span></div><div class="region-body"><div class="empty-hint">${idx === 0 ? "<b>Start with data.</b><br>Add a Dataset node to this region to begin. Regions are responsibility zones; a workflow may skip any of them." : ""}</div></div>`;
+    const body = reg.querySelector(".region-body");
+    const ins = bv.ins.filter(v => v.region === r.id), outs = bv.outs.filter(v => v.region === r.id);
+    if (ins.length) body.appendChild(rail("in", ins));
+    if (outs.length) body.appendChild(rail("out", outs));
+    nodesHere.forEach(n => body.appendChild(nodeEl(n)));
+    ws.appendChild(reg);
+    if (idx < REGIONS.length - 1) ws.appendChild(gutter(idx));
+  });
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.classList.add("wires"); svg.id = "wires"; svg.setAttribute("aria-hidden", "true");
+  ws.appendChild(svg);
+  applyStatus(); draw();
+}
+
+function rail(dir, vals) {
+  const el = document.createElement("div");
+  el.className = "rail " + dir;
+  el.innerHTML = `<span class="rail-label">${dir === "in" ? "Inputs" : "Outputs"}</span>`;
+  vals.forEach(v => {
+    const b = document.createElement("button");
+    b.className = "bval"; b.dataset.key = v.key; b.dataset.dir = dir; b.dataset.region = v.region;
+    b.id = dir === "out" ? "bv-out-" + v.region + "-" + v.key.replace(".", "-") : "bv-in-" + v.edge.id;
+    if (dir === "in") b.dataset.edge = v.edge.id;
+    const t = typeOf(v.sn, v.sp, "out");
+    const nuse = (v.consumers || []).length;
+    const sub = dir === "out" ? "used by " + nuse + (nuse === 1 ? " node" : " nodes") : "from " + REGIONS.find(x => x.id === regionOf(v.sn)).short;
+    b.innerHTML = `<i class="glyph g-${t}" aria-hidden="true"></i><span style="min-width:0"><span class="nm">${SHORT[v.sn]}.<wbr>${v.sp}</span><span class="sub">${sub}</span></span>`;
+    b.setAttribute("aria-pressed", "false");
+    b.setAttribute("aria-label", `${dir === "out" ? "Output" : "Input"} boundary value ${valueName(v.sn, v.sp)}, ${sub}. Press Enter to trace.`);
+    b.addEventListener("mouseenter", () => showTip(b, v.key));
+    b.addEventListener("focus", () => showTip(b, v.key));
+    b.addEventListener("mouseleave", hideTip); b.addEventListener("blur", hideTip);
+    b.addEventListener("click", () => toggleTrace(v.key));
+    el.appendChild(b);
+  });
+  return el;
+}
+
+function consumersOf(key) { return EDGES.filter(e => valueKey(e.sn, e.sp) === key); }
+
+function showTip(anchor, key) {
+  const [sn, sp] = key.split(".");
+  const cons = consumersOf(key);
+  const tip = document.getElementById("tip");
+  tip.innerHTML = `<h4>${valueName(sn, sp)}</h4><div class="k">Produced by</div><ul><li>${regionName(regionOf(sn))} / ${nodeLabel(byId[sn])} (port ${sp})</li></ul><div class="k">Consumed by</div><ul>${cons.map(e => `<li>${regionName(regionOf(e.tn))} / ${nodeLabel(byId[e.tn])} (port ${e.tp})</li>`).join("")}</ul><div class="k">Enter or click: trace the real connections</div>`;
+  const r = anchor.getBoundingClientRect();
+  tip.style.left = Math.min(r.right + 8, window.innerWidth - 330) + "px"; tip.style.top = r.top + "px";
+  tip.classList.add("show");
+}
+function hideTip() { document.getElementById("tip").classList.remove("show"); }
+
+function gutter(idx) {
+  const g = document.createElement("div");
+  const left = REGIONS[idx];
+  g.className = "gutter"; g.tabIndex = 0; g.setAttribute("role", "separator"); g.setAttribute("aria-orientation", "vertical");
+  g.setAttribute("aria-label", `Resize ${left.name} region`);
+  g.setAttribute("aria-valuemin", "200"); g.setAttribute("aria-valuemax", "900"); g.setAttribute("aria-valuenow", left.width);
+  g.innerHTML = `<span class="gbtns"><button class="gbtn" aria-label="Narrow ${left.name}" tabindex="-1">−</button><button class="gbtn" aria-label="Widen ${left.name}" tabindex="-1">+</button></span>`;
+  const [minus, plus] = g.querySelectorAll(".gbtn");
+  minus.addEventListener("click", e => { e.stopPropagation(); resize(idx, -40); });
+  plus.addEventListener("click", e => { e.stopPropagation(); resize(idx, 40); });
+  g.addEventListener("keydown", e => {
+    if (e.key === "ArrowLeft") { resize(idx, e.shiftKey ? -80 : -16); e.preventDefault(); }
+    if (e.key === "ArrowRight") { resize(idx, e.shiftKey ? 80 : 16); e.preventDefault(); }
+  });
+  g.addEventListener("pointerdown", e => {
+    if (e.target.classList.contains("gbtn")) return;
+    const startX = e.clientX, startW = left.width; g.setPointerCapture(e.pointerId);
+    const move = ev => setWidth(idx, startW + (ev.clientX - startX) / state.zoom);
+    const up = () => { g.removeEventListener("pointermove", move); g.removeEventListener("pointerup", up); say(`${left.name} width ${left.width} pixels`); };
+    g.addEventListener("pointermove", move); g.addEventListener("pointerup", up);
+  });
+  return g;
+}
+function minWidth(r) { const ns = NODES.filter(n => n.region === r.id); return Math.max(200, ...ns.map(n => n.x + 168 + (n.region !== "evaluate" ? 108 : 12))); }
+function setWidth(idx, w) {
+  const r = REGIONS[idx]; r.width = Math.max(minWidth(r), Math.min(900, Math.round(w)));
+  document.getElementById("region-" + r.id).style.width = r.width + "px";
+  ws.querySelectorAll(".gutter")[idx].setAttribute("aria-valuenow", r.width);
+  draw();
+}
+function resize(idx, d) { setWidth(idx, REGIONS[idx].width + d); say(`${REGIONS[idx].name} width ${REGIONS[idx].width} pixels`); }
+
+function nodeEl(n) {
+  const el = document.createElement("div");
+  el.className = "node"; el.id = "node-" + n.id; el.tabIndex = 0;
+  el.style.left = n.x + "px"; el.style.top = n.y + "px";
+  el.setAttribute("role", "group");
+  el.setAttribute("aria-label", `${n.kicker} node ${nodeLabel(n)}${n.slice ? "" : ", illustrative extra"}. Arrow keys move between connected nodes, Enter expands, F opens focus mode, M moves the node.`);
+  const params = n.params.map(p => `<div class="field"><label for="${n.id}-${p.k}">${p.label}</label><input id="${n.id}-${p.k}" type="number" step="${Number.isInteger(p.step) && p.step === 1 ? 1 : "any"}" value="${p.v}"><span class="hint">${p.hint}</span></div>`).join("");
+  const ctl = (a, id) => a.kind === "bool" ? `<input id="${id}" type="checkbox" ${a.v ? "checked" : ""} style="width:18px;height:18px;justify-self:start">`
+    : a.kind === "enum" ? `<select id="${id}" class="btn" style="min-height:26px;padding:2px 6px">${a.opts.map(o => `<option${o === a.v ? " selected" : ""}>${o}</option>`).join("")}</select>`
+    : a.kind === "fixed" ? `<span id="${id}" style="font-size:12px">${a.v} (fixed)</span>`
+    : `<input id="${id}" type="number" step="${a.kind === "int" ? 1 : "any"}" value="${a.v}">`;
+  const adv = n.advanced ? `<div class="sect">Advanced (illustrative)</div>` + n.advanced.map((a, i) => `<div class="field"><label for="${n.id}-adv${i}">${a.label}</label>${ctl(a, n.id + "-adv" + i)}</div>`).join("") : "";
+  const steps = n.steps ? `<div class="sect">Inside this node</div><ol class="steps">${n.steps.map(s => `<li>${s}</li>`).join("")}</ol>` : "";
+  el.innerHTML = `
+    <div class="node-head"><div><div class="node-kicker">${n.kicker}</div><div class="node-title">${n.title}</div><div class="node-impl">${n.impl}</div></div>
+      <div class="node-tools"><button class="icon-btn" data-act="expand" aria-label="Expand ${nodeLabel(n)}" tabindex="-1">▸</button><button class="icon-btn" data-act="focus" aria-label="Focus mode for ${nodeLabel(n)}" tabindex="-1">⤢</button></div></div>
+    <div class="node-sum">${n.sum}</div>
+    <div class="msg-slot"></div>
+    <div class="node-body">${params ? `<div class="sect">Parameters</div>${params}` : ""}${steps}${adv}${!params && !steps && !adv ? '<div class="node-impl">No parameters for this node.</div>' : ""}</div>
+    <div class="node-foot"><span class="status st-notrun">– Not run</span>${n.slice ? "" : '<span class="illus">extra</span>'}</div>`;
+  n.ins.forEach((p, i) => el.appendChild(portEl(n, p, "in", i, n.ins.length)));
+  n.outs.forEach((p, i) => el.appendChild(portEl(n, p, "out", i, n.outs.length)));
+  el.querySelector('[data-act="expand"]').addEventListener("click", e => { e.stopPropagation(); toggleExpand(n.id); });
+  el.querySelector('[data-act="focus"]').addEventListener("click", e => { e.stopPropagation(); toggleFocus(n.id); });
+  el.addEventListener("dblclick", e => { if (!e.target.closest(".node-body")) toggleExpand(n.id); });
+  el.addEventListener("keydown", e => {
+    if (e.target !== el) return;
+    const step = e.shiftKey ? 32 : 8;
+    const moves = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
+    if (state.moving === n.id) {
+      if (moves[e.key]) { moveNode(n.id, ...moves[e.key]); e.preventDefault(); }
+      else if (e.key === "Enter" || e.key === "Escape" || e.key === "m" || e.key === "M") { endMove(); e.preventDefault(); e.stopPropagation(); }
+      return;
+    }
+    if (e.key.startsWith("Arrow")) { navigate(n.id, e.key, e.shiftKey); e.preventDefault(); }
+    else if (e.key === "m" || e.key === "M") { startMove(n.id); e.preventDefault(); }
+    else if (e.key === "Enter") { toggleExpand(n.id); e.preventDefault(); }
+    else if (e.key === "f" || e.key === "F") { toggleFocus(n.id); e.preventDefault(); }
+  });
+  el.addEventListener("focus", () => select(n.id));
+  // Drag only from the header; content inside the body never drags or pans.
+  el.querySelector(".node-head").addEventListener("pointerdown", e => {
+    if (e.target.closest("button") || state.focused) return;
+    const sx = e.clientX, sy = e.clientY, ox = n.x, oy = n.y; el.setPointerCapture(e.pointerId);
+    const mv = ev => { setPos(n.id, ox + (ev.clientX - sx) / state.zoom, oy + (ev.clientY - sy) / state.zoom); };
+    const up = () => { el.removeEventListener("pointermove", mv); el.removeEventListener("pointerup", up); };
+    el.addEventListener("pointermove", mv); el.addEventListener("pointerup", up);
+  });
+  el.querySelector(".node-body").addEventListener("wheel", e => e.stopPropagation(), { passive: true });
+  return el;
+}
+function portEl(n, p, dir, i, count) {
+  const el = document.createElement("span");
+  el.className = "port " + dir; el.dataset.node = n.id; el.dataset.port = p.k; el.dataset.dir = dir;
+  el.id = `port-${n.id}-${dir}-${p.k}`;
+  el.style.top = (40 + i * 22) + "px"; el.setAttribute("role", "img"); el.setAttribute("aria-label", `${dir === "in" ? "Input" : "Output"} port ${p.k}, type ${p.t}`);
+  el.innerHTML = `<i class="glyph g-${p.t}" aria-hidden="true"></i>`;
+  el.title = `${dir === "in" ? "Input" : "Output"} ${p.k} (${p.t})`;
+  return el;
+}
+function setPos(id, x, y) {
+  const n = byId[id], r = REGIONS.find(r => r.id === n.region);
+  n.x = Math.max(4, Math.min(r.width - 172, Math.round(x))); n.y = Math.max(4, Math.min(400, Math.round(y)));
+  draw();
+}
+// Keyboard navigation (walkthrough W5): Right follows outputs downstream, Left goes upstream,
+// Up/Down pick the nearest node above/below in the same region. M enters move mode.
+function navigate(id, key, shift) {
+  let target = null;
+  if (key === "ArrowRight") {
+    const order = r => REGIONS.findIndex(x => x.id === r);
+    if (shift && state.nav && state.nav.list.includes(id)) {
+      const i = (state.nav.list.indexOf(id) + 1) % state.nav.list.length; target = state.nav.list[i];
+      say(`Downstream ${i + 1} of ${state.nav.list.length} from ${nodeLabel(byId[state.nav.from])}`);
+    } else {
+      const list = [...new Set(EDGES.filter(e => e.sn === id).map(e => e.tn))].sort((a, b) => order(byId[a].region) - order(byId[b].region) || byId[a].y - byId[b].y);
+      if (list.length) { state.nav = { from: id, list }; target = list[0]; if (list.length > 1) say(`Downstream 1 of ${list.length}. Shift+Right for the next.`); }
+    }
+  }
+  if (key === "ArrowLeft") target = (EDGES.find(e => e.tn === id) || {}).sn;
+  if (key === "ArrowUp" || key === "ArrowDown") {
+    const me = byId[id], y0 = state.eff[id];
+    const cands = NODES.filter(n => n.region === me.region && n.id !== id && (key === "ArrowUp" ? state.eff[n.id] < y0 : state.eff[n.id] > y0));
+    cands.sort((a, b) => Math.abs(state.eff[a.id] - y0) - Math.abs(state.eff[b.id] - y0));
+    target = cands[0] && cands[0].id;
+  }
+  if (target) document.getElementById("node-" + target).focus();
+  else say(key === "ArrowRight" ? "No downstream node" : key === "ArrowLeft" ? "No upstream node" : "No node " + (key === "ArrowUp" ? "above" : "below") + " in this region");
+}
+function startMove(id) { state.moving = id; document.getElementById("node-" + id).classList.add("moving"); say(`Moving ${nodeLabel(byId[id])}. Arrow keys move it; Enter or Escape to finish.`); }
+function endMove() { const id = state.moving; if (!id) return; state.moving = null; document.getElementById("node-" + id).classList.remove("moving"); say("Move finished"); }
+function moveNode(id, dx, dy) { const n = byId[id]; setPos(id, n.x + dx, n.y + dy); say(`${nodeLabel(n)} moved`); }
+function select(id) { document.querySelectorAll(".node.selected").forEach(e => e.classList.remove("selected")); document.getElementById("node-" + id).classList.add("selected"); state.selected = id; }
+function toggleExpand(id) {
+  const el = document.getElementById("node-" + id);
+  const on = el.classList.toggle("expanded");
+  el.querySelector('[data-act="expand"]').textContent = on ? "▾" : "▸";
+  say(`${nodeLabel(byId[id])} ${on ? "expanded" : "collapsed"}`); draw();
+}
+function toggleFocus(id) {
+  const el = document.getElementById("node-" + id), scrim = document.getElementById("scrim");
+  if (state.focused === id) { el.classList.remove("focused"); scrim.classList.remove("show"); state.focused = null; el.focus(); say("Focus mode closed"); draw(); return; }
+  if (state.focused) toggleFocus(state.focused);
+  state.focused = id; el.classList.add("focused"); scrim.classList.add("show"); say(`Focus mode: ${nodeLabel(byId[id])}. Escape to close.`); draw();
+}
+document.getElementById("scrim").addEventListener("click", () => state.focused && toggleFocus(state.focused));
+
+// Geometry and wires
+function pt(el, side) {
+  const a = el.getBoundingClientRect(), w = ws.getBoundingClientRect();
+  const x = side === "left" ? a.left : side === "right" ? a.right : (a.left + a.right) / 2;
+  return [(x - w.left) / state.zoom, ((a.top + a.bottom) / 2 - w.top) / state.zoom];
+}
+function curve([x1, y1], [x2, y2]) { const dx = Math.max(30, Math.abs(x2 - x1) / 2); return `M${x1},${y1} C${x1 + dx},${y1} ${x2 - dx},${y2} ${x2},${y2}`; }
+// Effective layout: stored positions never change here; an expanded node temporarily pushes
+// the nodes below it in the same region down, and they return when it collapses (walkthrough W4).
+function layout() {
+  const eff = {};
+  for (const r of REGIONS) {
+    const ns = NODES.filter(n => n.region === r.id).sort((a, b) => a.y - b.y || a.x - b.x);
+    const pushers = [];
+    let maxBottom = 0;
+    for (const n of ns) {
+      const el = document.getElementById("node-" + n.id);
+      let y = n.y;
+      for (const p of pushers) if (p.x < n.x + 168 && n.x < p.x + p.w && p.bottom + 12 > y) y = Math.max(y, p.bottom + 12);
+      eff[n.id] = y; el.style.left = n.x + "px"; el.style.top = y + "px";
+      const h = el.offsetHeight, w = el.offsetWidth;
+      if (state.focused !== n.id) pushers.push({ x: n.x, w, bottom: y + h }); // nodes never overlap; growth pushes the nodes below
+      maxBottom = Math.max(maxBottom, y + h);
+    }
+    const body = document.querySelector(`#region-${r.id} .region-body`);
+    if (body) body.style.height = Math.max(520, maxBottom + 24) + "px";
+  }
+  // Rail entries sit level with the port they serve; overlaps are stacked.
+  const portY = (nid, dir, port) => { const list = dir === "in" ? byId[nid].ins : byId[nid].outs; return eff[nid] + 40 + list.findIndex(p => p.k === port) * 22; };
+  document.querySelectorAll(".rail").forEach(railEl => {
+    const items = [...railEl.querySelectorAll(".bval")].map(b => {
+      let target;
+      if (b.dataset.dir === "in" && b.dataset.edge === "bad") target = portY("modelB", "in", "split");
+      else if (b.dataset.dir === "in") { const e = EDGES.find(x => x.id === b.dataset.edge); target = portY(e.tn, "in", e.tp); }
+      else { const [sn, sp] = b.dataset.key.split("."); target = portY(sn, "out", sp); }
+      return { b, target: target - 14 };
+    }).sort((a, b) => a.target - b.target);
+    let next = 22;
+    for (const it of items) { const y = Math.max(it.target, next); it.b.style.top = y + "px"; next = y + it.b.offsetHeight + 4; }
+  });
+  state.eff = eff;
+}
+function draw() {
+  const svg = document.getElementById("wires"); if (!svg) return;
+  layout();
+  svg.setAttribute("width", ws.offsetWidth); svg.setAttribute("height", ws.offsetHeight);
+  const paths = [];
+  const free = state.view === "free";
+  const tkey = state.trace;
+  for (const e of EDGES) {
+    if (state.focused && (e.sn === state.focused || e.tn === state.focused)) continue; // focus mode lifts the node out; its wires are hidden until it returns
+    const sp = document.getElementById(`port-${e.sn}-out-${e.sp}`), tp = document.getElementById(`port-${e.tn}-in-${e.tp}`);
+    const hot = tkey && valueKey(e.sn, e.sp) === tkey;
+    if (free || regionOf(e.sn) === regionOf(e.tn)) {
+      paths.push(`<path class="${free ? "long" : ""}${hot ? " hot" : ""}" d="${curve(pt(sp, "c"), pt(tp, "c"))}"/>`);
+    } else {
+      const key = valueKey(e.sn, e.sp);
+      const ob = document.getElementById(`bv-out-${regionOf(e.sn)}-${key.replace(".", "-")}`);
+      const ib = document.getElementById(`bv-in-${e.id}`);
+      paths.push(`<path class="${hot ? "hot" : ""}" d="${curve(pt(sp, "c"), pt(ob, "left"))}"/>`);
+      paths.push(`<path class="${hot ? "hot" : ""}" d="${curve(pt(ib, "right"), pt(tp, "c"))}"/>`);
+      if (hot) paths.push(`<path class="xray" d="${curve(pt(sp, "c"), pt(tp, "c"))}"/>`);
+    }
+  }
+  if (state.status === "invalid") {
+    const a = document.getElementById("port-evalA-out-metrics"), b = document.getElementById("port-modelB-in-split");
+    const ob = document.querySelector('.bval.bad[data-dir="out"]'), ib = document.querySelector('.bval.bad[data-dir="in"]');
+    if (a && ob) paths.push(`<path class="bad" d="${curve(pt(a, "c"), pt(ob, "left"))}"/>`);
+    if (b && ib) paths.push(`<path class="bad" d="${curve(pt(ib, "right"), pt(b, "c"))}"/>`);
+  }
+  if (state.status === "connecting") {
+    const a = document.getElementById("port-split-out-split"), ob = document.getElementById("bv-out-split-split-split");
+    if (a && ob) paths.push(`<path class="xray" d="${curve(pt(a, "c"), pt(ob, "left"))}"/>`);
+  }
+  svg.innerHTML = [...new Set(paths)].join("");
+}
+
+// Trace / X-ray
+function toggleTrace(key) {
+  if (state.trace === key) return exitTrace();
+  state.trace = key;
+  const [sn, sp] = key.split("."), cons = consumersOf(key);
+  ws.classList.add("tracing");
+  document.querySelectorAll(".lit").forEach(e => e.classList.remove("lit"));
+  document.getElementById("node-" + sn).classList.add("lit");
+  cons.forEach(e => document.getElementById("node-" + e.tn).classList.add("lit"));
+  document.querySelectorAll(`.bval[data-key="${key}"]`).forEach(b => { b.classList.add("lit"); b.setAttribute("aria-pressed", "true"); });
+  document.getElementById("trace-title").textContent = "Tracing " + valueName(sn, sp);
+  document.getElementById("trace-desc").textContent = `From ${regionName(regionOf(sn))} / ${nodeLabel(byId[sn])} to ${cons.length} consumer(s): ` + cons.map(e => `${regionName(regionOf(e.tn))} / ${nodeLabel(byId[e.tn])}`).join(", ") + ". Dashed lines show the real connections temporarily.";
+  document.getElementById("b-trace").classList.add("show");
+  say(document.getElementById("trace-desc").textContent); draw();
+}
+function exitTrace() {
+  state.trace = null; ws.classList.remove("tracing");
+  document.querySelectorAll(".lit").forEach(e => e.classList.remove("lit"));
+  document.querySelectorAll('.bval[aria-pressed="true"]').forEach(b => b.setAttribute("aria-pressed", "false"));
+  document.getElementById("b-trace").classList.remove("show"); say("Trace closed"); draw();
+}
+document.getElementById("trace-exit").addEventListener("click", exitTrace);
+document.addEventListener("keydown", e => { if (e.key === "Escape") { if (state.status === "connecting") { state.status = "idle"; document.getElementById("state-sel").value = "idle"; applyStatus(); } else if (state.moving) endMove(); else if (state.focused) toggleFocus(state.focused); else if (state.trace) exitTrace(); } });
+
+// Illustrative statuses
+const ST = { notrun: "– Not run", running: "◌ Running", completed: "✓ Completed", failed: "✕ Failed", blocked: "⊘ Blocked", unrelated: "○ Unrelated" };
+function setStatus(id, s) { const el = document.querySelector(`#node-${id} .status`); el.className = "status st-" + s; el.textContent = ST[s]; el.title = s === "unrelated" ? "Not started: does not depend on the failed node" : s === "blocked" ? "Not run: depends on a failed node" : ""; }
+function applyStatus() {
+  const s = state.status;
+  document.body.classList.toggle("empty", s === "empty");
+  ["b-conflict", "b-busy", "b-connect"].forEach(b => document.getElementById(b).classList.remove("show"));
+  document.querySelectorAll(".port").forEach(p => p.classList.remove("ok", "no", "src"));
+  document.querySelectorAll(".bval.bad").forEach(b => b.remove());
+  document.querySelectorAll(".msg-slot").forEach(m => (m.innerHTML = ""));
+  document.querySelectorAll(".node").forEach(n => n.classList.remove("failed", "invalid"));
+  NODES.forEach(n => setStatus(n.id, "notrun"));
+  const run = document.getElementById("run-btn"); run.disabled = false; run.textContent = "Run";
+  let result = "Not run";
+  if (s === "running" || s === "busy") { ["dataset", "prepare", "feature", "split"].forEach(i => setStatus(i, "completed")); setStatus("modelA", "running"); run.disabled = true; run.textContent = "Running…"; result = "Running…"; }
+  if (s === "success" || s === "conflict") { NODES.forEach(n => setStatus(n.id, "completed")); result = "Accuracy 0.81 · Model 1 (Logistic regression)"; }
+  if (s === "failure") {
+    ["dataset", "prepare", "feature", "split"].forEach(i => setStatus(i, "completed")); setStatus("modelA", "failed");
+    ["evalA", "compare"].forEach(i => setStatus(i, "blocked")); ["modelB", "evalB"].forEach(i => setStatus(i, "unrelated"));
+    document.getElementById("node-modelA").classList.add("failed");
+    document.querySelector("#node-modelA .msg-slot").innerHTML = `<div class="msg err" role="alert"><span class="mk">Run failed</span><b>A text column reached the model without encoding</b>Route the data through Prepare Data, then run again.<details><summary>Technical details</summary><code>code unencoded-category-input · category execution · operation vidap.slice.model · exception text withheld</code></details></div>`;
+    result = "Run failed on Model";
+  }
+  if (s === "invalid") {
+    document.getElementById("node-modelB").classList.add("invalid");
+    document.querySelector("#node-modelB .msg-slot").innerHTML = `<div class="msg warn" role="alert"><span class="mk">Fix before running</span><b>Model expects split but receives metrics</b>Remove the connection from Evaluate 1 or connect a split.<details><summary>Technical details</summary><code>Phase 1 validation · incompatible nominal type metrics → split</code></details></div>`;
+    run.disabled = true; result = "Not runnable: 1 validation error";
+    // An invalid cross-region connection follows the rail model too: amber entries on both rails, no wire across gutters.
+    const mk = (dir, attrs, nm, sub) => { const b = document.createElement("button"); b.className = "bval bad"; Object.assign(b.dataset, attrs); b.innerHTML = `<i class="glyph g-metrics" aria-hidden="true"></i><span><span class="nm">${nm}</span><span class="sub">${sub}</span></span>`; b.setAttribute("aria-label", `Invalid connection: ${nm}, ${sub}`); return b; };
+    document.querySelector("#region-model .rail.in").appendChild(mk("in", { dir: "in", edge: "bad", key: "bad" }, "Evaluate 1.<wbr>metrics", "⚠ not allowed here"));
+    let out = document.querySelector("#region-evaluate .rail.out");
+    if (!out) { out = document.createElement("div"); out.className = "rail out"; out.innerHTML = '<span class="rail-label">Outputs</span>'; document.querySelector("#region-evaluate .region-body").appendChild(out); }
+    out.appendChild(mk("out", { dir: "out", key: "evalA.metrics", bad: "1" }, "Evaluate 1.<wbr>metrics", "⚠ to MODEL, not allowed"));
+  }
+  if (s === "conflict") document.getElementById("b-conflict").classList.add("show");
+  if (s === "busy") document.getElementById("b-busy").classList.add("show");
+  if (s === "connecting") {
+    document.getElementById("b-connect").classList.add("show");
+    document.getElementById("port-split-out-split").classList.add("src");
+    document.querySelectorAll(".port.in").forEach(p => p.classList.add(byId[p.dataset.node].ins.find(x => x.k === p.dataset.port).t === "split" && p.dataset.node !== "split" ? "ok" : "no"));
+  }
+  NODES.filter(n => n.result).forEach(n => { document.querySelector(`#node-${n.id} .node-sum`).textContent = (s === "success" || s === "conflict") ? `Accuracy ${n.result}` : "—"; });
+  const cmp = document.querySelector("#node-compare .node-sum"); if (cmp) cmp.textContent = (s === "success" || s === "conflict") ? "1: 0.81 · 2: 0.78" : "—";
+  document.getElementById("result-v").textContent = result;
+  setTimeout(draw, 0);
+}
+document.getElementById("state-sel").addEventListener("change", e => { state.status = e.target.value; applyStatus(); say("Illustrative state: " + e.target.selectedOptions[0].textContent); });
+document.getElementById("run-btn").addEventListener("click", () => {
+  if (state.status === "busy") return;
+  state.status = "running"; applyStatus(); document.getElementById("state-sel").value = "running";
+  setTimeout(() => { state.status = "success"; applyStatus(); document.getElementById("state-sel").value = "success"; say("Run completed. Accuracy 0.81, illustrative."); }, 900);
+});
+function setView(v) {
+  state.view = v; document.body.classList.toggle("free", v === "free");
+  document.getElementById("v-regions").setAttribute("aria-pressed", v === "regions"); document.getElementById("v-free").setAttribute("aria-pressed", v === "free");
+  if (state.trace) exitTrace(); draw(); say(v === "free" ? "Free canvas comparison view" : "Regions view");
+}
+document.getElementById("v-regions").addEventListener("click", () => setView("regions"));
+document.getElementById("v-free").addEventListener("click", () => setView("free"));
+document.querySelectorAll("[data-z]").forEach(b => b.addEventListener("click", () => {
+  state.zoom = Number(b.dataset.z); ws.style.zoom = state.zoom;
+  document.querySelectorAll("[data-z]").forEach(x => x.setAttribute("aria-pressed", x === b)); draw(); say("Zoom " + b.textContent);
+}));
+ws.style.zoom = state.zoom;
+window.addEventListener("resize", draw);
+build();
+</script>
+</body>
+</html>
