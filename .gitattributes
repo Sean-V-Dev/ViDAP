@@ -15,6 +15,7 @@
 *.html text eol=lf
 *.py text eol=lf
 *.toml text eol=lf
+*.csv text eol=lf
 *.lock text eol=lf
 *.sh text eol=lf
 

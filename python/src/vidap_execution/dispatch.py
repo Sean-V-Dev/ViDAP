@@ -8,7 +8,7 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 from .bindings import StaticBinding
-from .diagnostics import TechnicalContext, capture_exception
+from .diagnostics import TechnicalContext, capture_exception, declared_code
 from .planner import ExecutionPlan
 from .representation import ExecutionNode
 
@@ -202,7 +202,7 @@ def dispatch(
                 plan,
                 completed,
                 node,
-                "handler-failed",
+                declared_code(error),
                 results,
                 technical.type,
                 technical=technical,

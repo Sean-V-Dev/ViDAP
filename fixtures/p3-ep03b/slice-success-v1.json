@@ -1,0 +1,19 @@
+{
+  "format": "vidap.workflow",
+  "schemaVersion": "1.0",
+  "workflowId": "40000000-0000-4000-8000-000000000001",
+  "nodes": [
+    {"id": "41000000-0000-4000-8000-000000000001", "type": "vidap.slice.dataset", "parameters": {}},
+    {"id": "41000000-0000-4000-8000-000000000002", "type": "vidap.slice.prepare", "parameters": {"missing_fill": 0.0}},
+    {"id": "41000000-0000-4000-8000-000000000003", "type": "vidap.slice.split", "parameters": {"test_fraction": 0.25, "seed": 0}},
+    {"id": "41000000-0000-4000-8000-000000000004", "type": "vidap.slice.model", "parameters": {"regularization": 1.0}},
+    {"id": "41000000-0000-4000-8000-000000000005", "type": "vidap.slice.evaluate", "parameters": {}}
+  ],
+  "edges": [
+    {"id": "42000000-0000-4000-8000-000000000001", "source": {"nodeId": "41000000-0000-4000-8000-000000000001", "portKey": "table"}, "target": {"nodeId": "41000000-0000-4000-8000-000000000002", "portKey": "table"}},
+    {"id": "42000000-0000-4000-8000-000000000002", "source": {"nodeId": "41000000-0000-4000-8000-000000000002", "portKey": "prepared"}, "target": {"nodeId": "41000000-0000-4000-8000-000000000003", "portKey": "table"}},
+    {"id": "42000000-0000-4000-8000-000000000003", "source": {"nodeId": "41000000-0000-4000-8000-000000000003", "portKey": "split"}, "target": {"nodeId": "41000000-0000-4000-8000-000000000004", "portKey": "split"}},
+    {"id": "42000000-0000-4000-8000-000000000004", "source": {"nodeId": "41000000-0000-4000-8000-000000000004", "portKey": "model"}, "target": {"nodeId": "41000000-0000-4000-8000-000000000005", "portKey": "model"}},
+    {"id": "42000000-0000-4000-8000-000000000005", "source": {"nodeId": "41000000-0000-4000-8000-000000000003", "portKey": "split"}, "target": {"nodeId": "41000000-0000-4000-8000-000000000005", "portKey": "split"}}
+  ]
+}

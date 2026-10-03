@@ -6,17 +6,19 @@ transform data, train and evaluate established machine-learning libraries,
 compare experiments, understand results in practical language, and export
 conventional Python or Jupyter artifacts.
 
-> **The Phase 0 foundation and Phase 1 workflow kernel are accepted.** Phase 2
-> has an accepted headless execution foundation. Its controlled scalar reference
-> proof is implemented for independent validation; Phase 2 acceptance is pending.
+> **Phases 0, 1, and 2 are accepted.** Phase 3, the first visual end-to-end
+> slice, is in progress: its five slice operations, the local `/api/slice/`
+> channel, and workflow save/load exist, and the editor workspace opens, edits,
+> validates, and saves slice workflows; adding, connecting, and running nodes
+> in the editor come next.
 
 ## Intended architecture and prerequisites
 
 The accepted direction is a TypeScript/React local web UI and a separate local
 CPython/FastAPI host. The browser remains a visual editing and presentation
 layer; future workflow and execution semantics are outside browser-only state.
-The local shell and headless workflow kernel implement only bounded parts of
-this direction; the visual workflow product remains future work.
+The local shell, the headless workflow kernel, and the Phase 3 editor
+workspace implement only bounded parts of this direction.
 
 Windows is the only currently supported development environment. Prerequisites
 are Git, Node.js 24 LTS with its bundled npm, and uv. CPython 3.14.7 is pinned
@@ -97,8 +99,10 @@ npm.cmd run deps:audit
 
 They provide inventory, fail-closed license review, and advisory evidence; the
 only reviewed exceptions are the literal entries in [Decision Record
-0003](docs/decisions/0003-ep06-locked-license-disposition.md) and [Decision
-Record 0004](docs/decisions/0004-ep06-generic-license-metadata-disposition.md).
+0003](docs/decisions/0003-ep06-locked-license-disposition.md), [Decision
+Record 0004](docs/decisions/0004-ep06-generic-license-metadata-disposition.md),
+and [Decision Record
+0005](docs/decisions/0005-p3-slice-numeric-runtime-license-disposition.md).
 They do not auto-fix dependencies, resolve a floating graph, create an SBOM, or
 make legal or exploitability conclusions. See [dependency controls](docs/dependency-controls.md)
 for the license policy, temporary-output guardrails, triage expectations, and
@@ -116,10 +120,20 @@ the canonical `vidap.workflow`/`1.0` document, static node contracts, and
 validation. The accepted Phase 2 kernel prepares, plans, dispatches, and
 records headless attempts. The P2-EP05 reference proof uses four fixed
 checked-integer operations and two synthetic workflows; successful runs write
-one versioned scalar value in an owned local proof slot. It has no workflow
-API, product editor, data loader, model, export, authentication, telemetry,
-hosted service, deployment, or desktop-wrapper capability. `launch` and
-`/api/status` remain the foundation shell only;
+one versioned scalar value in an owned local proof slot. The Phase 3 slice
+adds five fixed operations (Dataset, Prepare Data, Train/Test Split, Model, and
+Evaluate) over one controlled synthetic CSV, using scikit-learn's logistic
+regression; a successful headless run records one versioned accuracy result in
+the same owned slot. The local `/api/slice/` channel serves the slice
+contracts, validates and runs workflows, and saves and loads them under
+`.vidap-local/workflows/` with outside-change detection. The browser editor
+(`npm.cmd run launch`, then the printed URL) opens a saved slice workflow in its
+five regions, edits settings from the backend contracts, shows backend
+validation on the node, and saves layout and settings without silent
+overwrites. There is still no graph authoring or run control in the editor,
+user data loading, model choice, export, authentication,
+telemetry, hosted service, deployment, or desktop-wrapper capability.
+`/api/status` remains the foundation status response;
 automatic OpenAPI and documentation endpoints are disabled. Windows remains
 the only supported platform until other environments are independently
 validated. JSX accessibility linting is intentionally deferred by decision
@@ -135,6 +149,8 @@ record 0001 until a maintained compatible peer set and meaningful JSX exist.
 - [Phase 2 plan](ViDAP_Phase_2_Plan.md)
 - [Accepted Phase 2 run foundation](ViDAP_P2_EP04_Validation_and_Reconciliation.md)
 - [P2-EP05 reference proof packet](ViDAP_P2_EP05.md)
+- [Phase 3 plan](ViDAP_Phase_3_Plan.md)
+- [P3-EP03B slice operations packet](ViDAP_P3_EP03B.md)
 - [P0-EP01 reconciliation](ViDAP_P0_EP01_Validation_and_Reconciliation.md)
 - [P0-EP02 reconciliation](ViDAP_P0_EP02_Validation_and_Reconciliation.md)
 - [Contribution guide](CONTRIBUTING.md)

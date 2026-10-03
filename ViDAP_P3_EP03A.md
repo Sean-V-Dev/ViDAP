@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Draft; awaiting explicit user approval |
+| Status | Complete — accepted by Central (Decision Record 0005) |
 | Packet version | 0.1 |
 | Packet type | Research and evidence; documentation-only repository change |
 | Parent phase plan | `ViDAP_Phase_3_Plan.md` version 1.1 |
@@ -13,6 +13,7 @@
 | Authorized worker output | `ViDAP_P3_EP03A_Dependency_Review.md` |
 | Central follow-up | A decision record on any review-required findings, then `ViDAP_P3_EP03A_Validation_and_Reconciliation.md` (Central only) |
 | Created | 2026-10-02 |
+| Approved | 2026-10-02 by explicit user direction |
 | Owner | Central |
 
 ---
@@ -35,8 +36,8 @@ closeout) are unchanged.
 
 ## 2. Authorization Boundary
 
-This draft authorizes nothing. If the user explicitly approves this exact
-version, one bounded worker may research current primary sources; build a
+The user explicitly approved this exact version on 2026-10-02. One bounded
+worker may research current primary sources; build a
 candidate dependency set in **one disposable copy outside the repository and
 OneDrive**; download the candidate wheels into a disposable location to
 inspect their contents; have the user run the Windows dependency controls
@@ -237,7 +238,6 @@ the decision record.
 
 ## 13. Next Action
 
-Review this draft. On explicit approval of this exact version, a worker
-executes it. After validation, Central writes a decision record on the
+This exact v0.1 was approved on 2026-10-02; one worker executes it. After validation, Central writes a decision record on the
 findings and the reconciliation; P3-EP03B (backend slice implementation) is
 then drafted for separate approval.

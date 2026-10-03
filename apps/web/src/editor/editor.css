@@ -1,0 +1,750 @@
+/* ViDAP editor styles. Tokens are exactly DESIGN.md Section 2 (light theme). */
+
+:root {
+  --canvas: #f4f5f7;
+  --surface: #ffffff;
+  --region: #fafbfc;
+  --text: #1b1f24;
+  --text-2: #4a5361;
+  --muted: #5f6977;
+  --border: #d5dae1;
+  --border-strong: #7a8494;
+  --accent: #2457c5;
+  --ok: #1e7a46;
+  --err: #b42318;
+  --warn: #8a5a00;
+  --t-table: #0e6a87;
+  --t-split: #6e45b8;
+  --t-model: #a84b0c;
+  --t-metrics: #3d6b12;
+  --dim-fill: #eef0f3;
+  --dim-border: #c9cfd7;
+  --accent-bg: #e8eefb;
+  --ok-bg: #e7f4ec;
+  --err-bg: #fdecea;
+  --warn-bg: #fff4db;
+  --font: "Segoe UI", system-ui, sans-serif;
+  --mono: "Cascadia Mono", Consolas, monospace;
+  --radius: 6px;
+  --radius-small: 4px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--canvas);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The page never scrolls sideways (DESIGN.md Section 2): the top bar wraps and
+   only the workspace scrolls. */
+.editor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Top bar (DESIGN.md Section 3): wraps at 1280×720 rather than overflowing. */
+.top-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 8px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.product {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.workflow-state {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.workflow-name {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.state-unsaved {
+  color: var(--warn);
+}
+
+.state-saved {
+  color: var(--muted);
+}
+
+.top-actions,
+.run-area,
+.banner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.primary-result {
+  margin: 0 0 0 auto;
+  font-size: 13px;
+}
+
+.result-label {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.run-reason {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+/* Controls (DESIGN.md Section 7). */
+.button,
+.segment,
+.icon-button,
+.gutter-button {
+  min-width: 24px;
+  min-height: 24px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-small);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.button {
+  padding: 4px 12px;
+}
+
+.button:hover:not(:disabled),
+.segment:hover:not(:disabled),
+.icon-button:hover,
+.gutter-button:hover {
+  background: var(--region);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.button-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--surface);
+  font-weight: 600;
+}
+
+.button-danger {
+  border-color: var(--err);
+  color: var(--err);
+}
+
+.segmented {
+  display: inline-flex;
+}
+
+.segment {
+  border-radius: 0;
+  padding: 4px 8px;
+}
+
+.segment:first-child {
+  border-radius: var(--radius-small) 0 0 var(--radius-small);
+}
+
+.segment:last-child {
+  border-radius: 0 var(--radius-small) var(--radius-small) 0;
+}
+
+.segment[aria-pressed="true"] {
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Banners sit under the top bar and never cover the canvas. */
+.banners {
+  display: flex;
+  flex-direction: column;
+}
+
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+
+.banner p,
+.banner ul {
+  margin: 0;
+}
+
+.banner-title {
+  font-weight: 600;
+}
+
+.banner-info {
+  background: var(--accent-bg);
+}
+
+.banner-warn {
+  background: var(--warn-bg);
+  color: var(--text);
+  border-left: 4px solid var(--warn);
+}
+
+.banner-error {
+  background: var(--err-bg);
+  border-left: 4px solid var(--err);
+}
+
+.change-summary,
+.open-list {
+  width: 100%;
+  padding-left: 16px;
+}
+
+.open-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+}
+
+.save-as {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.save-as input {
+  min-height: 24px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-small);
+  font: inherit;
+}
+
+/* Workspace: regions left to right; the workspace scrolls, regions never reflow. */
+.workspace {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+.zoom-layer {
+  transform-origin: 0 0;
+  width: max-content;
+}
+
+.workspace-rows {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.regions {
+  display: flex;
+  align-items: stretch;
+}
+
+.region {
+  position: relative;
+  flex: none;
+  background: var(--region);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.region-unassigned {
+  border: 2px dashed var(--warn);
+}
+
+.region-header {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.region-header h2 {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.region-count {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.rail {
+  position: absolute;
+  top: 40px;
+  bottom: 0;
+  width: 96px;
+  margin: 0;
+  padding: 0;
+}
+
+.rail-inputs {
+  left: 0;
+  border-right: 1px solid var(--border);
+}
+
+.rail-outputs {
+  right: 0;
+  border-left: 1px solid var(--border);
+}
+
+.rail-title {
+  display: block;
+  padding: 4px 8px;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.rail-slot {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  list-style: none;
+}
+
+.rail-entry {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 24px;
+  padding: 2px 4px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-small);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  overflow-wrap: break-word;
+  cursor: default;
+}
+
+.rail-name {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.rail-sub {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.rail-entry.type-table {
+  border-left: 3px solid var(--t-table);
+}
+
+.rail-entry.type-split {
+  border-left: 3px solid var(--t-split);
+}
+
+.rail-entry.type-model {
+  border-left: 3px solid var(--t-model);
+}
+
+.rail-entry.type-metrics {
+  border-left: 3px solid var(--t-metrics);
+}
+
+.hover-card {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 5;
+  width: 220px;
+  padding: 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 2px 8px rgb(27 31 36 / 15%);
+  font-size: 11px;
+}
+
+.hover-card-left {
+  left: auto;
+  right: 0;
+}
+
+.hover-card p {
+  margin: 0 0 4px;
+}
+
+.wires {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.wire {
+  fill: none;
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+}
+
+.empty-hint {
+  position: absolute;
+  top: 64px;
+  left: 112px;
+  right: 112px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* Gutters: 24 wide hit area, 4×56 visible grip (DESIGN.md Section 2). */
+.gutter {
+  flex: none;
+  width: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.gutter-button {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  font-size: 13px;
+}
+
+.gutter-grip {
+  width: 24px;
+  height: 56px;
+  cursor: col-resize;
+  background: linear-gradient(var(--border-strong), var(--border-strong))
+    center / 4px 56px no-repeat;
+  border-radius: var(--radius-small);
+}
+
+/* The band below the regions stays reserved for the future results dock. */
+.results-band {
+  height: 120px;
+}
+
+/* Nodes (DESIGN.md Section 5). */
+.node {
+  position: absolute;
+  width: 168px;
+  min-height: 120px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.node-expanded {
+  width: 290px;
+  z-index: 2;
+}
+
+.node-warn {
+  border: 2px solid var(--warn);
+}
+
+.node-moving {
+  outline: 2px dashed var(--accent);
+  outline-offset: 2px;
+}
+
+.node-header {
+  position: relative;
+  padding-right: 52px;
+  cursor: grab;
+}
+
+.node-kicker {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.node-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.node-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  gap: 4px;
+}
+
+.icon-button {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+}
+
+.node-implementation,
+.node-summary,
+.node-description {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: var(--text-2);
+}
+
+.chip {
+  display: inline-block;
+  margin: 8px 0 0;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 11px;
+}
+
+.chip-not-run {
+  border: 1px solid var(--border-strong);
+  color: var(--text-2);
+}
+
+.ports {
+  position: absolute;
+  top: 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ports-input {
+  left: -7px;
+}
+
+.ports-output {
+  right: -7px;
+}
+
+.port {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--surface);
+}
+
+.port-table {
+  border-color: var(--t-table);
+}
+
+.port-split {
+  border-color: var(--t-split);
+}
+
+.port-model {
+  border-color: var(--t-model);
+}
+
+.port-metrics {
+  border-color: var(--t-metrics);
+}
+
+.node-message {
+  margin-top: 8px;
+  padding: 8px;
+  border-radius: var(--radius-small);
+  font-size: 12px;
+}
+
+.node-message-warn {
+  background: var(--warn-bg);
+}
+
+.message-label {
+  margin: 0;
+  color: var(--warn);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.message-headline {
+  margin: 4px 0 0;
+  font-weight: 700;
+}
+
+.message-remedy {
+  margin: 2px 0 0;
+}
+
+.message-details summary,
+.node-advanced summary {
+  min-height: 24px;
+  cursor: pointer;
+}
+
+.message-details p,
+.node-advanced p {
+  margin: 2px 0;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.node-body {
+  max-height: 230px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.node-focus .node-body {
+  max-height: 60vh;
+}
+
+.field {
+  margin: 0 0 8px;
+}
+
+.field label,
+.field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.field input[type="number"],
+.field input[type="text"],
+.field select {
+  width: 100%;
+  min-height: 24px;
+  margin-top: 2px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-small);
+  font: inherit;
+}
+
+.field-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.field-check input {
+  width: 24px;
+  height: 24px;
+}
+
+.field-hint,
+.field-note {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.field-note {
+  color: var(--warn);
+}
+
+.field-fixed {
+  font-size: 12px;
+}
+
+/* Focus mode and dialogs. */
+.focus-overlay,
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(27 31 36 / 45%);
+}
+
+.focus-panel .node {
+  position: relative;
+  width: min(640px, 90vw);
+}
+
+.dialog {
+  width: min(440px, 90vw);
+  padding: 16px;
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.dialog h2 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

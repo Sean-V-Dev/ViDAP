@@ -1,0 +1,57 @@
+{
+  "fixtureManifestVersion": "1.0",
+  "fixtures": [
+    {
+      "id": "p3-ep03b-slice-dataset-v1",
+      "schemaVersion": "1.0",
+      "path": "fixtures/p3-ep03b/slice-dataset-v1.csv",
+      "byteSize": 3260,
+      "sha256": "30EF03B9A552AF2482A87D087B170C777629D72EE4247C3A4F1822570A0FC5FF",
+      "provenance": "Synthetic rows generated for the approved P3-EP03B slice; no real-world source.",
+      "terms": "MIT",
+      "creationMethod": "Deterministic standard-library generator python/tests/slice_fixture_generator.py, generator version 1.0, seed 20261002, 160 rows; a test regenerates and compares the exact bytes.",
+      "declaredSchema": [{"name": "feature_a", "kind": "numeric", "nullable": false}, {"name": "feature_b", "kind": "numeric", "nullable": true}, {"name": "segment", "kind": "category", "categories": ["north", "south", "east"]}, {"name": "label", "kind": "target", "categories": ["0", "1"]}],
+      "expectedResult": {"rows": 160, "positiveLabels": 74, "missingFeatureB": 13},
+      "permittedConsumers": ["P3-EP03B tests", "later Phase 3 packets and their independent validation"],
+      "privacyClassification": "synthetic non-sensitive",
+      "privacyAttestation": "Contains no personal, sensitive, credential, path, network, telemetry, proprietary, or real-world dataset content.",
+      "centralReviewer": "Central approved the fixed design; byte-level review pending",
+      "reviewDate": "2026-10-02",
+      "byteReviewStatus": "pending independent validation and Central reconciliation"
+    },
+    {
+      "id": "p3-ep03b-slice-success-v1",
+      "schemaVersion": "1.0",
+      "path": "fixtures/p3-ep03b/slice-success-v1.json",
+      "byteSize": 1806,
+      "sha256": "EC853D200FEDD5B1E3D158B327CA248144EA9F5C18E42465F840DFFE94D408DB",
+      "provenance": "Synthetic workflow authored for the approved P3-EP03B slice.",
+      "terms": "MIT",
+      "creationMethod": "Authored UTF-8 JSON from the packet's five-node graph with explicit default parameters.",
+      "expectedResult": {"outcome": "succeeded", "completedNodes": 5, "metrics": {"accuracy": 0.9, "correct": 36, "testRows": 40}, "metricsWithRegularization0.0001": {"accuracy": 0.55, "correct": 22, "testRows": 40}},
+      "permittedConsumers": ["P3-EP03B tests", "later Phase 3 packets and their independent validation"],
+      "privacyClassification": "synthetic non-sensitive",
+      "privacyAttestation": "Contains no personal, sensitive, credential, path, network, telemetry, proprietary, or real-world dataset content.",
+      "centralReviewer": "Central approved the fixed design; byte-level review pending",
+      "reviewDate": "2026-10-02",
+      "byteReviewStatus": "pending independent validation and Central reconciliation"
+    },
+    {
+      "id": "p3-ep03b-slice-bypass-prepare-v1",
+      "schemaVersion": "1.0",
+      "path": "fixtures/p3-ep03b/slice-bypass-prepare-v1.json",
+      "byteSize": 1467,
+      "sha256": "FFF38ABA4E35D3C7E11EBD9220327086BB42BB8739B1C3D4133D215C15947307",
+      "provenance": "Synthetic workflow authored for the approved P3-EP03B slice.",
+      "terms": "MIT",
+      "creationMethod": "Authored UTF-8 JSON: the success graph without Prepare Data, with Dataset feeding Train/Test Split directly.",
+      "expectedResult": {"outcome": "failed", "code": "unencoded-category-input", "failedNode": "Model", "completedNodes": 2, "blockedNodes": 1, "metricsPublished": false},
+      "permittedConsumers": ["P3-EP03B tests", "later Phase 3 packets and their independent validation"],
+      "privacyClassification": "synthetic non-sensitive",
+      "privacyAttestation": "Contains no personal, sensitive, credential, path, network, telemetry, proprietary, or real-world dataset content.",
+      "centralReviewer": "Central approved the fixed design; byte-level review pending",
+      "reviewDate": "2026-10-02",
+      "byteReviewStatus": "pending independent validation and Central reconciliation"
+    }
+  ]
+}

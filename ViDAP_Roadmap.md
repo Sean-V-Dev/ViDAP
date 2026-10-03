@@ -5,7 +5,7 @@
 | Status | Approved, amended |
 | Version | 4.6 |
 | Approved | 2026-09-17 |
-| Last updated | 2026-10-01 |
+| Last updated | 2026-10-02 |
 | Parent | `ViDAP_Phased_Plan_Spine.md` version 1.3 |
 | Product source | `ViDAP_Overview.txt` |
 | Created | 2026-09-17 |
@@ -40,10 +40,10 @@ Detailed work is planned one phase at a time. Roadmap changes may clarify sequen
 | Phase 0 | Complete | P0-EP01 through P0-EP08 accepted and centrally reconciled |
 | Phase 1 | Complete | `ViDAP_P1_EP06_Validation_and_Reconciliation.md` accepts P1-EP06 and reconciles P1-AC12 |
 | Phase 2 | Complete | `ViDAP_P2_EP06_Validation_and_Reconciliation.md` accepts EP06 and reconciles P2-AC01–P2-AC12 |
-| Phase 3 | Plan approved | `ViDAP_Phase_3_Plan.md` v1.1 approved 2026-10-01; P3-EP01 complete (D3.1–D3.4 accepted 2026-10-01); P3-EP02 complete (D3.5–D3.10 and `DESIGN.md` accepted 2026-10-02); P3-EP03A (dependency review) v0.1 drafted, awaiting approval |
+| Phase 3 | Plan approved | `ViDAP_Phase_3_Plan.md` v1.1 approved 2026-10-01; P3-EP01 complete (D3.1–D3.4 accepted 2026-10-01); P3-EP02 complete (D3.5–D3.10 and `DESIGN.md` accepted 2026-10-02); P3-EP03A complete (Decision Record 0005 accepted 2026-10-02); P3-EP03B complete (slice operations run headlessly, accepted 2026-10-02); P3-EP03C complete (channel and save/load, accepted 2026-10-02); WS3.3 backend slice complete; P3-EP04A complete (editor workspace, accepted 2026-10-03) |
 | Phases 4-11 | Sequenced only | Remain at roadmap resolution until predecessor reconciliation |
 | Visual workflow interaction direction | Approved cross-phase direction | `UX refinement.txt` is incorporated into Spine v1.3 and the Phase 3–8 roadmap boundaries and governs the next Phase 3 planning work |
-| Execution packets | Twenty-two complete | P0-EP01 through P0-EP08, P1-EP01 through P1-EP06, P2-EP01 through P2-EP06, P3-EP01, and P3-EP02 complete |
+| Execution packets | Twenty-six complete | P0-EP01 through P0-EP08, P1-EP01 through P1-EP06, P2-EP01 through P2-EP06, P3-EP01, P3-EP02, P3-EP03A, P3-EP03B, P3-EP03C, and P3-EP04A complete |
 | Product implementation | Phase 1 kernel plus Phase 2 reference proof | Accepted canonical document, static contracts/validation, immutable execution representation, deterministic planner/dispatcher, bounded attempt record, owned metadata-first local artifacts, attempt-local reuse, sanitized runtime diagnostics, and one fixed scalar reference family; no product UI, data/ML, export, or cross-run cache |
 
 No percentage-complete values are used. A phase moves state only when its named gate and evidence support the change.
@@ -179,7 +179,13 @@ H3 is the first target that demonstrates the core product promise end to end. H4
 - **Decisions due in the phase plan:** Minimal vertical-slice operations; semantic-region taxonomy and presentation-state ownership; resizable-gutter and boundary-interface behavior; dependency trace/X-ray behavior; compact/expanded/focus node interaction; local connection/layout assistance; result and error presentation; accessibility baseline; UI/runtime integration contract; concise visual design system or equivalent; current maintained design/UX support mechanism; representative screen/state set; and proportionate visual/UX validation method.
 - **Status:** Phase plan approved 2026-10-01 (`ViDAP_Phase_3_Plan.md` v1.1).
   P3-EP01 (D3.1–D3.4) and P3-EP02 (D3.5–D3.10 and the `DESIGN.md` design
-  system) are complete and accepted. Every remaining bounded packet requires
+  system) are complete and accepted. P3-EP03A (dependency and license review)
+  is complete; Decision Record 0005 accepts the slice's numeric runtime
+  dependencies. P3-EP03B is complete: the five slice operations run
+  headlessly with recorded metrics. P3-EP03C is complete: the local
+  `/api/slice/` channel and workflow save/load are accepted, completing WS3.3.
+  P3-EP04A is complete: the browser editor workspace opens, edits, validates,
+  and saves slice workflows. Every remaining bounded packet requires
   separate approval before execution.
 
 ### P4 - Data Intake, Profiling, and Preparation
@@ -388,7 +394,7 @@ Calendar estimates may be added after Phase 0 establishes the repository baselin
 
 ## 12. Next Action
 
-Obtain approval of `ViDAP_P3_EP03A.md` v0.1 (dependency and license review,
-the F2 gate). P3-EP03B (backend slice implementation) follows Central's
-license decision and needs its own approval. Later Phase 3 packets follow the approved Phase 3 plan and each require
-separate approval.
+WS3.3 (P3-EP03A, P3-EP03B, P3-EP03C) and P3-EP04A (editor workspace) are
+complete. P3-EP04B (graph authoring) is ready to draft, carrying the items in
+`ViDAP_P3_EP04A_Validation_and_Reconciliation.md` Section 5. Later Phase 3
+packets follow the approved Phase 3 plan and each require separate approval.

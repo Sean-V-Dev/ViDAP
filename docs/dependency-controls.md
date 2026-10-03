@@ -41,8 +41,9 @@ multi-license, platform-binary, material-notice, generated, and native cases
 are review-required and also fail closed unless an exact accepted catalog entry
 applies.
 
-[Decision Record 0003](decisions/0003-ep06-locked-license-disposition.md) and
-[Decision Record 0004](decisions/0004-ep06-generic-license-metadata-disposition.md)
+[Decision Record 0003](decisions/0003-ep06-locked-license-disposition.md),
+[Decision Record 0004](decisions/0004-ep06-generic-license-metadata-disposition.md),
+and [Decision Record 0005](decisions/0005-p3-slice-numeric-runtime-license-disposition.md)
 amend D0.6 only for their literal package/version/license-or-gate-value
 catalogs. The control prints the record ID, limited role, and distribution
 re-review trigger for every catalog match. A changed version, license string,
@@ -54,8 +55,9 @@ For Python metadata, the control uses the first populated declaration field in
 this fixed order: SPDX expression, package metadata, then classifier. It never
 searches later fields for an allowed alternative. A generic label or a
 non-SPDX full-text claim therefore remains an unapproved finding unless the
-selected package/version/license-or-gate-value is an exact Record 0003 or 0004
-catalog entry.
+selected package/version/license-or-gate-value is an exact Record 0003, 0004,
+or 0005 catalog entry. Record 0005's scipy entry stores its long gate value as
+base64 and is used only if the decoded bytes match the recorded SHA-256.
 
 Tool metadata and scanner output begin review; they do not decide legal
 compatibility or exploitability. A Central decision is required before a
@@ -78,8 +80,10 @@ triage requires them. Dependabot may propose weekly npm and GitHub Actions
 updates only: it has a two-PR limit per ecosystem and groups only patch/minor
 development-tool updates within that ecosystem. Major and security updates stay
 individually reviewable. There is no auto-merge, bot bypass, Dependabot UV
-update, automatic fix, or Phase 0 SBOM. Revisit an SBOM before the first public
-release, a later ML dependency, or distribution artifacts.
+update, automatic fix, or SBOM. Record 0005 deferred an SBOM again when the
+Phase 3 slice added scikit-learn; an SBOM that includes bundled native
+components is required before the first public release, an installer, a
+packaged environment, a desktop build, or any other distribution artifact.
 
 CI repeats the root locked setup and control tasks on `windows-latest`. Its
 temporary Python advisory JSON may be retained as a 14-day artifact; no

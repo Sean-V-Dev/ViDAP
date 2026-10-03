@@ -8,6 +8,37 @@ from dataclasses import dataclass
 
 _IDENTIFIER = re.compile(r"[A-Za-z_][A-Za-z_0-9]{0,79}")
 
+DECLARED_FAILURES = {
+    "unencoded-category-input": (
+        "The model received a category column that has not been converted to numbers.",
+        "Route the data through Prepare Data before the model.",
+    ),
+    "missing-value-input": (
+        "The model received rows with missing values.",
+        "Route the data through Prepare Data, which fills missing values, "
+        "before the model.",
+    ),
+}
+"""The closed first-party list of declared handler failures and fixed text."""
+
+
+class DeclaredFailure(Exception):
+    """A first-party handler failure with a fixed, closed-list code."""
+
+    def __init__(self, code: str) -> None:
+        if code not in DECLARED_FAILURES:
+            raise ValueError("declared failure code is not in the closed list")
+        super().__init__("declared failure")
+        self.code = code
+
+
+def declared_code(error: BaseException) -> str:
+    """Map only a closed-list declared failure to its code; all else is generic."""
+
+    if type(error) is DeclaredFailure and error.code in DECLARED_FAILURES:
+        return error.code
+    return "handler-failed"
+
 
 @dataclass(frozen=True, slots=True)
 class TechnicalContext:
@@ -84,6 +115,7 @@ def diagnostic(
             "The attempt record could not be published safely.",
             "Inspect and explicitly remove the owned pending attempt before retrying.",
         ),
+        **DECLARED_FAILURES,
     }
     explanation, remedy = explanations[code]
     return RuntimeDiagnostic(

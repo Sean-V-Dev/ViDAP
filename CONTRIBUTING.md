@@ -62,16 +62,30 @@ stop its child process trees. `smoke` performs the same readiness proof and
 automatic cleanup. It must never select a different port, bind publicly, write
 a log/PID file, or terminate a process it did not start.
 
-The shell may display only its Phase 0 limitation and the local host status.
-`GET /api/status` is the sole static, input-free cross-boundary response; it is
-not a health/product API or a generic contract. Workflow, graph, data, model,
-experiment, export, persistence, browser E2E, hosting, and desktop work remain
-deferred.
+The browser app is the Phase 3 editor workspace (`apps/web/src/editor/`). It
+reads node definitions, validation verdicts, and saved files only through
+`/api/slice/`, and follows `DESIGN.md`; it must not copy parameter defaults,
+ranges, or validation rules into UI code. Its tests replay responses recorded
+from the real backend (`apps/web/src/editor/test-data/`); regenerate them with
+the capture described in `ViDAP_P3_EP04A_Implementation_Report.md` when the
+channel changes. `GET /api/status` is the static, input-free foundation response; it is not a
+health/product API or a generic contract. The Phase 3 slice adds the local
+`/api/slice/` channel (contracts, validate, run, and workflow save/load). It is
+loopback-only and unauthenticated, refuses non-loopback hosts and foreign
+origins, grants no CORS, and accepts only bounded JSON bodies. Graph
+authoring, run controls, general data and model work, export, browser E2E,
+hosting, and desktop work remain deferred.
 
 `fixtures/p0-ep07-foundation-status.json` is the one synthetic ≤1 KiB EP07
 fixture. It records expected static status evidence and required provenance,
 terms, consumer, privacy, and review metadata. Only the EP07 harness/tests may
 consume it; do not serve it, treat it as input, or add dataset-like fixtures.
+
+`fixtures/p3-ep03b/` holds the Phase 3 slice's one synthetic CSV, its two
+workflows, and their D0.7 manifest. Only the slice's first-party Dataset
+operation and tests consume them; the CSV is regenerated only by its
+checked-in deterministic generator, and any change needs a new fixture version
+and manifest update.
 
 ## Local quality evidence
 
@@ -111,8 +125,9 @@ updates may be grouped. Major and security updates remain individually
 reviewable. UV bot updates, auto-merge, and bot trust bypasses are not used.
 
 See [dependency controls](docs/dependency-controls.md) and accepted [Decision
-Record 0003](docs/decisions/0003-ep06-locked-license-disposition.md) and
-[Decision Record 0004](docs/decisions/0004-ep06-generic-license-metadata-disposition.md)
+Record 0003](docs/decisions/0003-ep06-locked-license-disposition.md),
+[Decision Record 0004](docs/decisions/0004-ep06-generic-license-metadata-disposition.md),
+and [Decision Record 0005](docs/decisions/0005-p3-slice-numeric-runtime-license-disposition.md)
 for the allowed, review-required, prohibited, and literal-catalog license
 treatment; advisory triage; temporary audit-output rules; the no-SBOM deferral;
 and the no-auto-fix policy. Continue
@@ -187,6 +202,9 @@ Never commit credentials, tokens, personal data, sensitive data, absolute user
 paths, environments, caches, build output, or transient artifacts. The
 reserved `.vidap-local/` location is untracked repository-local state only when
 a later packet names a legitimate need; it is not an approved secret store.
+Named uses so far: `.vidap-local/runs/` for attempt records and
+`.vidap-local/workflows/` for backend-saved slice workflows and their
+workspace-view sidecars.
 
 Build, test, coverage, environment, package-cache, and downloaded-data paths
 are untracked under `.gitignore`. Approved tracked fixtures remain possible at

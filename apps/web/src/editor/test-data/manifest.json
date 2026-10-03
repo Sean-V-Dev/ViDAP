@@ -1,0 +1,29 @@
+{
+  "fixtureManifestVersion": "1.0",
+  "fixtures": [
+    {
+      "id": "p3-ep04a-editor-recorded-responses-v1",
+      "schemaVersion": "1.0",
+      "path": "apps/web/src/editor/test-data/recorded.ts",
+      "byteSize": 15172,
+      "sha256": "E9EE46608003F58B355D62011FCC01285C23536657810C4DA73B78FF06A85B42",
+      "provenance": "Responses captured from the real /api/slice/ backend on the user's Windows machine during P3-EP04A, using the synthetic P3-EP03B success fixture; no real-world source.",
+      "terms": "MIT",
+      "creationMethod": "User-run capture script against npm.cmd run launch, converted to a typed module and formatted with the locked Prettier; the capture and conversion commands are recorded in ViDAP_P3_EP04A_Implementation_Report.md.",
+      "expectedResult": {
+        "responses": 12,
+        "contracts": 5,
+        "workflowDigest": "sha256:db55a1637c426c7e5493a87a3891dad7d97fc90009ee217b79087f4a4492f0cb"
+      },
+      "permittedConsumers": [
+        "P3-EP04A editor tests",
+        "later Phase 3 packets and their independent validation"
+      ],
+      "privacyClassification": "synthetic non-sensitive",
+      "privacyAttestation": "Contains no personal, sensitive, credential, path, network, telemetry, proprietary, or real-world dataset content.",
+      "centralReviewer": "pending",
+      "reviewDate": "2026-10-02",
+      "byteReviewStatus": "pending independent validation and Central reconciliation"
+    }
+  ]
+}

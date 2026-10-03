@@ -68,6 +68,8 @@ Desktop.ini
 /downloads/
 
 # Repository-local mutable state, reports, and temporary output
+# (.vidap-local/runs/ holds attempt records; .vidap-local/workflows/ holds
+# backend-saved slice workflows and their workspace-view sidecars)
 /.vidap-local/
 /reports/
 /tmp/

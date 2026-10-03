@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | **Proposed** by the P3-EP02 worker, revised after the user walkthrough and the first independent review; becomes authoritative only after independent validation and Central acceptance |
+| Status | **Accepted** by Central on 2026-10-02 in `ViDAP_P3_EP02_Validation_and_Reconciliation.md`; the authoritative ViDAP design system |
 | Version | 0.2 |
 | Governing decisions | Decision record 0002; Phase 3 plan v1.1 (D3.5–D3.10); `UX refinement.txt` |
 | Evidence | `docs/design/p3-ep02-prototype/` (throwaway prototype and state screenshots) |
@@ -56,7 +56,7 @@ canvas, per WCAG 2.2.
 | `--err` | `#B42318` | Runtime failure | 6.6:1 |
 | `--warn` | `#8A5A00` | Validation problems, conflicts, prototype/preview labels | 5.9:1 |
 | `--t-table` / `--t-split` / `--t-model` / `--t-metrics` | `#0E6A87` / `#6E45B8` / `#A84B0C` / `#3D6B12` | Port-type glyphs | 5.7–6.6:1 |
-| `--dim-fill` / `--dim-border` | `#EEF0F3` / `#C9CFD7` | De-emphasized items during trace | text keeps ≥ 6.9:1 |
+| `--dim-fill` / `--dim-border` | `#EEF0F3` / `#C9CFD7` | De-emphasized items during trace | text keeps ≥ 4.68:1 (primary text 14.5:1); the dimmed border is about 1.5:1, see Section 9 |
 
 Tinted backgrounds (`--accent-bg #E8EEFB`, `--ok-bg #E7F4EC`, `--err-bg
 #FDECEA`, `--warn-bg #FFF4DB`) keep their foreground at 4.7:1 or better.
@@ -295,8 +295,10 @@ phase.
 Target: WCAG 2.2 Level AA for the editor, at the default zoom.
 
 - Text contrast at least 4.5:1; component and graphic boundaries at least
-  3:1 (1.4.3, 1.4.11). The token table meets both, including dimmed items
-  during trace.
+  3:1 (1.4.3, 1.4.11). The token table meets both. Dimmed items during trace
+  keep text at 4.68:1 or better; their dimmed border (about 1.5:1) is
+  de-emphasis, and P3-EP05 either accepts that or keeps a 3:1 border, and
+  records which.
 - Every action is keyboard-operable (2.1.1): select, navigate between
   connected nodes, move (move mode), expand, focus mode, trace and exit,
   gutter resize, run, view and zoom. Connecting by keyboard is designed in

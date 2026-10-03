@@ -30,7 +30,14 @@ from .artifacts import (
 from .bindings import BindingMap
 from .diagnostics import RuntimeDiagnostic, diagnostic
 from .dispatch import DispatchResult, RuntimeTable, dispatch, preflight_dispatch
-from .output import PROOF_SLOT, ReferenceOutputRefusal, emit_node_id, selected_bytes
+from .output import (
+    PROOF_SLOT,
+    ReferenceOutputRefusal,
+    emit_node_id,
+    evaluate_node_id,
+    selected_bytes,
+    selected_metrics_bytes,
+)
 from .planner import plan_execution
 from .reuse import AttemptLedger, ReuseEvent
 
@@ -148,9 +155,21 @@ def run_attempt(
     *,
     seed: int | None = None,
     _reference_output: bool = False,
+    _slice_output: bool = False,
 ) -> AttemptResult:
     """Refuse before allocation; dispatch once after publishing pending ownership."""
 
+    if _reference_output and _slice_output:
+        raise AttemptRefusal("an attempt selects at most one fixed output authority")
+    if _slice_output:
+        from .slice import SLICE_BINDINGS, SLICE_REGISTRY, SLICE_RUNTIME_TABLE
+
+        if (
+            registry is not SLICE_REGISTRY
+            or bindings is not SLICE_BINDINGS
+            or table is not SLICE_RUNTIME_TABLE
+        ):
+            raise AttemptRefusal("slice output requires fixed first-party authorities")
     if _reference_output:
         from .reference import (
             REFERENCE_BINDINGS,
@@ -168,7 +187,13 @@ def run_attempt(
             )
     plan = plan_execution(document, registry, bindings)
     preflight_dispatch(plan, table)
-    selected_emit = emit_node_id(plan) if _reference_output else None
+    selected_emit = (
+        emit_node_id(plan)
+        if _reference_output
+        else evaluate_node_id(plan)
+        if _slice_output
+        else None
+    )
     if seed is not None and (type(seed) is not int or not -(2**63) <= seed < 2**63):
         raise AttemptRefusal("seed must be an optional signed 64-bit integer")
     for node in plan.representation.nodes:
@@ -193,7 +218,11 @@ def run_attempt(
     output_bytes: bytes | None = None
     if selected_emit is not None and result is not None and reason is None:
         try:
-            output_bytes = selected_bytes(plan, result, selected_emit)
+            output_bytes = (
+                selected_metrics_bytes(plan, result, selected_emit)
+                if _slice_output
+                else selected_bytes(plan, result, selected_emit)
+            )
             write_proof_slot(attempt_id, output_bytes)
         except ReferenceOutputRefusal, ArtifactRefusal, OSError, ValueError:
             output_failed = True

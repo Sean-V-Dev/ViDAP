@@ -1,4 +1,7 @@
 import { createRoot } from "react-dom/client";
-import { FoundationRoot } from "./foundation-root";
+import { createSliceClient } from "./editor/api";
+import { Editor } from "./editor/Editor";
 
-createRoot(document.getElementById("root")!).render(<FoundationRoot />);
+createRoot(document.getElementById("root")!).render(
+  <Editor client={createSliceClient()} />,
+);

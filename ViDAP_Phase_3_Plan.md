@@ -273,8 +273,8 @@ current outcome is, without opening every node?
 |---|---|---|---|
 | WS3.1 Slice and integration decisions | Resolve D3.1–D3.4 with evidence | Phase 2 reconciliation | Complete: P3-EP01 v0.1 accepted 2026-10-01 |
 | WS3.2 Design and interaction decisions | Resolve D3.5–D3.10, including the design system and a throwaway interaction prototype as evidence | WS3.1 (D3.4 at minimum) | Complete: P3-EP02 v0.1 accepted 2026-10-02 |
-| WS3.3 Backend slice | Implement the approved slice operations, fixtures, and the D3.2/D3.3 channel, headlessly tested | D3.1–D3.3 | Split: P3-EP03A dependency and license review (v0.1 drafted, awaiting approval); P3-EP03B implementation after Central's license decision |
-| WS3.4 Editor core | Canvas, regions, gutters, contract-driven nodes, typed connections, validation feedback, save/load | D3.4–D3.9, WS3.3 contracts | P3-EP04 |
+| WS3.3 Backend slice | Implement the approved slice operations, fixtures, and the D3.2/D3.3 channel, headlessly tested | D3.1–D3.3 | Split: P3-EP03A dependency and license review complete (Decision Record 0005 accepted 2026-10-02); P3-EP03B slice dependency, operations, and headless run complete (accepted 2026-10-02); P3-EP03C `/api/slice/` channel and save/load complete (accepted 2026-10-02). WS3.3 complete |
+| WS3.4 Editor core | Canvas, regions, gutters, contract-driven nodes, typed connections, validation feedback, save/load | D3.4–D3.9, WS3.3 contracts | Split: P3-EP04A editor workspace complete (accepted 2026-10-03); P3-EP04B graph authoring (adding, removing, and connecting nodes) ready to draft |
 | WS3.5 Run, results, and trace | Run controls, status, recorded result and error presentation, boundary trace/X-ray | D3.5–D3.7, WS3.3–WS3.4 | P3-EP05 |
 | WS3.6 Closeout | Reproduce Phase 3 evidence, fresh-user walkthrough, independent visual/UX review, reconciliation | WS3.1–WS3.5 | P3-EP06 |
 

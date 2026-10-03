@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 
+from .slice_api import install
+
 FOUNDATION_STATUS = {
     "application": "ViDAP",
     "scope": "phase-0-foundation",
@@ -14,4 +16,5 @@ def create_app() -> FastAPI:
     async def foundation_status() -> dict[str, str]:
         return FOUNDATION_STATUS
 
+    install(app)
     return app
