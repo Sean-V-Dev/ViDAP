@@ -185,44 +185,100 @@ export function sidecarFrom(
 }
 
 /**
- * Temporary push-down (DESIGN.md Principle 3, walkthrough W4): while a node is
- * taller than compact (expanded, or showing a message), nodes below it in the
- * same region slide down by the extra height. `heights` holds measured node
- * heights; a node not measured yet uses its nominal height. Stored positions
- * never change; this returns display offsets only.
+ * Expanding toward open space (G-F3, P3-EP04B): an expanded node that would
+ * reach past its region's node area into the Outputs rail is shown shifted
+ * left by that overflow, never left of the node area. Temporary, like
+ * push-down; the stored position never changes. Returns the displayed x.
+ */
+export function displayX(
+  position: Point,
+  isExpanded: boolean,
+  regionWidth: number,
+): number {
+  if (!isExpanded) {
+    return position.x;
+  }
+  const overflow = position.x + EXPANDED_WIDTH - (regionWidth - RAIL_WIDTH * 2);
+  return position.x - Math.min(position.x, Math.max(0, overflow));
+}
+
+/**
+ * Temporary push-down (DESIGN.md Principle 3, walkthrough W4). Nodes are taken
+ * top to bottom in each region. When a node's displayed bottom has moved down
+ * (it grew, being expanded or showing a message, or it was itself pushed), a
+ * node below that it now covers moves down just enough to clear it with the
+ * usual gap, and never by more than that node moved. A node it does not cover
+ * stays put. `heights` holds measured heights (nominal until measured).
+ * Stored positions never change; this returns display offsets only.
  */
 export function pushDownOffsets(
   document: WorkflowDocument,
   positions: Record<string, Point>,
   expanded: string | null,
   heights: Readonly<Record<string, number>> = {},
+  widths: Readonly<Record<string, number>> = {},
 ): Record<string, number> {
   const offsets: Record<string, number> = {};
-  for (const node of document.nodes) {
-    const origin = positions[node.id];
-    const extra = displayHeight(node.id, expanded, heights) - COMPACT_HEIGHT;
-    if (!origin || extra <= 0) {
-      continue;
+  const placed = document.nodes
+    .filter((node) => positions[node.id])
+    .map((node) => ({
+      id: node.id,
+      region: regionOf(node),
+      y: positions[node.id].y,
+      x: displayX(
+        positions[node.id],
+        node.id === expanded,
+        widths[regionOf(node)] ?? DEFAULT_REGION_WIDTH,
+      ),
+      width: nodeWidth(node.id === expanded),
+      height: displayHeight(node.id, expanded, heights),
+    }))
+    .sort((a, b) => (a.y === b.y ? a.id.localeCompare(b.id) : a.y - b.y));
+  const top = (id: string, y: number) => y + (offsets[id] ?? 0);
+  placed.forEach((upper, index) => {
+    const bottom = top(upper.id, upper.y) + upper.height;
+    const moved = bottom - (upper.y + COMPACT_HEIGHT);
+    if (moved <= 0) {
+      return;
     }
-    const width = nodeWidth(node.id === expanded);
-    for (const other of document.nodes) {
-      const position = positions[other.id];
+    for (const lower of placed.slice(index + 1)) {
+      const lowerTop = top(lower.id, lower.y);
+      const sideBySide =
+        lower.x >= upper.x + upper.width || lower.x + lower.width <= upper.x;
       if (
-        other.id === node.id ||
-        !position ||
-        regionOf(other) !== regionOf(node) ||
-        position.y <= origin.y
+        lower.region !== upper.region ||
+        lower.y <= upper.y ||
+        sideBySide ||
+        lowerTop >= bottom
       ) {
         continue;
       }
-      const overlaps =
-        position.x < origin.x + width && position.x + NODE_WIDTH > origin.x;
-      if (overlaps) {
-        offsets[other.id] = (offsets[other.id] ?? 0) + extra;
-      }
+      const push = Math.min(moved, bottom + NODE_GAP - lowerTop);
+      offsets[lower.id] = (offsets[lower.id] ?? 0) + push;
+    }
+  });
+  return offsets;
+}
+
+/**
+ * Where a new node goes (P3-EP04B §5.3): the top of an empty region, else
+ * NODE_GAP below the bottom of the region's lowest node. No node moves.
+ */
+export function placeNewNode(
+  document: WorkflowDocument,
+  positions: Record<string, Point>,
+  region: string,
+  heights: Readonly<Record<string, number>> = {},
+): Point {
+  let bottom: number | null = null;
+  for (const node of nodesIn(document, region)) {
+    const position = positions[node.id];
+    if (position) {
+      const nodeBottom = position.y + displayHeight(node.id, null, heights);
+      bottom = bottom === null ? nodeBottom : Math.max(bottom, nodeBottom);
     }
   }
-  return offsets;
+  return { x: PAD, y: bottom === null ? PAD : bottom + NODE_GAP };
 }
 
 export function nodeHeight(expanded: boolean): number {
@@ -306,10 +362,17 @@ export function regionHeight(
   positions: Record<string, Point>,
   expanded: string | null,
   heights: Readonly<Record<string, number>> = {},
+  widths: Readonly<Record<string, number>> = {},
 ): number {
   let bottom = 320;
   if (document) {
-    const offsets = pushDownOffsets(document, positions, expanded, heights);
+    const offsets = pushDownOffsets(
+      document,
+      positions,
+      expanded,
+      heights,
+      widths,
+    );
     for (const node of document.nodes) {
       const position = positions[node.id];
       if (position) {

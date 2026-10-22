@@ -101,6 +101,36 @@ describe("number spelling (P3-AC08)", () => {
     expect(writeJson(value, () => undefined)).toBe(JSON.stringify(value));
   });
 
+  it("keeps a node's spellings when a node before it is removed", async () => {
+    const loadedText = `{"name":"two","workflow":{"format":"vidap.workflow",
+      "schemaVersion":"1.0","workflowId":"two-id","nodes":[
+      {"id":"a","type":"t","parameters":{"p":0.0}},
+      {"id":"b","type":"t","parameters":{"p":1.0}}],"edges":[]},
+      "workflowDigest":"d","sidecar":null,"sidecarDigest":null,"sidecarNotice":null}`;
+    const bodies: string[] = [];
+    const client = createSliceClient((input, init) => {
+      if (typeof init?.body === "string") {
+        bodies.push(init.body);
+      }
+      return Promise.resolve(
+        new Response(
+          input.endsWith("/validate")
+            ? '{"valid":true,"diagnostics":[]}'
+            : loadedText,
+          { status: 200 },
+        ),
+      );
+    });
+    const loaded = await client.load("two");
+    await client.validate({
+      ...loaded.workflow,
+      nodes: loaded.workflow.nodes.slice(1),
+    });
+    expect(bodies[0]).toContain(
+      '"nodes":[{"id":"b","type":"t","parameters":{"p":1.0}}]',
+    );
+  });
+
   it("says unreachable only when the backend did not answer", () => {
     const answered = new ApiError(404, { detail: "Not Found" });
     expect(answered.message).not.toContain("could not be reached");

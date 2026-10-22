@@ -3,7 +3,15 @@
 // a gutter: values leave through the Outputs rail and arrive on Inputs rails.
 
 import { Fragment, useState } from "react";
-import type { Diagnostic, JsonValue, WorkflowDocument } from "./api";
+import type {
+  Diagnostic,
+  Endpoint,
+  JsonValue,
+  WorkflowDocument,
+  WorkflowNode,
+} from "./api";
+import { AddMenu } from "./AddMenu";
+import { compatible, typesForRegion } from "./authoring";
 import type { ContractIndex, InputEntry, OutputEntry } from "./model";
 import {
   boundaryEntries,
@@ -13,11 +21,13 @@ import {
   regionOf,
 } from "./model";
 import {
+  DEFAULT_REGION_WIDTH,
   GUTTER_STEP,
   GUTTER_STEP_LARGE,
   MAX_REGION_WIDTH,
   RAIL_WIDTH,
   REGION_HEADER,
+  displayX,
   minimumWidth,
   nodeWidth,
   portOffset,
@@ -26,8 +36,8 @@ import {
   stackRail,
   type Layout,
 } from "./layout";
-import { useMeasuredHeights } from "./measure";
-import { NodeView } from "./NodeView";
+import { useMeasuredHeights, type MeasureRef } from "./measure";
+import { NodeView, type InputConnections, type PortState } from "./NodeView";
 import { UNASSIGNED, regionLabel, regionShortLabel } from "./presentation";
 
 export interface WorkspaceProps {
@@ -58,6 +68,30 @@ export interface WorkspaceProps {
     region: string,
     event: React.PointerEvent<HTMLDivElement>,
   ) => void;
+  // Measured node heights (owned by the editor, which also places new nodes).
+  nodeHeights: Readonly<Record<string, number>>;
+  measureNode: MeasureRef;
+  // Authoring (P3-EP04B).
+  connecting: Endpoint | null;
+  invalidEdges: ReadonlySet<string>;
+  problemPorts: ReadonlySet<string>;
+  onAddNode: (region: string, type: string) => void;
+  registerAddButton: (
+    region: string,
+  ) => (element: HTMLButtonElement | null) => void;
+  onPortActivate: (
+    nodeId: string,
+    direction: "input" | "output",
+    key: string,
+  ) => void;
+  onPortPointerDown: (
+    nodeId: string,
+    direction: "input" | "output",
+    key: string,
+    event: React.PointerEvent<HTMLButtonElement>,
+  ) => void;
+  onDisconnect: (edgeId: string) => void;
+  onRemoveNode: (nodeId: string) => void;
 }
 
 const ENTRY_HALF = 12;
@@ -73,18 +107,24 @@ interface HoverCard {
 }
 
 export function Workspace(props: WorkspaceProps) {
-  const { document, contracts, names, layout, expanded } = props;
+  const { document, contracts, names, layout, expanded, nodeHeights } = props;
   const [card, setCard] = useState<HoverCard | null>(null);
-  const [nodeHeights, measureNode] = useMeasuredHeights();
   const [railHeights, measureRail] = useMeasuredHeights();
   const offsets = document
-    ? pushDownOffsets(document, layout.positions, expanded, nodeHeights)
+    ? pushDownOffsets(
+        document,
+        layout.positions,
+        expanded,
+        nodeHeights,
+        layout.widths,
+      )
     : {};
   const height = regionHeight(
     document,
     layout.positions,
     expanded,
     nodeHeights,
+    layout.widths,
   );
   // A node lifted into focus mode leaves its slot empty; its wires are hidden
   // while it is lifted (DESIGN.md Section 5).
@@ -92,6 +132,59 @@ export function Workspace(props: WorkspaceProps) {
   const boundaries = document
     ? boundaryEntries(document)
     : { outputs: [] as OutputEntry[], inputs: [] as InputEntry[] };
+  const contractList = [...contracts.values()];
+  // Outputs whose value feeds a connection the backend found invalid.
+  const invalidOutputs = new Set(
+    (document?.edges ?? [])
+      .filter((edge) => props.invalidEdges.has(edge.id))
+      .map((edge) => `${edge.source.nodeId}:${edge.source.portKey}`),
+  );
+  const nodeX = (nodeId: string) => {
+    const position = layout.positions[nodeId];
+    const node = document ? nodeById(document, nodeId) : undefined;
+    if (!position || !node) {
+      return 0;
+    }
+    return displayX(
+      position,
+      nodeId === expanded,
+      layout.widths[regionOf(node)] ?? DEFAULT_REGION_WIDTH,
+    );
+  };
+  const valueText = (nodeId: string, portKey: string) =>
+    `${names.get(nodeId) ?? nodeId}.${portKey}`;
+  const connectionsOf = (node: WorkflowNode): InputConnections[] =>
+    (contracts.get(node.type)?.inputs ?? []).map((port) => ({
+      portKey: port.key,
+      label: port.label,
+      sources: (document?.edges ?? [])
+        .filter(
+          (edge) =>
+            edge.target.nodeId === node.id && edge.target.portKey === port.key,
+        )
+        .map((edge) => ({
+          edgeId: edge.id,
+          text: valueText(edge.source.nodeId, edge.source.portKey),
+        })),
+    }));
+  const portState = (
+    nodeId: string,
+    direction: "input" | "output",
+    key: string,
+  ): PortState => {
+    const source = props.connecting;
+    if (!source || !document) {
+      return null;
+    }
+    if (direction === "output") {
+      return source.nodeId === nodeId && source.portKey === key
+        ? "source"
+        : null;
+    }
+    return compatible(document, contracts, source, { nodeId, portKey: key })
+      ? "compatible"
+      : "incompatible";
+  };
 
   const portY = (
     nodeId: string,
@@ -185,6 +278,14 @@ export function Workspace(props: WorkspaceProps) {
                   <span className="region-count">
                     {nodes.length} {nodes.length === 1 ? "node" : "nodes"}
                   </span>
+                  {document && region !== UNASSIGNED.key && (
+                    <AddMenu
+                      regionLabel={label}
+                      types={typesForRegion(contractList, region)}
+                      onAdd={(type) => props.onAddNode(region, type)}
+                      registerButton={props.registerAddButton(region)}
+                    />
+                  )}
                 </header>
                 <div
                   className="rail rail-inputs"
@@ -197,6 +298,7 @@ export function Workspace(props: WorkspaceProps) {
                   {inputs.map((entry) => {
                     const id = entry.edgeId;
                     const top = inputY.get(id) ?? REGION_HEADER;
+                    const invalid = props.invalidEdges.has(id);
                     return (
                       <div
                         role="listitem"
@@ -207,7 +309,7 @@ export function Workspace(props: WorkspaceProps) {
                       >
                         <button
                           type="button"
-                          className={`rail-entry type-${typeOf(entry.source.nodeId, entry.source.portKey, "output")}`}
+                          className={`rail-entry type-${typeOf(entry.source.nodeId, entry.source.portKey, "output")}${invalid ? " rail-entry-invalid" : ""}`}
                           data-rail="input"
                           data-edge-id={entry.edgeId}
                           onMouseEnter={() =>
@@ -250,7 +352,9 @@ export function Workspace(props: WorkspaceProps) {
                             )}
                           </span>
                           <span className="rail-sub">
-                            from {regionShortLabel(entry.source.region)}
+                            {invalid
+                              ? "⚠ not allowed here"
+                              : `from ${regionShortLabel(entry.source.region)}`}
                           </span>
                         </button>
                         {card?.id === id && (
@@ -291,18 +395,18 @@ export function Workspace(props: WorkspaceProps) {
                         return (
                           <path
                             key={edge.id}
-                            className="wire"
+                            className={`wire${props.invalidEdges.has(edge.id) ? " wire-invalid" : ""}`}
                             data-edge-id={edge.id}
                             d={curve(
                               RAIL_WIDTH +
-                                from.x +
+                                nodeX(edge.source.nodeId) +
                                 nodeWidth(edge.source.nodeId === expanded),
                               portY(
                                 edge.source.nodeId,
                                 edge.source.portKey,
                                 "output",
                               ),
-                              RAIL_WIDTH + to.x,
+                              RAIL_WIDTH + nodeX(edge.target.nodeId),
                               portY(
                                 edge.target.nodeId,
                                 edge.target.portKey,
@@ -321,11 +425,11 @@ export function Workspace(props: WorkspaceProps) {
                     return (
                       <path
                         key={id}
-                        className="wire wire-rail"
+                        className={`wire wire-rail${invalidOutputs.has(id) ? " wire-invalid" : ""}`}
                         data-value={id}
                         d={curve(
                           RAIL_WIDTH +
-                            from.x +
+                            nodeX(entry.nodeId) +
                             nodeWidth(entry.nodeId === expanded),
                           portY(entry.nodeId, entry.portKey, "output"),
                           width - RAIL_WIDTH,
@@ -342,13 +446,13 @@ export function Workspace(props: WorkspaceProps) {
                     return (
                       <path
                         key={entry.edgeId}
-                        className="wire wire-rail"
+                        className={`wire wire-rail${props.invalidEdges.has(entry.edgeId) ? " wire-invalid" : ""}`}
                         data-edge-id={entry.edgeId}
                         d={curve(
                           RAIL_WIDTH,
                           (inputY.get(entry.edgeId) ?? REGION_HEADER) +
                             ENTRY_HALF,
-                          RAIL_WIDTH + to.x,
+                          RAIL_WIDTH + nodeX(entry.nodeId),
                           portY(entry.nodeId, entry.portKey, "input"),
                         )}
                       />
@@ -358,7 +462,9 @@ export function Workspace(props: WorkspaceProps) {
                 {region === "DATA" &&
                   (!document || document.nodes.length === 0) && (
                     <p className="empty-hint">
-                      Open a saved workflow to start.
+                      {document
+                        ? "Use + Add in each region to add its nodes."
+                        : "Open a saved workflow, or start one with New."}
                     </p>
                   )}
                 {document &&
@@ -379,7 +485,7 @@ export function Workspace(props: WorkspaceProps) {
                         moving={node.id === props.moving}
                         diagnostics={props.diagnosticsByNode.get(node.id) ?? []}
                         style={{
-                          left: RAIL_WIDTH + position.x,
+                          left: RAIL_WIDTH + nodeX(node.id),
                           top:
                             REGION_HEADER +
                             position.y +
@@ -389,8 +495,27 @@ export function Workspace(props: WorkspaceProps) {
                         }}
                         registerElement={(element) => {
                           props.registerNode(node.id)(element);
-                          measureNode(node.id)(element);
+                          props.measureNode(node.id)(element);
                         }}
+                        ports={{
+                          state: (direction, key) =>
+                            portState(node.id, direction, key),
+                          problem: (direction, key) =>
+                            direction === "input" &&
+                            props.problemPorts.has(`${node.id}:${key}`),
+                          onActivate: (direction, key) =>
+                            props.onPortActivate(node.id, direction, key),
+                          onPointerDown: (direction, key, event) =>
+                            props.onPortPointerDown(
+                              node.id,
+                              direction,
+                              key,
+                              event,
+                            ),
+                        }}
+                        connections={connectionsOf(node)}
+                        onDisconnect={props.onDisconnect}
+                        onRemove={() => props.onRemoveNode(node.id)}
                         onParameterChange={(key, value) =>
                           props.onParameterChange(node.id, key, value)
                         }
@@ -432,7 +557,7 @@ export function Workspace(props: WorkspaceProps) {
                       >
                         <button
                           type="button"
-                          className={`rail-entry type-${typeOf(entry.nodeId, entry.portKey, "output")}`}
+                          className={`rail-entry type-${typeOf(entry.nodeId, entry.portKey, "output")}${invalidOutputs.has(id) ? " rail-entry-invalid" : ""}`}
                           data-rail="output"
                           data-value={id}
                           onMouseEnter={() =>

@@ -1,20 +1,13 @@
 import {
   act,
-  cleanup,
   fireEvent,
   render,
   screen,
   waitFor,
   within,
 } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-  ApiError,
-  type LoadedWorkflow,
-  type NodeContract,
-  type SliceClient,
-  type WorkflowDocument,
-} from "./api";
+import { describe, expect, it } from "vitest";
+import { ApiError } from "./api";
 import { Editor } from "./Editor";
 import {
   COMPACT_HEIGHT,
@@ -26,66 +19,16 @@ import {
   RAIL_WIDTH,
 } from "./layout";
 import { recorded } from "./test-data/recorded";
-
-const ID = (n: number) => `41000000-0000-4000-8000-00000000000${n}`;
-const clone = <T,>(value: T): T => structuredClone(value);
-
-interface StubOptions {
-  contracts?: NodeContract[];
-  loaded?: LoadedWorkflow;
-}
-
-function stubClient(options: StubOptions = {}) {
-  const loaded = options.loaded ?? recorded.loadExample;
-  const client = {
-    contracts: vi.fn<SliceClient["contracts"]>(() =>
-      Promise.resolve(clone(options.contracts ?? recorded.contracts)),
-    ),
-    validate: vi.fn<SliceClient["validate"]>((document: WorkflowDocument) =>
-      Promise.resolve(
-        clone(
-          document.nodes[3]?.parameters?.regularization === 0
-            ? recorded.validateInvalid
-            : recorded.validateValid,
-        ),
-      ),
-    ),
-    list: vi.fn<SliceClient["list"]>(() =>
-      Promise.resolve(clone(recorded.list)),
-    ),
-    load: vi.fn<SliceClient["load"]>(() => Promise.resolve(clone(loaded))),
-    save: vi.fn<SliceClient["save"]>((name: string) =>
-      Promise.resolve({ ...clone(recorded.saveExample), name }),
-    ),
-    compare: vi.fn<SliceClient["compare"]>(() =>
-      Promise.resolve(clone(recorded.compareUnchanged)),
-    ),
-  };
-  return client;
-}
-
-async function openExample(
-  client: ReturnType<typeof stubClient>,
-  firstNode = "Model",
-) {
-  render(<Editor client={client} />);
-  await waitFor(() => expect(client.contracts).toHaveBeenCalled());
-  fireEvent.click(screen.getByRole("button", { name: "Open…" }));
-  fireEvent.click(
-    await screen.findByRole("button", { name: "capture-example" }),
-  );
-  await screen.findByRole("group", { name: firstNode });
-  await waitFor(() => expect(client.validate).toHaveBeenCalled());
-}
-
-const node = (name: string) => screen.getByRole("group", { name });
-const regionOf = (label: string) =>
-  screen.getByRole("region", { name: `${label} region` });
+import {
+  ID,
+  clone,
+  node,
+  openExample,
+  regionOf,
+  stubClient,
+} from "./test-support";
 
 describe("Editor workspace", () => {
-  // Vitest globals are off, so Testing Library cannot register this itself.
-  afterEach(cleanup);
-
   it("lays out the slice in its five regions with Not run chips", async () => {
     const client = stubClient();
     await openExample(client);

@@ -34,7 +34,38 @@ export interface NodeViewProps {
   onKeyDown: (event: React.KeyboardEvent<HTMLDivElement>) => void;
   onBlur?: (event: React.FocusEvent<HTMLDivElement>) => void;
   onHeaderPointerDown?: (event: React.PointerEvent<HTMLDivElement>) => void;
+  /** Port controls for connecting (P3-EP04B); static glyphs when absent. */
+  ports?: PortInteraction;
+  /** The expanded node's Connections section (inputs and their sources). */
+  connections?: InputConnections[];
+  onDisconnect?: (edgeId: string) => void;
+  onRemove?: () => void;
 }
+
+export type PortState = "source" | "compatible" | "incompatible" | null;
+
+export interface PortInteraction {
+  state: (direction: "input" | "output", key: string) => PortState;
+  problem: (direction: "input" | "output", key: string) => boolean;
+  onActivate: (direction: "input" | "output", key: string) => void;
+  onPointerDown: (
+    direction: "input" | "output",
+    key: string,
+    event: React.PointerEvent<HTMLButtonElement>,
+  ) => void;
+}
+
+export interface InputConnections {
+  portKey: string;
+  label: string;
+  sources: { edgeId: string; text: string }[];
+}
+
+const PORT_STATE_TEXT: Record<Exclude<PortState, null>, string> = {
+  source: ", connecting from here",
+  compatible: ", can connect",
+  incompatible: ", cannot connect",
+};
 
 // Double-click toggles the node from anywhere on it except its controls and
 // its settings body, where a double-click selects text in a field.
@@ -194,24 +225,113 @@ function ParameterField({
 function Ports({
   contract,
   direction,
+  nodeId,
+  interaction,
 }: {
   contract: NodeContract | undefined;
   direction: "input" | "output";
+  nodeId: string;
+  interaction: PortInteraction | undefined;
 }) {
   const ports =
     (direction === "input" ? contract?.inputs : contract?.outputs) ?? [];
   return (
     <div className={`ports ports-${direction}`}>
-      {ports.map((port) => (
-        <span
-          key={port.key}
-          className={`port port-${port.nominalType}`}
-          role="img"
-          aria-label={`${direction === "input" ? "Input" : "Output"} port ${port.key}, type ${port.nominalType}`}
-          title={`${port.label} (${port.nominalType})`}
-        />
-      ))}
+      {ports.map((port) => {
+        const name = `${direction === "input" ? "Input" : "Output"} port ${port.key}, type ${port.nominalType}`;
+        const title = `${port.label} (${port.nominalType})`;
+        const dot = (
+          <span
+            className={`port-dot port-${port.nominalType}`}
+            aria-hidden="true"
+          />
+        );
+        if (!interaction) {
+          return (
+            <span
+              key={port.key}
+              className="port"
+              role="img"
+              aria-label={name}
+              title={title}
+            >
+              {dot}
+            </span>
+          );
+        }
+        const state = interaction.state(direction, port.key);
+        const problem = interaction.problem(direction, port.key);
+        const classes = [
+          "port",
+          state ? `port-${state}` : "",
+          problem ? "port-problem" : "",
+        ]
+          .filter(Boolean)
+          .join(" ");
+        return (
+          <button
+            key={port.key}
+            type="button"
+            className={classes}
+            aria-label={`${name}${state ? PORT_STATE_TEXT[state] : ""}${problem ? ", has a problem" : ""}`}
+            title={title}
+            data-node-id={nodeId}
+            data-port-key={port.key}
+            data-port-direction={direction}
+            onClick={() => interaction.onActivate(direction, port.key)}
+            onPointerDown={(event) =>
+              interaction.onPointerDown(direction, port.key, event)
+            }
+          >
+            {dot}
+            {state === "incompatible" && (
+              <span className="port-cross" aria-hidden="true">
+                ✕
+              </span>
+            )}
+          </button>
+        );
+      })}
     </div>
+  );
+}
+
+function Connections({
+  name,
+  connections,
+  onDisconnect,
+}: {
+  name: string;
+  connections: InputConnections[];
+  onDisconnect: ((edgeId: string) => void) | undefined;
+}) {
+  return (
+    <section className="node-connections" aria-label={`${name} connections`}>
+      <p className="field-label">Connections</p>
+      <ul>
+        {connections.flatMap((input) =>
+          input.sources.length === 0
+            ? [<li key={input.portKey}>{input.label}: not connected</li>]
+            : input.sources.map((source) => (
+                <li key={source.edgeId}>
+                  <span>
+                    {input.label} ← {source.text}
+                  </span>
+                  {onDisconnect && (
+                    <button
+                      type="button"
+                      className="button"
+                      aria-label={`Disconnect ${source.text} from ${input.label}`}
+                      onClick={() => onDisconnect(source.edgeId)}
+                    >
+                      Disconnect
+                    </button>
+                  )}
+                </li>
+              )),
+        )}
+      </ul>
+    </section>
   );
 }
 
@@ -232,6 +352,10 @@ export function NodeView({
   onKeyDown,
   onBlur,
   onHeaderPointerDown,
+  ports,
+  connections,
+  onDisconnect,
+  onRemove,
 }: NodeViewProps) {
   const headingId = useId();
   const kicker = regionShortLabel(region);
@@ -301,8 +425,18 @@ export function NodeView({
           </button>
         </div>
       </div>
-      <Ports contract={contract} direction="input" />
-      <Ports contract={contract} direction="output" />
+      <Ports
+        contract={contract}
+        direction="input"
+        nodeId={node.id}
+        interaction={ports}
+      />
+      <Ports
+        contract={contract}
+        direction="output"
+        nodeId={node.id}
+        interaction={ports}
+      />
       {implementation && (
         <p className="node-implementation">{implementation}</p>
       )}
@@ -349,10 +483,26 @@ export function NodeView({
           ) : (
             <p className="field-hint">This step has no settings.</p>
           )}
+          {connections && connections.length > 0 && (
+            <Connections
+              name={name}
+              connections={connections}
+              onDisconnect={onDisconnect}
+            />
+          )}
           <details className="node-advanced">
             <summary>Advanced</summary>
             <p>Type {node.type}</p>
             <p>Node ID {node.id}</p>
+            {onRemove && (
+              <button
+                type="button"
+                className="button button-danger"
+                onClick={onRemove}
+              >
+                Remove node
+              </button>
+            )}
           </details>
         </div>
       )}

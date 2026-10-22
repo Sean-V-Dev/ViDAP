@@ -66,9 +66,10 @@ The browser app is the Phase 3 editor workspace (`apps/web/src/editor/`). It
 reads node definitions, validation verdicts, and saved files only through
 `/api/slice/`, and follows `DESIGN.md`; it must not copy parameter defaults,
 ranges, or validation rules into UI code. Its tests replay responses recorded
-from the real backend (`apps/web/src/editor/test-data/`); regenerate them with
-the capture described in `ViDAP_P3_EP04A_Implementation_Report.md` when the
-channel changes. `GET /api/status` is the static, input-free foundation response; it is not a
+from the real backend (`apps/web/src/editor/test-data/`). When the channel
+changes, regenerate them with `node scripts/capture-editor-responses.mjs` while
+`npm.cmd run launch` runs, then update the manifest's hash and size from its
+output. `GET /api/status` is the static, input-free foundation response; it is not a
 health/product API or a generic contract. The Phase 3 slice adds the local
 `/api/slice/` channel (contracts, validate, run, and workflow save/load). It is
 loopback-only and unauthenticated, refuses non-loopback hosts and foreign

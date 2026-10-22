@@ -4,6 +4,7 @@ import {
   COMPACT_HEIGHT,
   EXPANDED_HEIGHT,
   MAX_REGION_WIDTH,
+  NODE_GAP,
   NODE_WIDTH,
   PAD,
   RAIL_ENTRY_MIN_GAP,
@@ -12,6 +13,8 @@ import {
   REGION_HEADER,
   clampPosition,
   clampWidth,
+  displayX,
+  placeNewNode,
   layoutFrom,
   minimumWidth,
   pushDownOffsets,
@@ -110,6 +113,42 @@ describe("layout", () => {
     expect(regionHeight(document, positions, null, heights)).toBe(
       REGION_HEADER + 160 + 80 + COMPACT_HEIGHT + PAD * 2,
     );
+  });
+
+  it("moves a node below only as far as it is actually covered", () => {
+    const document = slice();
+    document.nodes.push({ id: ID(6), type: "vidap.slice.model" });
+    // A tall compact node (142, a wrapped description) far above: not moved.
+    const far = { [ID(4)]: { x: 16, y: 16 }, [ID(6)]: { x: 16, y: 300 } };
+    expect(
+      pushDownOffsets(document, far, null, { [ID(4)]: COMPACT_HEIGHT + 22 }),
+    ).toEqual({});
+    // A node 10 px below a compact node that grows by 80: moved by 80, so
+    // its own 10 px gap is kept rather than widened.
+    const near = { [ID(4)]: { x: 16, y: 16 }, [ID(6)]: { x: 16, y: 146 } };
+    expect(
+      pushDownOffsets(document, near, null, { [ID(4)]: COMPACT_HEIGHT + 80 }),
+    ).toEqual({ [ID(6)]: 80 });
+  });
+
+  it("shifts an expanded node left into open space without storing it", () => {
+    const position = { x: 200, y: 16 };
+    // Node area is 600 - 192 = 408 wide; 200 + 290 overflows it by 82.
+    expect(displayX(position, true, 600)).toBe(118);
+    expect(displayX(position, false, 600)).toBe(200);
+    // Never left of the node area: a narrow region still overlaps sideways.
+    expect(displayX({ x: 16, y: 16 }, true, 400)).toBe(0);
+    expect(position).toEqual({ x: 200, y: 16 });
+  });
+
+  it("places a new node at the top of an empty region, else below the lowest", () => {
+    const document = slice();
+    expect(placeNewNode(document, {}, "MODEL")).toEqual({ x: PAD, y: PAD });
+    const positions = { [ID(4)]: { x: 40, y: 100 } };
+    expect(
+      placeNewNode(document, positions, "MODEL", { [ID(4)]: 150 }),
+    ).toEqual({ x: PAD, y: 100 + 150 + NODE_GAP });
+    expect(positions[ID(4)]).toEqual({ x: 40, y: 100 });
   });
 
   it("stacks rail entries by their measured heights", () => {

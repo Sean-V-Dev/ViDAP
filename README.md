@@ -8,9 +8,9 @@ conventional Python or Jupyter artifacts.
 
 > **Phases 0, 1, and 2 are accepted.** Phase 3, the first visual end-to-end
 > slice, is in progress: its five slice operations, the local `/api/slice/`
-> channel, and workflow save/load exist, and the editor workspace opens, edits,
-> validates, and saves slice workflows; adding, connecting, and running nodes
-> in the editor come next.
+> channel, and workflow save/load exist, and the editor builds, opens, edits,
+> validates, and saves slice workflows; running them from the editor comes
+> next.
 
 ## Intended architecture and prerequisites
 
@@ -127,10 +127,11 @@ regression; a successful headless run records one versioned accuracy result in
 the same owned slot. The local `/api/slice/` channel serves the slice
 contracts, validates and runs workflows, and saves and loads them under
 `.vidap-local/workflows/` with outside-change detection. The browser editor
-(`npm.cmd run launch`, then the printed URL) opens a saved slice workflow in its
-five regions, edits settings from the backend contracts, shows backend
-validation on the node, and saves layout and settings without silent
-overwrites. There is still no graph authoring or run control in the editor,
+(`npm.cmd run launch`, then the printed URL) builds a slice workflow from an
+empty canvas (adding nodes per region and connecting typed ports by mouse or
+keyboard) or opens a saved one in its five regions, edits settings from the
+backend contracts, shows backend validation on the node, and saves layout and
+settings without silent overwrites. There is still no run control in the editor,
 user data loading, model choice, export, authentication,
 telemetry, hosted service, deployment, or desktop-wrapper capability.
 `/api/status` remains the foundation status response;

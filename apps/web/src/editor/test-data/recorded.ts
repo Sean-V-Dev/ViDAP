@@ -1,9 +1,10 @@
 // Recorded responses captured from the real /api/slice/ backend for the
-// P3-EP04A editor tests. Regenerate with the capture command in
-// ViDAP_P3_EP04A_Implementation_Report.md; do not edit by hand.
+// editor tests. Regenerate with `node scripts/capture-editor-responses.mjs`
+// while `npm.cmd run launch` runs; do not edit by hand.
 
 import type {
   CompareResult,
+  Diagnostic,
   LoadedWorkflow,
   NodeContract,
   SaveResult,
@@ -13,6 +14,7 @@ import type {
 
 export interface ErrorBody {
   error: { code: string; message: string };
+  diagnostics?: Diagnostic[];
   [key: string]: unknown;
 }
 
@@ -20,12 +22,20 @@ export interface Recorded {
   contracts: NodeContract[];
   validateValid: ValidateResult;
   validateInvalid: ValidateResult;
+  validateEmpty: ValidateResult;
+  validateMissingInput: ValidateResult;
+  validateTypeMismatch: ValidateResult;
+  validateCycle: ValidateResult;
   saveExample: SaveResult;
   saveNoLayout: SaveResult;
+  saveEmpty: SaveResult;
   list: WorkflowSummary[];
   loadExample: LoadedWorkflow;
   loadNoLayout: LoadedWorkflow;
   notFound: ErrorBody;
+  saveRefused: ErrorBody;
+  saveBadName: ErrorBody;
+  saveNameTaken: ErrorBody;
   saveConflict: ErrorBody;
   compareChanged: CompareResult;
   compareUnchanged: CompareResult;
@@ -54,7 +64,7 @@ export const recorded: Recorded = {
       ],
     },
     workflowDigest:
-      "sha256:5b11338de2bea725f99ea033e59de56dd1a92aa3f0b59058a6dc799595867182",
+      "sha256:7256643216c3b6210e5e2a2728f2375e728ee62fa36eb33f537acc98c296f6ac",
   },
   compareUnchanged: {
     changed: false,
@@ -527,6 +537,12 @@ export const recorded: Recorded = {
       message: "No saved workflow has that name.",
     },
   },
+  saveBadName: {
+    error: {
+      code: "invalid-name",
+      message: "The workflow name is not allowed.",
+    },
+  },
   saveConflict: {
     error: {
       code: "conflict",
@@ -552,7 +568,13 @@ export const recorded: Recorded = {
       ],
     },
     workflowDigest:
-      "sha256:5b11338de2bea725f99ea033e59de56dd1a92aa3f0b59058a6dc799595867182",
+      "sha256:7256643216c3b6210e5e2a2728f2375e728ee62fa36eb33f537acc98c296f6ac",
+  },
+  saveEmpty: {
+    name: "capture-empty",
+    sidecarDigest: null,
+    workflowDigest:
+      "sha256:fcd4c0a0d11162200a78ccec954335d4d15a7504938dc670940f98d241d8339b",
   },
   saveExample: {
     name: "capture-example",
@@ -561,11 +583,67 @@ export const recorded: Recorded = {
     workflowDigest:
       "sha256:db55a1637c426c7e5493a87a3891dad7d97fc90009ee217b79087f4a4492f0cb",
   },
+  saveNameTaken: {
+    error: {
+      code: "conflict",
+      message: "The saved files changed since they were loaded.",
+    },
+    missing: false,
+    sidecarDigest: null,
+    summary: {
+      edgesAdded: [],
+      edgesRemoved: [],
+      labelsChanged: [],
+      layoutMetadataChanged: false,
+      nodesAdded: [],
+      nodesRemoved: [],
+      parametersChanged: [],
+    },
+    workflowDigest:
+      "sha256:db55a1637c426c7e5493a87a3891dad7d97fc90009ee217b79087f4a4492f0cb",
+  },
   saveNoLayout: {
     name: "capture-no-layout",
     sidecarDigest: null,
     workflowDigest:
       "sha256:db55a1637c426c7e5493a87a3891dad7d97fc90009ee217b79087f4a4492f0cb",
+  },
+  saveRefused: {
+    diagnostics: [
+      {
+        category: "semantic",
+        code: "VIDAP-MISSING-REQUIRED-INPUT",
+        elementKind: "port",
+        elementReference: "41000000-0000-4000-8000-000000000004:split",
+        jsonPointer: null,
+        message: "Required input 'split' is not connected.",
+        remedy: "Add one compatible incoming edge.",
+        severity: "error",
+      },
+    ],
+    error: {
+      code: "invalid-workflow",
+      message: "The workflow is not valid.",
+    },
+  },
+  validateCycle: {
+    diagnostics: [
+      {
+        category: "semantic",
+        code: "VIDAP-DIRECTED-CYCLE",
+        elementKind: "workflow",
+        elementReference: "40000000-0000-4000-8000-000000000003",
+        jsonPointer: null,
+        message: "Workflow connections contain a directed cycle.",
+        remedy: "Remove an edge so the workflow is acyclic.",
+        severity: "error",
+      },
+    ],
+    valid: false,
+  },
+  validateEmpty: {
+    diagnostics: [],
+    valid: true,
   },
   validateInvalid: {
     diagnostics: [
@@ -577,6 +655,46 @@ export const recorded: Recorded = {
         jsonPointer: null,
         message: "Parameter 'regularization' is below the minimum.",
         remedy: "Use a value within the declared numeric range.",
+        severity: "error",
+      },
+    ],
+    valid: false,
+  },
+  validateMissingInput: {
+    diagnostics: [
+      {
+        category: "semantic",
+        code: "VIDAP-MISSING-REQUIRED-INPUT",
+        elementKind: "port",
+        elementReference: "41000000-0000-4000-8000-000000000004:split",
+        jsonPointer: null,
+        message: "Required input 'split' is not connected.",
+        remedy: "Add one compatible incoming edge.",
+        severity: "error",
+      },
+    ],
+    valid: false,
+  },
+  validateTypeMismatch: {
+    diagnostics: [
+      {
+        category: "semantic",
+        code: "VIDAP-MISSING-REQUIRED-INPUT",
+        elementKind: "port",
+        elementReference: "41000000-0000-4000-8000-000000000005:split",
+        jsonPointer: null,
+        message: "Required input 'split' is not connected.",
+        remedy: "Add one compatible incoming edge.",
+        severity: "error",
+      },
+      {
+        category: "semantic",
+        code: "VIDAP-NOMINAL-TYPE-MISMATCH",
+        elementKind: "edge",
+        elementReference: "42000000-0000-4000-8000-000000000005",
+        jsonPointer: null,
+        message: "Connected ports use different nominal types.",
+        remedy: "Connect ports with the same declared type.",
         severity: "error",
       },
     ],

@@ -320,7 +320,7 @@ export function writeJson(
   }
   if (Array.isArray(value)) {
     const items = value.map((item: unknown, position) =>
-      writeJson(item, spellingAt, `${pointer}/${position}`),
+      writeJson(item, spellingAt, `${pointer}/${itemToken(item, position)}`),
     );
     return `[${items.join(",")}]`;
   }
@@ -336,6 +336,37 @@ export function writeJson(
     return `{${members.join(",")}}`;
   }
   return JSON.stringify(value) ?? "null";
+}
+
+/**
+ * The pointer token for an array item. An item with a string `id` (a node or
+ * an edge) is named by that ID, so a kept spelling follows its node when
+ * nodes are added or removed around it (P3-EP04B).
+ */
+function itemToken(item: unknown, position: number): string {
+  return isRecord(item) && typeof item.id === "string"
+    ? `@${pointerToken(item.id)}`
+    : String(position);
+}
+
+/** Re-key a positional pointer from `numberSpellings` with `itemToken`. */
+function anchorPointer(root: unknown, pointer: string): string {
+  let current: unknown = root;
+  let anchored = "";
+  for (const token of pointer.split("/").slice(1)) {
+    if (Array.isArray(current)) {
+      const position = Number(token);
+      const item: unknown = current[position];
+      anchored += `/${itemToken(item, position)}`;
+      current = item;
+    } else {
+      anchored += `/${token}`;
+      current = isRecord(current)
+        ? current[token.replace(/~1/g, "/").replace(/~0/g, "~")]
+        : undefined;
+    }
+  }
+  return anchored;
 }
 
 const WORKFLOW = "/workflow";
@@ -418,7 +449,10 @@ export function createSliceClient(
       const own = new Map<string, string>();
       for (const [pointer, spelled] of all) {
         if (pointer.startsWith(`${WORKFLOW}/`)) {
-          own.set(pointer.slice(WORKFLOW.length), spelled);
+          own.set(
+            anchorPointer(result.value, pointer).slice(WORKFLOW.length),
+            spelled,
+          );
         }
       }
       kept.set(result.value.workflow.workflowId, own);

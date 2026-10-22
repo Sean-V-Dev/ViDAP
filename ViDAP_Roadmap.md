@@ -40,11 +40,11 @@ Detailed work is planned one phase at a time. Roadmap changes may clarify sequen
 | Phase 0 | Complete | P0-EP01 through P0-EP08 accepted and centrally reconciled |
 | Phase 1 | Complete | `ViDAP_P1_EP06_Validation_and_Reconciliation.md` accepts P1-EP06 and reconciles P1-AC12 |
 | Phase 2 | Complete | `ViDAP_P2_EP06_Validation_and_Reconciliation.md` accepts EP06 and reconciles P2-AC01–P2-AC12 |
-| Phase 3 | Plan approved | `ViDAP_Phase_3_Plan.md` v1.1 approved 2026-10-01; P3-EP01 complete (D3.1–D3.4 accepted 2026-10-01); P3-EP02 complete (D3.5–D3.10 and `DESIGN.md` accepted 2026-10-02); P3-EP03A complete (Decision Record 0005 accepted 2026-10-02); P3-EP03B complete (slice operations run headlessly, accepted 2026-10-02); P3-EP03C complete (channel and save/load, accepted 2026-10-02); WS3.3 backend slice complete; P3-EP04A complete (editor workspace, accepted 2026-10-03) |
+| Phase 3 | Plan approved | `ViDAP_Phase_3_Plan.md` v1.1 approved 2026-10-01; P3-EP01 complete (D3.1–D3.4 accepted 2026-10-01); P3-EP02 complete (D3.5–D3.10 and `DESIGN.md` accepted 2026-10-02); P3-EP03A complete (Decision Record 0005 accepted 2026-10-02); P3-EP03B complete (slice operations run headlessly, accepted 2026-10-02); P3-EP03C complete (channel and save/load, accepted 2026-10-02); WS3.3 backend slice complete; P3-EP04A complete (editor workspace, accepted 2026-10-03); P3-EP04B complete (graph authoring, accepted 2026-10-21); WS3.4 editor core complete; P3-EP05 (`WS3.5`) next |
 | Phases 4-11 | Sequenced only | Remain at roadmap resolution until predecessor reconciliation |
 | Visual workflow interaction direction | Approved cross-phase direction | `UX refinement.txt` is incorporated into Spine v1.3 and the Phase 3–8 roadmap boundaries and governs the next Phase 3 planning work |
-| Execution packets | Twenty-six complete | P0-EP01 through P0-EP08, P1-EP01 through P1-EP06, P2-EP01 through P2-EP06, P3-EP01, P3-EP02, P3-EP03A, P3-EP03B, P3-EP03C, and P3-EP04A complete |
-| Product implementation | Phase 1 kernel plus Phase 2 reference proof | Accepted canonical document, static contracts/validation, immutable execution representation, deterministic planner/dispatcher, bounded attempt record, owned metadata-first local artifacts, attempt-local reuse, sanitized runtime diagnostics, and one fixed scalar reference family; no product UI, data/ML, export, or cross-run cache |
+| Execution packets | Twenty-seven complete | P0-EP01 through P0-EP08, P1-EP01 through P1-EP06, P2-EP01 through P2-EP06, P3-EP01, P3-EP02, P3-EP03A, P3-EP03B, P3-EP03C, P3-EP04A, and P3-EP04B complete |
+| Product implementation | Phase 1 kernel, Phase 2 reference proof, plus Phase 3 backend slice and visual editor core | Accepted canonical document, static contracts/validation, immutable execution representation, deterministic planner/dispatcher, bounded attempt record, owned metadata-first local artifacts, attempt-local reuse, sanitized runtime diagnostics, five-operation Phase 3 slice backend + `/api/slice/` channel, and browser visual editor workspace with graph authoring (`P3-EP04A`–`B`); run/results/trace (`P3-EP05`) pending |
 
 No percentage-complete values are used. A phase moves state only when its named gate and evidence support the change.
 
@@ -394,7 +394,7 @@ Calendar estimates may be added after Phase 0 establishes the repository baselin
 
 ## 12. Next Action
 
-WS3.3 (P3-EP03A, P3-EP03B, P3-EP03C) and P3-EP04A (editor workspace) are
-complete. P3-EP04B (graph authoring) is ready to draft, carrying the items in
-`ViDAP_P3_EP04A_Validation_and_Reconciliation.md` Section 5. Later Phase 3
-packets follow the approved Phase 3 plan and each require separate approval.
+WS3.3 (`P3-EP03A`, `P3-EP03B`, `P3-EP03C`) and WS3.4 (`P3-EP04A`, `P3-EP04B`) are
+complete. `P3-EP05` (`WS3.5` — Run, results, and trace) is ready to draft and
+execute. Later Phase 3 packets follow the approved Phase 3 plan and each
+require separate approval.

@@ -80,7 +80,7 @@ Every Phase 3 packet must read:
    statements are not authoritative.
 6. `ViDAP_P1_EP06_Validation_and_Reconciliation.md`,
    `ViDAP_P2_EP06_Validation_and_Reconciliation.md`, and the accepted
-   decisions D1.1–D1.7 and D2.1–D2.8.
+   decisions D1.1–D1.7, D2.1–D2.8, and Decision Record 0002 (`docs/decisions/0002-local-dev-launch-and-api-proxy.md`).
 7. `CONTRIBUTING.md`, including "When your shell cannot run the Windows
    commands", which governs how a non-Windows worker obtains the Windows
    attestation without damaging the environment.
@@ -274,7 +274,7 @@ current outcome is, without opening every node?
 | WS3.1 Slice and integration decisions | Resolve D3.1–D3.4 with evidence | Phase 2 reconciliation | Complete: P3-EP01 v0.1 accepted 2026-10-01 |
 | WS3.2 Design and interaction decisions | Resolve D3.5–D3.10, including the design system and a throwaway interaction prototype as evidence | WS3.1 (D3.4 at minimum) | Complete: P3-EP02 v0.1 accepted 2026-10-02 |
 | WS3.3 Backend slice | Implement the approved slice operations, fixtures, and the D3.2/D3.3 channel, headlessly tested | D3.1–D3.3 | Split: P3-EP03A dependency and license review complete (Decision Record 0005 accepted 2026-10-02); P3-EP03B slice dependency, operations, and headless run complete (accepted 2026-10-02); P3-EP03C `/api/slice/` channel and save/load complete (accepted 2026-10-02). WS3.3 complete |
-| WS3.4 Editor core | Canvas, regions, gutters, contract-driven nodes, typed connections, validation feedback, save/load | D3.4–D3.9, WS3.3 contracts | Split: P3-EP04A editor workspace complete (accepted 2026-10-03); P3-EP04B graph authoring (adding, removing, and connecting nodes) ready to draft |
+| WS3.4 Editor core | Canvas, regions, gutters, contract-driven nodes, typed connections, validation feedback, save/load | D3.4–D3.9, WS3.3 contracts | Split: P3-EP04A editor workspace complete (accepted 2026-10-03); P3-EP04B graph authoring complete (accepted 2026-10-21). WS3.4 complete |
 | WS3.5 Run, results, and trace | Run controls, status, recorded result and error presentation, boundary trace/X-ray | D3.5–D3.7, WS3.3–WS3.4 | P3-EP05 |
 | WS3.6 Closeout | Reproduce Phase 3 evidence, fresh-user walkthrough, independent visual/UX review, reconciliation | WS3.1–WS3.5 | P3-EP06 |
 
@@ -416,5 +416,6 @@ visible-result, external-edit, and north-star requirements.
 `ViDAP_P3_EP01_Validation_and_Reconciliation.md`, with F1 and F6 accepted as
 narrow Phase 2 extensions and F2 as a P3-EP03 gate. `ViDAP_P3_EP02.md` v0.1
 is complete: D3.5–D3.10 and `DESIGN.md` v0.2 are accepted in
-`ViDAP_P3_EP02_Validation_and_Reconciliation.md`. P3-EP03 (backend slice) is
-ready to draft. No implementation is authorized.
+`ViDAP_P3_EP02_Validation_and_Reconciliation.md`. WS3.3 (`P3-EP03A`–`C`) and
+WS3.4 (`P3-EP04A`–`B`) are complete. `P3-EP05` (`WS3.5` — Run, results, and
+trace) is ready to draft and execute.

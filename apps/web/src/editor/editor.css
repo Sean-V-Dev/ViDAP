@@ -323,8 +323,52 @@ body {
 }
 
 .region-count {
+  margin-left: auto;
   color: var(--muted);
   font-size: 11px;
+}
+
+/* + Add (DESIGN.md Section 3): a menu button in the region header. */
+.add-menu {
+  position: relative;
+  margin-left: 8px;
+}
+
+.add-button {
+  padding: 2px 8px;
+}
+
+.add-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  padding: 4px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 2px 8px rgb(27 31 36 / 15%);
+}
+
+.add-item {
+  min-height: 24px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: var(--radius-small);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.add-item:hover,
+.add-item:focus-visible {
+  background: var(--accent-bg);
 }
 
 .rail {
@@ -438,6 +482,22 @@ body {
   fill: none;
   stroke: var(--border-strong);
   stroke-width: 1.5;
+}
+
+/* A connection the backend found invalid (DESIGN.md Section 4). */
+.wire-invalid {
+  stroke: var(--warn);
+  stroke-dasharray: 4 3;
+}
+
+.rail-entry.rail-entry-invalid {
+  border-color: var(--warn);
+  border-style: dashed;
+  background: var(--warn-bg);
+}
+
+.rail-entry-invalid .rail-sub {
+  color: var(--warn);
 }
 
 .empty-hint {
@@ -562,29 +622,77 @@ body {
   color: var(--text-2);
 }
 
+/* Ports: a 24×24 target (WCAG 2.5.8) centered on the node edge, holding the
+   12 px type glyph. Centers sit at PORT_TOP + n × PORT_STEP (layout.ts). */
 .ports {
   position: absolute;
-  top: 44px;
+  top: 40px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
 
 .ports-input {
-  left: -7px;
+  left: -13px;
 }
 
 .ports-output {
-  right: -7px;
+  right: -13px;
 }
 
 .port {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  font: inherit;
+}
+
+button.port {
+  cursor: pointer;
+}
+
+.port-dot {
   display: block;
   width: 12px;
   height: 12px;
   border: 2px solid var(--border-strong);
   border-radius: 50%;
   background: var(--surface);
+}
+
+/* Connecting (DESIGN.md Section 4): source marked, compatible inputs outlined
+   in accent, incompatible inputs dimmed with ✕. */
+.port-source .port-dot {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.port-compatible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.port-incompatible .port-dot {
+  opacity: 0.35;
+}
+
+.port-cross {
+  position: absolute;
+  color: var(--text-2);
+  font-size: 10px;
+  line-height: 1;
+}
+
+.port-problem .port-dot {
+  border-color: var(--warn);
+  border-style: dashed;
+  background: var(--warn-bg);
 }
 
 .port-table {
@@ -636,6 +744,31 @@ body {
 .node-advanced summary {
   min-height: 24px;
   cursor: pointer;
+}
+
+.node-advanced .button-danger {
+  margin-top: 4px;
+}
+
+/* The expanded node's inputs and their sources (P3-EP04B §5.4). */
+.node-connections {
+  margin: 0 0 8px;
+}
+
+.node-connections ul {
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+}
+
+.node-connections li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 2px 0;
 }
 
 .message-details p,

@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
+import addMenu from "./AddMenu.tsx?raw";
 import api from "./api.ts?raw";
+import authoring from "./authoring.ts?raw";
 import confirmDialog from "./ConfirmDialog.tsx?raw";
 import editor from "./Editor.tsx?raw";
 import layout from "./layout.ts?raw";
+import measure from "./measure.ts?raw";
 import model from "./model.ts?raw";
 import nodeView from "./NodeView.tsx?raw";
 import presentation from "./presentation.ts?raw";
@@ -10,10 +13,13 @@ import workspace from "./Workspace.tsx?raw";
 import { recorded } from "./test-data/recorded";
 
 const sources: Record<string, string> = {
+  addMenu,
   api,
+  authoring,
   confirmDialog,
   editor,
   layout,
+  measure,
   model,
   nodeView,
   presentation,
@@ -90,5 +96,26 @@ describe("single sources (A3)", () => {
       summary: null,
       workflowDigest: recorded.loadExample.workflowDigest,
     });
+  });
+
+  it("records one diagnostic kind per authoring problem (P3-EP04B)", () => {
+    const kinds = (result: { diagnostics: { elementKind: string }[] }) =>
+      result.diagnostics.map((item) => item.elementKind).sort();
+    expect(recorded.validateEmpty).toEqual({ valid: true, diagnostics: [] });
+    expect(kinds(recorded.validateMissingInput)).toEqual(["port"]);
+    expect(kinds(recorded.validateTypeMismatch)).toEqual(["edge", "port"]);
+    expect(kinds(recorded.validateCycle)).toEqual(["workflow"]);
+    expect(recorded.saveRefused.error.code).toBe("invalid-workflow");
+    expect(recorded.saveRefused.diagnostics?.length).toBeGreaterThan(0);
+    expect(recorded.saveBadName.error.code).toBe("invalid-name");
+    expect(recorded.saveNameTaken.error.code).toBe("conflict");
+    expect(recorded.saveEmpty.name).toBe("capture-empty");
+    // Every saved or loaded response carries canonical sha256 digests.
+    for (const digest of [
+      recorded.saveEmpty.workflowDigest,
+      recorded.loadExample.workflowDigest,
+    ]) {
+      expect(digest).toMatch(/^sha256:[0-9a-f]{64}$/);
+    }
   });
 });

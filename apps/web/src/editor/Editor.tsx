@@ -1,5 +1,6 @@
-// The ViDAP editor workspace (P3-EP04A). It opens, edits, validates, and saves
-// existing slice workflows through the `/api/slice/` channel only.
+// The ViDAP editor workspace (P3-EP04A) with graph authoring (P3-EP04B). It
+// opens, builds, edits, validates, and saves slice workflows through the
+// `/api/slice/` channel only.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./editor.css";
@@ -7,11 +8,21 @@ import {
   ApiError,
   type ChangeSummary,
   type Diagnostic,
+  type Endpoint,
   type JsonValue,
   type SliceClient,
   type WorkflowDocument,
   type WorkflowSummary,
 } from "./api";
+import {
+  connect,
+  edgesTouching,
+  newId,
+  newWorkflow,
+  withNode,
+  withoutEdge,
+  withoutNode,
+} from "./authoring";
 import { ConfirmDialog } from "./ConfirmDialog";
 import {
   DEFAULT_REGION_WIDTH,
@@ -21,15 +32,18 @@ import {
   clampPosition,
   clampWidth,
   layoutFrom,
+  placeNewNode,
   positionedNodes,
   sidecarFrom,
   type Layout,
 } from "./layout";
+import { useMeasuredHeights } from "./measure";
 import {
   displayNames,
   downstream,
   indexContracts,
   nodeById,
+  portOf,
   regionOf,
   upstream,
   verticalNeighbour,
@@ -38,6 +52,7 @@ import {
   type ContractIndex,
 } from "./model";
 import { NodeView } from "./NodeView";
+import { regionLabel } from "./presentation";
 import { Workspace } from "./Workspace";
 
 const VALIDATE_DELAY_MS = 400;
@@ -45,8 +60,9 @@ const FOCUSABLE =
   'button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])';
 
 interface OpenWorkflow {
-  name: string;
-  workflowDigest: string;
+  /** `null` until a new workflow is first saved under a name. */
+  name: string | null;
+  workflowDigest: string | null;
   sidecarDigest: string | null;
   document: WorkflowDocument;
 }
@@ -58,6 +74,7 @@ interface Conflict {
 
 interface Notice {
   tone: "info" | "warn" | "error";
+  title?: string;
   text: string;
   diagnostics?: Diagnostic[];
 }
@@ -75,11 +92,24 @@ const EMPTY_LAYOUT: Layout = {
   viewport: { x: 0, y: 0, zoom: 1 },
 };
 
+/**
+ * The node a diagnostic belongs on: an edge's consumer for an edge finding
+ * (DESIGN.md Section 4), otherwise the node its reference starts with (node,
+ * `nodeId:port`, `nodeId:parameter`). `null` means the workspace banner.
+ */
 function nodeIdOf(
   document: WorkflowDocument,
-  reference: string,
+  diagnostic: Diagnostic,
 ): string | null {
-  const id = reference.slice(0, 36);
+  if (diagnostic.elementKind === "edge") {
+    const edge = document.edges.find(
+      (item) => item.id === diagnostic.elementReference,
+    );
+    return edge && nodeById(document, edge.target.nodeId)
+      ? edge.target.nodeId
+      : null;
+  }
+  const id = diagnostic.elementReference.slice(0, 36);
   return document.nodes.some((node) => node.id === id) ? id : null;
 }
 
@@ -145,7 +175,12 @@ export function Editor({ client }: { client: SliceClient }) {
   const [listing, setListing] = useState<WorkflowSummary[] | null>(null);
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
   const [announcement, setAnnouncement] = useState("");
+  const [saveAsOpen, setSaveAsOpen] = useState(false);
+  const [connecting, setConnecting] = useState<Endpoint | null>(null);
+  const [connectMessage, setConnectMessage] = useState<string | null>(null);
+  const [nodeHeights, measureNode] = useMeasuredHeights();
   const nodeElements = useRef(new Map<string, HTMLDivElement>());
+  const addButtons = useRef(new Map<string, HTMLButtonElement>());
   const validateTimer = useRef<number | undefined>(undefined);
   const validateSequence = useRef(0);
   const navigation = useRef<{ source: string; index: number } | null>(null);
@@ -179,20 +214,24 @@ export function Editor({ client }: { client: SliceClient }) {
 
   const announce = useCallback((text: string) => setAnnouncement(text), []);
 
+  // `action` (an authoring announcement) is said first and kept in front of
+  // the verdict, so the live region never replaces one with the other.
   const requestValidation = useCallback(
-    (document: WorkflowDocument, immediate = false) => {
+    (document: WorkflowDocument, immediate = false, action = "") => {
       window.clearTimeout(validateTimer.current);
       const sequence = ++validateSequence.current;
+      if (action) {
+        announce(action);
+      }
       const run = () => {
         client.validate(document).then(
           (result) => {
             if (sequence === validateSequence.current) {
               setDiagnostics(result.diagnostics);
-              announce(
-                result.valid
-                  ? "Workflow is valid."
-                  : `${result.diagnostics.length} ${result.diagnostics.length === 1 ? "problem" : "problems"} to fix before running.`,
-              );
+              const verdict = result.valid
+                ? "Workflow is valid."
+                : `${result.diagnostics.length} ${result.diagnostics.length === 1 ? "problem" : "problems"} to fix before running.`;
+              announce(action ? `${action} ${verdict}` : verdict);
             }
           },
           (error: unknown) => {
@@ -241,6 +280,9 @@ export function Editor({ client }: { client: SliceClient }) {
           setConflict(null);
           setListing(null);
           setDiagnostics([]);
+          setConnecting(null);
+          setConnectMessage(null);
+          setSaveAsOpen(false);
           setGeneration((value) => value + 1);
           setNotice(
             loaded.sidecarNotice
@@ -310,14 +352,35 @@ export function Editor({ client }: { client: SliceClient }) {
       viewport: { ...layout.viewport, ...scrollPosition.current },
     });
 
+  // The channel saves only valid workflows; a refusal keeps the work open and
+  // unsaved and lists what to fix (P3-EP04B §5.2).
+  const refusedSave = (error: unknown): boolean => {
+    if (error instanceof ApiError && error.code === "invalid-workflow") {
+      setNotice({
+        tone: "warn",
+        title: "Fix before saving",
+        text: error.message,
+        diagnostics: error.diagnostics,
+      });
+      announce("Save refused: the workflow has problems to fix.");
+      return true;
+    }
+    return false;
+  };
+
   const save = () => {
     if (!open) {
+      return;
+    }
+    const name = open.name;
+    if (name === null) {
+      setSaveAsOpen(true);
       return;
     }
     const sidecar = currentSidecar(open.document);
     client
       .save(
-        open.name,
+        name,
         open.document,
         sidecar,
         open.workflowDigest,
@@ -332,7 +395,7 @@ export function Editor({ client }: { client: SliceClient }) {
           });
           setDirty(false);
           setNotice(null);
-          announce(`Saved ${open.name}.`);
+          announce(`Saved ${name}.`);
         },
         (error: unknown) => {
           if (error instanceof ApiError && error.code === "conflict") {
@@ -340,7 +403,7 @@ export function Editor({ client }: { client: SliceClient }) {
             announce(
               "Save refused: the saved files changed outside the editor.",
             );
-          } else {
+          } else if (!refusedSave(error)) {
             setNotice({
               tone: "error",
               text:
@@ -372,10 +435,14 @@ export function Editor({ client }: { client: SliceClient }) {
         setDirty(false);
         setConflict(null);
         setSaveAsName("");
+        setSaveAsOpen(false);
         setNotice(null);
         announce(`Saved as ${result.name}.`);
       },
       (error: unknown) => {
+        if (refusedSave(error)) {
+          return;
+        }
         setNotice({
           tone: "error",
           text:
@@ -389,19 +456,44 @@ export function Editor({ client }: { client: SliceClient }) {
     );
   };
 
-  // Outside changes: check whenever the window regains focus (D3.3).
+  const startNew = () => {
+    const document = newWorkflow(newId());
+    setOpen({
+      name: null,
+      workflowDigest: null,
+      sidecarDigest: null,
+      document,
+    });
+    setLayout(layoutFrom(document, null).layout);
+    setDirty(true);
+    setExpanded(null);
+    setFocusMode(null);
+    setMoving(null);
+    setConflict(null);
+    setListing(null);
+    setNotice(null);
+    setDiagnostics([]);
+    setConnecting(null);
+    setConnectMessage(null);
+    setSaveAsOpen(false);
+    setGeneration((value) => value + 1);
+    announce("Started a new workflow.");
+    requestValidation(document, true);
+  };
+
+  // Outside changes: check whenever the window regains focus (D3.3). A new
+  // workflow has no saved files yet, so there is nothing to compare.
   useEffect(() => {
     if (!open) {
       return;
     }
+    const { name, workflowDigest } = open;
+    if (name === null || workflowDigest === null) {
+      return;
+    }
     const onFocus = () => {
       client
-        .compare(
-          open.name,
-          open.document,
-          open.workflowDigest,
-          open.sidecarDigest,
-        )
+        .compare(name, open.document, workflowDigest, open.sidecarDigest)
         .then(
           (result) => {
             if (result.changed) {
@@ -450,7 +542,7 @@ export function Editor({ client }: { client: SliceClient }) {
       return result;
     }
     for (const item of diagnostics) {
-      const id = nodeIdOf(open.document, item.elementReference);
+      const id = nodeIdOf(open.document, item);
       if (id) {
         result.set(id, [...(result.get(id) ?? []), item]);
       }
@@ -458,10 +550,29 @@ export function Editor({ client }: { client: SliceClient }) {
     return result;
   }, [diagnostics, open]);
   const workspaceDiagnostics = open
-    ? diagnostics.filter(
-        (item) => !nodeIdOf(open.document, item.elementReference),
-      )
+    ? diagnostics.filter((item) => !nodeIdOf(open.document, item))
     : [];
+  // Connections and input ports the backend found a problem with (DESIGN.md
+  // Section 4): edge findings by edge ID; port findings, and the consumer end
+  // of each problem edge, as `nodeId:port`.
+  const { invalidEdges, problemPorts } = useMemo(() => {
+    const edges = new Set<string>();
+    const ports = new Set<string>();
+    for (const item of diagnostics) {
+      if (item.elementKind === "edge") {
+        const edge = open?.document.edges.find(
+          (candidate) => candidate.id === item.elementReference,
+        );
+        if (edge) {
+          edges.add(edge.id);
+          ports.add(`${edge.target.nodeId}:${edge.target.portKey}`);
+        }
+      } else if (item.elementKind === "port") {
+        ports.add(item.elementReference);
+      }
+    }
+    return { invalidEdges: edges, problemPorts: ports };
+  }, [diagnostics, open]);
 
   const focusNode = (id: string) => {
     nodeElements.current.get(id)?.focus();
@@ -638,6 +749,10 @@ export function Editor({ client }: { client: SliceClient }) {
           `Moving ${name(id)}. Arrow keys move it; Shift moves farther; Enter or Escape finishes.`,
         );
         return;
+      case "Delete":
+        event.preventDefault();
+        requestRemove(id);
+        return;
       default:
         return;
     }
@@ -745,6 +860,216 @@ export function Editor({ client }: { client: SliceClient }) {
     requestValidation(document);
   };
 
+  // --- Authoring (P3-EP04B). Every edit changes only nodes and edges, marks
+  // the workflow unsaved, and asks the backend to validate the result. ---
+
+  // A discrete edit (not typing) is validated at once, not after the pause;
+  // `action` is announced, then the verdict after it.
+  const applyDocument = (document: WorkflowDocument, action: string) => {
+    if (!open) {
+      return;
+    }
+    setOpen({ ...open, document });
+    setDirty(true);
+    requestValidation(document, true, action);
+  };
+
+  const valueLabel = (endpoint: Endpoint) =>
+    `${names.get(endpoint.nodeId) ?? endpoint.nodeId}.${endpoint.portKey}`;
+
+  const addNode = (region: string, type: string) => {
+    if (!open || !contracts) {
+      return;
+    }
+    const id = newId();
+    const position = placeNewNode(
+      open.document,
+      layout.positions,
+      region,
+      nodeHeights,
+    );
+    const document = withNode(open.document, id, type);
+    setLayout((current) => ({
+      ...current,
+      positions: { ...current.positions, [id]: position },
+    }));
+    const name = displayNames(document, contracts).get(id) ?? id;
+    applyDocument(document, `Added ${name} to ${regionLabel(region)}.`);
+    window.setTimeout(() => focusNode(id), 0);
+  };
+
+  const removeNode = (id: string) => {
+    if (!open) {
+      return;
+    }
+    const node = nodeById(open.document, id);
+    if (!node) {
+      return;
+    }
+    const name = names.get(id) ?? id;
+    const region = regionOf(node);
+    const above = verticalNeighbour(
+      id,
+      -1,
+      positionedNodes(open.document, layout.positions),
+    );
+    setLayout((current) => {
+      const positions = { ...current.positions };
+      delete positions[id];
+      return { ...current, positions };
+    });
+    if (expanded === id) {
+      setExpanded(null);
+    }
+    if (focusMode === id) {
+      setFocusMode(null);
+    }
+    if (moving === id) {
+      setMoving(null);
+    }
+    if (connecting?.nodeId === id) {
+      setConnecting(null);
+      setConnectMessage(null);
+    }
+    applyDocument(withoutNode(open.document, id), `Removed ${name}.`);
+    window.setTimeout(() => {
+      if (above) {
+        focusNode(above);
+      } else {
+        addButtons.current.get(region)?.focus();
+      }
+    }, 0);
+  };
+
+  const requestRemove = (id: string) => {
+    if (!open) {
+      return;
+    }
+    const name = names.get(id) ?? id;
+    const count = edgesTouching(open.document, id).length;
+    setConfirmation({
+      title: `Remove ${name}?`,
+      body:
+        count === 0
+          ? "It has no connections."
+          : `Its ${count} ${count === 1 ? "connection is" : "connections are"} removed too.`,
+      confirmLabel: "Remove",
+      onConfirm: () => removeNode(id),
+    });
+  };
+
+  const startConnecting = (source: Endpoint) => {
+    setConnecting(source);
+    setConnectMessage(null);
+    announce(
+      `Connecting from ${valueLabel(source)}. Choose an input port; Escape cancels.`,
+    );
+  };
+
+  const cancelConnecting = () => {
+    setConnecting(null);
+    setConnectMessage(null);
+    announce("Connecting cancelled.");
+  };
+
+  const completeConnection = (source: Endpoint, target: Endpoint) => {
+    if (!open || !contracts) {
+      return;
+    }
+    const outcome = connect(open.document, contracts, source, target, newId());
+    const targetNode = nodeById(open.document, target.nodeId);
+    const targetName = names.get(target.nodeId) ?? target.nodeId;
+    const portLabel =
+      (targetNode &&
+        portOf(contracts, targetNode, target.portKey, "input")?.label) ??
+      target.portKey;
+    switch (outcome.kind) {
+      case "incompatible": {
+        const message = `${targetName}'s ${portLabel} expects ${outcome.expected}, not ${outcome.offered}.`;
+        setConnectMessage(message);
+        announce(message);
+        return;
+      }
+      case "duplicate":
+        setConnecting(null);
+        setConnectMessage(null);
+        announce("Already connected.");
+        return;
+      case "replaced":
+        applyDocument(
+          outcome.document,
+          `Replaced the connection from ${valueLabel(outcome.replaced[0].source)}.`,
+        );
+        setConnecting(null);
+        setConnectMessage(null);
+        return;
+      case "created":
+        applyDocument(
+          outcome.document,
+          `Connected ${valueLabel(source)} to ${targetName}'s ${portLabel}.`,
+        );
+        setConnecting(null);
+        setConnectMessage(null);
+        return;
+    }
+  };
+
+  const onPortActivate = (
+    nodeId: string,
+    direction: "input" | "output",
+    portKey: string,
+  ) => {
+    if (direction === "output") {
+      startConnecting({ nodeId, portKey });
+    } else if (connecting) {
+      completeConnection(connecting, { nodeId, portKey });
+    } else {
+      announce("Start from an output port to connect.");
+    }
+  };
+
+  // Dragging from an output port: releasing over an input port completes the
+  // connection; releasing anywhere else leaves connecting active.
+  const onPortPointerDown = (
+    nodeId: string,
+    direction: "input" | "output",
+    portKey: string,
+    event: React.PointerEvent<HTMLButtonElement>,
+  ) => {
+    if (direction !== "output" || event.button !== 0) {
+      return;
+    }
+    const source = { nodeId, portKey };
+    startConnecting(source);
+    const onUp = (up: PointerEvent) => {
+      window.removeEventListener("pointerup", onUp);
+      const target =
+        up.target instanceof Element
+          ? up.target.closest<HTMLElement>('[data-port-direction="input"]')
+          : null;
+      const targetNode = target?.dataset.nodeId;
+      const targetPort = target?.dataset.portKey;
+      if (targetNode && targetPort) {
+        completeConnection(source, { nodeId: targetNode, portKey: targetPort });
+      }
+    };
+    window.addEventListener("pointerup", onUp);
+  };
+
+  const disconnect = (edgeId: string) => {
+    if (!open || !contracts) {
+      return;
+    }
+    const edge = open.document.edges.find((item) => item.id === edgeId);
+    if (!edge) {
+      return;
+    }
+    applyDocument(
+      withoutEdge(open.document, edgeId),
+      `Disconnected ${valueLabel(edge.source)} from ${names.get(edge.target.nodeId) ?? edge.target.nodeId}.`,
+    );
+  };
+
   const closeFocusMode = () => {
     const id = focusMode;
     setFocusMode(null);
@@ -764,13 +1089,23 @@ export function Editor({ client }: { client: SliceClient }) {
       : [];
 
   return (
-    <div className="editor">
+    <div
+      className="editor"
+      onKeyDownCapture={(event) => {
+        // Escape cancels connecting before anything else sees it.
+        if (connecting && event.key === "Escape") {
+          event.preventDefault();
+          event.stopPropagation();
+          cancelConnecting();
+        }
+      }}
+    >
       <header className="top-bar">
         <h1 className="product">ViDAP</h1>
         <p className="workflow-state" aria-live="off">
           {open ? (
             <>
-              <span className="workflow-name">{open.name}</span>{" "}
+              <span className="workflow-name">{open.name ?? "Untitled"}</span>{" "}
               <span className={dirty ? "state-unsaved" : "state-saved"}>
                 {dirty ? "● Unsaved changes" : "Saved"}
               </span>
@@ -780,6 +1115,20 @@ export function Editor({ client }: { client: SliceClient }) {
           )}
         </p>
         <div className="top-actions">
+          <button
+            type="button"
+            className="button"
+            onClick={() =>
+              confirmThen(
+                startNew,
+                "Discard unsaved changes?",
+                "Starting a new workflow discards the changes you have not saved.",
+                "Discard and start new",
+              )
+            }
+          >
+            New
+          </button>
           <button
             type="button"
             className="button"
@@ -795,6 +1144,15 @@ export function Editor({ client }: { client: SliceClient }) {
             disabled={!open || !dirty}
           >
             Save
+          </button>
+          <button
+            type="button"
+            className="button"
+            onClick={() => setSaveAsOpen(true)}
+            disabled={!open}
+            aria-expanded={saveAsOpen}
+          >
+            Save as…
           </button>
           <div className="segmented" role="group" aria-label="Zoom">
             {ZOOM_LEVELS.map((level) => (
@@ -829,6 +1187,53 @@ export function Editor({ client }: { client: SliceClient }) {
       </header>
 
       <div className="banners">
+        {connecting && (
+          <section className="banner banner-info" aria-label="Connecting">
+            <p className="banner-title">
+              Connecting from {valueLabel(connecting)} — choose an input port.
+              Escape cancels.
+            </p>
+            {connectMessage && <p>{connectMessage}</p>}
+            <button type="button" className="button" onClick={cancelConnecting}>
+              Cancel
+            </button>
+          </section>
+        )}
+        {saveAsOpen && open && !conflict && (
+          <section className="banner banner-info" aria-label="Save as">
+            <p className="banner-title">Save as</p>
+            <div className="banner-actions">
+              <label className="save-as">
+                <span>Name</span>
+                <input
+                  type="text"
+                  value={saveAsName}
+                  onChange={(event) => setSaveAsName(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && saveAsName.trim() !== "") {
+                      saveAs();
+                    }
+                  }}
+                />
+              </label>
+              <button
+                type="button"
+                className="button"
+                onClick={saveAs}
+                disabled={saveAsName.trim() === ""}
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                className="button"
+                onClick={() => setSaveAsOpen(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </section>
+        )}
         {listing && (
           <section
             className="banner banner-info"
@@ -897,10 +1302,14 @@ export function Editor({ client }: { client: SliceClient }) {
                       ? "Reloading discards the changes you have not saved and shows the saved files."
                       : "Reloading shows the saved files in place of the open copy.",
                     confirmLabel: dirty ? "Discard and reload" : "Reload",
-                    onConfirm: () => loadWorkflow(open.name),
+                    onConfirm: () => {
+                      if (open.name !== null) {
+                        loadWorkflow(open.name);
+                      }
+                    },
                   })
                 }
-                disabled={conflict.missing}
+                disabled={conflict.missing || open.name === null}
               >
                 Reload from disk
               </button>
@@ -928,6 +1337,7 @@ export function Editor({ client }: { client: SliceClient }) {
             className={`banner banner-${notice.tone}`}
             aria-label="Notice"
           >
+            {notice.title && <p className="banner-title">{notice.title}</p>}
             <p>{notice.text}</p>
             {notice.diagnostics && notice.diagnostics.length > 0 && (
               <ul>
@@ -1005,6 +1415,23 @@ export function Editor({ client }: { client: SliceClient }) {
             onHeaderPointerDown={onHeaderPointerDown}
             onResize={resize}
             onGutterPointerDown={onGutterPointerDown}
+            nodeHeights={nodeHeights}
+            measureNode={measureNode}
+            connecting={connecting}
+            invalidEdges={invalidEdges}
+            problemPorts={problemPorts}
+            onAddNode={addNode}
+            registerAddButton={(region) => (element) => {
+              if (element) {
+                addButtons.current.set(region, element);
+              } else {
+                addButtons.current.delete(region);
+              }
+            }}
+            onPortActivate={onPortActivate}
+            onPortPointerDown={onPortPointerDown}
+            onDisconnect={disconnect}
+            onRemoveNode={requestRemove}
           />
         </div>
       </div>

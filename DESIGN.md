@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Status | **Accepted** by Central on 2026-10-02 in `ViDAP_P3_EP02_Validation_and_Reconciliation.md`; the authoritative ViDAP design system |
-| Version | 0.2 |
+| Version | 0.3 (P3-EP04B amendment: adding, removing, connecting nodes; new and save-as) |
 | Governing decisions | Decision record 0002; Phase 3 plan v1.1 (D3.5–D3.10); `UX refinement.txt` |
 | Evidence | `docs/design/p3-ep02-prototype/` (throwaway prototype and state screenshots) |
 | Applies to | Every user-facing ViDAP surface, starting with the Phase 3 editor |
@@ -102,6 +102,11 @@ requirement.
 - **Workspace:** vertical regions left to right in responsibility order. The
   slice uses DATA, PREPARE, VALIDATE / SPLIT, MODEL, EVALUATE / COMPARE
   (UX §2). Regions are responsibility zones, not required stages.
+- **Adding nodes:** each region header has a **+ Add** menu listing the node
+  types that belong to that region (from the backend contracts and the region
+  map). A new node is placed at the top of an empty region, or below the
+  region's lowest node; existing nodes never move. There is no global node
+  palette or catalog (UX §11).
 - **UNASSIGNED region:** a node whose type has no region appears in an extra
   region at the far right, shown only when it has nodes, with an amber dashed
   border and the header "UNASSIGNED · type has no region".
@@ -160,11 +165,17 @@ competes with titles.
 
 ### Connection feedback
 
-- **Starting a connection** from an output port shows a "Connecting" banner,
-  marks the source port, outlines every compatible input port in accent,
-  and dims incompatible ports with a ✕. Compatibility in this early feedback
-  comes from the port types in the backend contracts; the backend's
-  validation result is still the authority.
+- **Connecting** starts from an output port (click, Enter or Space, or
+  drag). A "Connecting" banner names the source and how to cancel; the
+  source port is marked; every compatible input port is outlined in accent
+  and every other input port is dimmed with ✕. Compatibility in this early
+  feedback comes from the port types in the backend contracts; the backend's
+  validation result is still the authority. Choosing a compatible input
+  creates the connection; a single-connection input that is already
+  connected has its connection replaced, and the replacement is announced.
+  No in-progress line is drawn, so nothing crosses a gutter.
+- **Disconnecting:** the expanded node lists each input port with its source
+  and a Disconnect button.
 - **Dropping on an incompatible port** does not create a connection; the
   banner says why (for example "Model expects split, not metrics").
 - **A connection that exists but is invalid** (for example loaded from a
@@ -202,9 +213,13 @@ composite nodes and progressive disclosure.
   parameters, the steps inside a composite node, and an Advanced section.
   The body is bounded and scrolls internally; scrolling it never pans or
   zooms the canvas. Nodes directly below it in the same region slide down
-  while it is expanded and return when it collapses (walkthrough W4). It can
-  still overlap a neighboring rail or region sideways; expanding toward open
-  space is a P3-EP04 option.
+  while it is expanded and return when it collapses (walkthrough W4). When it
+  would overlap its region's Outputs rail, it is shown shifted left into
+  open space for as long as it is expanded; its stored position never
+  changes. A region narrower than the expanded node still overlaps sideways.
+- **Removing:** Delete on a focused node, or Remove node in its Advanced
+  section, asks for confirmation (naming how many connections go with it),
+  then removes the node and its connections.
 - **Focus mode (escape hatch):** F or the ⤢ button lifts the node into a
   centered, larger panel over a dimmed canvas. Its wires are hidden while
   lifted. Escape or clicking the dim area returns it.
@@ -234,7 +249,9 @@ composite nodes and progressive disclosure.
   node above or below in the same region. Enter expands; F opens focus mode;
   M enters move mode, where arrow keys move the node (Shift for larger
   steps) and Enter or Escape finishes. Ports have accessible names ("Input
-  port split, type split").
+  port split, type split"). Ports are in the Tab order after their node;
+  Enter or Space on an output port starts connecting, on an input port
+  completes it, and Escape cancels.
 
 ## 6. States and status language
 
@@ -247,6 +264,7 @@ composite nodes and progressive disclosure.
 | Blocked | Grey dashed chip "⊘ Blocked" (depends on a failed node; tooltip explains) |
 | Unrelated | Grey dotted chip "○ Unrelated" (not started; does not depend on the failure; tooltip explains) |
 | Validation problem | Amber outline and an amber "Fix before running" message; Run disabled |
+| Save refused | Amber banner "Fix before saving" with the backend's diagnostics; the work stays open and unsaved |
 | Selected / focused | Accent outline; keyboard focus always visible |
 
 Every status has an icon and words as well as color (WCAG 1.4.1).
@@ -301,9 +319,8 @@ Target: WCAG 2.2 Level AA for the editor, at the default zoom.
   records which.
 - Every action is keyboard-operable (2.1.1): select, navigate between
   connected nodes, move (move mode), expand, focus mode, trace and exit,
-  gutter resize, run, view and zoom. Connecting by keyboard is designed in
-  P3-EP04, because the graph library's documented keyboard support covers
-  focus, selection, and moving, not connecting.
+  gutter resize, run, view and zoom. Connecting is fully keyboard-operable
+  (Section 5).
 - Focus is always visible and never fully hidden (2.4.7, 2.4.11).
 - Every drag has a non-drag alternative (2.5.7). Targets are at least 24×24
   (2.5.8).
@@ -315,7 +332,8 @@ Target: WCAG 2.2 Level AA for the editor, at the default zoom.
 
 ## 10. Noise reduction and progressive disclosure
 
-- Show at most one summary line per compact node.
+- Show at most one summary line of content per compact node; it may wrap
+  and is never truncated.
 - Hide port labels on compact nodes; types show as glyphs, names on hover,
   in the boundary card, and to assistive technology.
 - Collapse technical detail by default; never remove it.
