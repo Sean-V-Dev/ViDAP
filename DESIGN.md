@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Status | **Accepted** by Central on 2026-10-02 in `ViDAP_P3_EP02_Validation_and_Reconciliation.md`; the authoritative ViDAP design system |
-| Version | 0.3 (P3-EP04B amendment: adding, removing, connecting nodes; new and save-as) |
+| Version | 0.4 (P3-EP05 amendment: dimmed-border 3:1 contrast resolution for trace mode) |
 | Governing decisions | Decision record 0002; Phase 3 plan v1.1 (D3.5–D3.10); `UX refinement.txt` |
 | Evidence | `docs/design/p3-ep02-prototype/` (throwaway prototype and state screenshots) |
 | Applies to | Every user-facing ViDAP surface, starting with the Phase 3 editor |
@@ -56,7 +56,7 @@ canvas, per WCAG 2.2.
 | `--err` | `#B42318` | Runtime failure | 6.6:1 |
 | `--warn` | `#8A5A00` | Validation problems, conflicts, prototype/preview labels | 5.9:1 |
 | `--t-table` / `--t-split` / `--t-model` / `--t-metrics` | `#0E6A87` / `#6E45B8` / `#A84B0C` / `#3D6B12` | Port-type glyphs | 5.7–6.6:1 |
-| `--dim-fill` / `--dim-border` | `#EEF0F3` / `#C9CFD7` | De-emphasized items during trace | text keeps ≥ 4.68:1 (primary text 14.5:1); the dimmed border is about 1.5:1, see Section 9 |
+| `--dim-fill` / `--dim-border` | `#EEF0F3` / `#C9CFD7` | De-emphasized fill and wires during trace | text keeps ≥ 4.68:1 (primary text 14.5:1); dimmed nodes and rail entries keep `--border-strong` (`#7A8494`, ≥ 3.3:1), see Section 9 |
 
 Tinted backgrounds (`--accent-bg #E8EEFB`, `--ok-bg #E7F4EC`, `--err-bg
 #FDECEA`, `--warn-bg #FFF4DB`) keep their foreground at 4.7:1 or better.
@@ -314,9 +314,11 @@ Target: WCAG 2.2 Level AA for the editor, at the default zoom.
 
 - Text contrast at least 4.5:1; component and graphic boundaries at least
   3:1 (1.4.3, 1.4.11). The token table meets both. Dimmed items during trace
-  keep text at 4.68:1 or better; their dimmed border (about 1.5:1) is
-  de-emphasis, and P3-EP05 either accepts that or keeps a 3:1 border, and
-  records which.
+  use `--dim-fill` (`#EEF0F3`), keeping text at 4.68:1 or better, and retain
+  `--border-strong` (`#7A8494`, 3.7:1 on `--region` and 3.3:1 against
+  `--dim-fill`) as their component border so the 3:1 non-text contrast floor
+  holds during trace (resolved in P3-EP05). Unrelated wires use
+  `--dim-border` (`#C9CFD7`).
 - Every action is keyboard-operable (2.1.1): select, navigate between
   connected nodes, move (move mode), expand, focus mode, trace and exit,
   gutter resize, run, view and zoom. Connecting is fully keyboard-operable

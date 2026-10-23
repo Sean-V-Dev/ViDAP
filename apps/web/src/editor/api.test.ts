@@ -41,9 +41,11 @@ function recordingFetcher() {
       ? LOADED
       : input.endsWith("/validate")
         ? '{"valid":true,"diagnostics":[]}'
-        : input.endsWith("/compare")
-          ? '{"changed":false,"missing":false,"workflowDigest":"d1","sidecarDigest":null,"summary":null}'
-          : '{"name":"spelled","workflowDigest":"d1","sidecarDigest":null}';
+        : input.endsWith("/run")
+          ? '{"attemptId":"a1","outcome":"succeeded","semanticDigest":"d1","nodes":[],"diagnostics":[],"metrics":null}'
+          : input.endsWith("/compare")
+            ? '{"changed":false,"missing":false,"workflowDigest":"d1","sidecarDigest":null,"summary":null}'
+            : '{"name":"spelled","workflowDigest":"d1","sidecarDigest":null}';
     return Promise.resolve(new Response(text, { status: 200 }));
   };
   return { fetcher, bodies };
@@ -65,6 +67,7 @@ describe("number spelling (P3-AC08)", () => {
     const loaded = await client.load("spelled");
     expect(loaded.workflow.nodes[0]?.parameters?.p).toBe(1);
     await client.validate(loaded.workflow);
+    await client.run(loaded.workflow);
     await client.compare("spelled", loaded.workflow, "d1", null);
     await client.save(
       "spelled",
@@ -74,10 +77,11 @@ describe("number spelling (P3-AC08)", () => {
       null,
     );
     expect(bodies[0]).toBe(WORKFLOW_TEXT);
-    expect(bodies[1]).toBe(
+    expect(bodies[1]).toBe(WORKFLOW_TEXT);
+    expect(bodies[2]).toBe(
       `{"workflow":${WORKFLOW_TEXT},"baseWorkflowDigest":"d1","baseSidecarDigest":null}`,
     );
-    expect(bodies[2]).toBe(
+    expect(bodies[3]).toBe(
       `{"workflow":${WORKFLOW_TEXT},"sidecar":null,"baseWorkflowDigest":"d1","baseSidecarDigest":null}`,
     );
   });
@@ -136,5 +140,10 @@ describe("number spelling (P3-AC08)", () => {
     expect(answered.message).not.toContain("could not be reached");
     expect(answered.message).not.toContain("Not Found");
     expect(new ApiError(0, null).message).toContain("could not be reached");
+    const indeterminate = new ApiError(500, {
+      error: { code: "publication-indeterminate", message: "Inspect attempt." },
+      attemptId: "attempt-123",
+    });
+    expect(indeterminate.attemptId).toBe("attempt-123");
   });
 });

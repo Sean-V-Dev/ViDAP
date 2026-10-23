@@ -8,14 +8,31 @@ import type {
   Diagnostic,
   JsonValue,
   NodeContract,
+  NodeRunStatus,
+  RuntimeDiagnostic,
+  SliceMetrics,
   WorkflowNode,
 } from "./api";
-import { effectiveValue, formatValue } from "./model";
+import {
+  effectiveValue,
+  formatCompactMetrics,
+  formatMetrics,
+  formatValue,
+} from "./model";
 import {
   implementationLine,
   regionShortLabel,
   resultSummaryLabel,
 } from "./presentation";
+
+export type NodeStatus = "not-run" | "running" | NodeRunStatus;
+
+export type TraceState = "highlighted" | "dimmed" | null;
+
+export interface RecordedNodeResult {
+  metrics: SliceMetrics;
+  stale: boolean;
+}
 
 export interface NodeViewProps {
   node: WorkflowNode;
@@ -26,6 +43,10 @@ export interface NodeViewProps {
   focusMode: boolean;
   moving: boolean;
   diagnostics: Diagnostic[];
+  status?: NodeStatus;
+  runtimeDiagnostics?: RuntimeDiagnostic[];
+  recordedResult?: RecordedNodeResult | null;
+  traceState?: TraceState;
   style?: React.CSSProperties;
   registerElement?: (element: HTMLDivElement | null) => void;
   onParameterChange: (key: string, value: JsonValue) => void;
@@ -67,17 +88,61 @@ const PORT_STATE_TEXT: Record<Exclude<PortState, null>, string> = {
   incompatible: ", cannot connect",
 };
 
+const STATUS_CHIP: Record<
+  NodeStatus,
+  { icon: string; label: string; className: string; title?: string }
+> = {
+  "not-run": {
+    icon: "–",
+    label: "Not run",
+    className: "chip chip-not-run",
+  },
+  running: {
+    icon: "◌",
+    label: "Running",
+    className: "chip chip-running",
+  },
+  completed: {
+    icon: "✓",
+    label: "Completed",
+    className: "chip chip-completed",
+  },
+  failed: {
+    icon: "✕",
+    label: "Failed",
+    className: "chip chip-failed",
+  },
+  blocked: {
+    icon: "⊘",
+    label: "Blocked",
+    className: "chip chip-blocked",
+    title: "Not run: depends on a failed node.",
+  },
+  unrelated: {
+    icon: "○",
+    label: "Unrelated",
+    className: "chip chip-unrelated",
+    title: "Not started: does not depend on the failed node.",
+  },
+};
+
 // Double-click toggles the node from anywhere on it except its controls and
 // its settings body, where a double-click selects text in a field.
 const NO_DOUBLE_CLICK =
   "button, input, select, textarea, label, summary, .node-body";
 
-function summaryLine(node: WorkflowNode, contract: NodeContract | undefined) {
+function summaryLine(
+  node: WorkflowNode,
+  contract: NodeContract | undefined,
+  recordedResult?: RecordedNodeResult | null,
+) {
   const result = resultSummaryLabel(node.type);
   if (result) {
-    // Recorded results arrive with run support (P3-EP05); nothing is shown
-    // that the backend did not record.
-    return `${result} —`;
+    if (!recordedResult) {
+      return `${result} —`;
+    }
+    const prefix = recordedResult.stale ? "Last run · " : "";
+    return `${prefix}${result} ${formatCompactMetrics(recordedResult.metrics)}`;
   }
   if (!contract || contract.parameters.length === 0) {
     return contract?.description ?? "";
@@ -185,6 +250,7 @@ function ParameterField({
             const ok = text.trim() !== "" && Number.isFinite(parsed);
             setUnparsed(!ok);
             if (ok) {
+              setShown(parsed);
               onChange(parsed);
             }
           }}
@@ -344,6 +410,10 @@ export function NodeView({
   focusMode,
   moving,
   diagnostics,
+  status = "not-run",
+  runtimeDiagnostics = [],
+  recordedResult = null,
+  traceState = null,
   style,
   registerElement,
   onParameterChange,
@@ -360,12 +430,18 @@ export function NodeView({
   const headingId = useId();
   const kicker = regionShortLabel(region);
   const implementation = implementationLine(node.type);
+  const resultLabel = resultSummaryLabel(node.type);
   const hasProblems = diagnostics.length > 0;
+  const hasRuntimeFailures = runtimeDiagnostics.length > 0;
+  const chip = STATUS_CHIP[status];
   const classes = [
     "node",
     expanded || focusMode ? "node-expanded" : "node-compact",
     focusMode ? "node-focus" : "",
     hasProblems ? "node-warn" : "",
+    status === "failed" || hasRuntimeFailures ? "node-failed" : "",
+    traceState === "highlighted" ? "node-trace-lit" : "",
+    traceState === "dimmed" ? "node-trace-dim" : "",
     moving ? "node-moving" : "",
   ]
     .filter(Boolean)
@@ -382,6 +458,7 @@ export function NodeView({
       aria-labelledby={headingId}
       aria-description={`${regionShortLabel(region)} region. Arrow keys move between connected nodes; Enter expands; F opens focus mode; M moves the node.`}
       data-node-id={node.id}
+      data-trace-state={traceState ?? undefined}
       onKeyDown={onKeyDown}
       onBlur={onBlur}
       onDoubleClick={(event) => {
@@ -440,10 +517,42 @@ export function NodeView({
       {implementation && (
         <p className="node-implementation">{implementation}</p>
       )}
-      {!open && <p className="node-summary">{summaryLine(node, contract)}</p>}
-      <p className="chip chip-not-run">
-        <span aria-hidden="true">–</span> Not run
+      {!open && (
+        <p className="node-summary">
+          {summaryLine(node, contract, recordedResult)}
+        </p>
+      )}
+      <p className={chip.className} title={chip.title}>
+        <span aria-hidden="true">{chip.icon}</span> {chip.label}
       </p>
+      {hasRuntimeFailures && (
+        <div className="node-message node-message-err">
+          <p className="message-label message-label-err">Run failed</p>
+          {runtimeDiagnostics.map((item, index) => (
+            <div key={`${item.code}-${item.attemptId}-${index}`}>
+              <p className="message-headline">{item.explanation}</p>
+              <p className="message-remedy">{item.remedy}</p>
+              <details className="message-details">
+                <summary>Technical details</summary>
+                <p>
+                  {item.code}
+                  {item.operationKey ? ` · ${item.operationKey}` : ""}
+                  {item.portKey ? ` · ${item.portKey}` : ""}
+                </p>
+                <p>Attempt {item.attemptId}</p>
+                {item.technical.type && <p>Type {item.technical.type}</p>}
+                <p>{item.technical.message}</p>
+                {item.technical.traceback.length > 0 && (
+                  <p>Traceback {item.technical.traceback.join(" → ")}</p>
+                )}
+                {item.technical.causes.length > 0 && (
+                  <p>Causes {item.technical.causes.join(" → ")}</p>
+                )}
+              </details>
+            </div>
+          ))}
+        </div>
+      )}
       {hasProblems && (
         <div className="node-message node-message-warn">
           <p className="message-label">Fix before running</p>
@@ -470,6 +579,12 @@ export function NodeView({
         >
           {contract?.description && (
             <p className="node-description">{contract.description}</p>
+          )}
+          {resultLabel && recordedResult && (
+            <p className="node-recorded-result">
+              {recordedResult.stale ? "Last run: " : "Recorded result: "}
+              {formatMetrics(recordedResult.metrics)}
+            </p>
           )}
           {contract && contract.parameters.length > 0 ? (
             contract.parameters.map((parameter) => (

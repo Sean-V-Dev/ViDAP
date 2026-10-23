@@ -45,6 +45,15 @@ export function stubClient(options: StubOptions = {}) {
     compare: vi.fn<SliceClient["compare"]>(() =>
       Promise.resolve(clone(recorded.compareUnchanged)),
     ),
+    run: vi.fn<SliceClient["run"]>((document: WorkflowDocument) =>
+      Promise.resolve(
+        clone(
+          document.nodes[3]?.parameters?.regularization === 0.0001
+            ? recorded.runRegularized
+            : recorded.runSuccess,
+        ),
+      ),
+    ),
   };
 }
 

@@ -13,11 +13,18 @@ export function useMeasuredHeights(): [Record<string, number>, MeasureRef] {
   const observer = useRef<ResizeObserver | null>(null);
   const keys = useRef(new Map<Element, string>());
   const elements = useRef(new Map<string, Element>());
+  const callbacks = useRef(
+    new Map<string, (element: HTMLElement | null) => void>(),
+  );
 
   useEffect(() => () => observer.current?.disconnect(), []);
 
-  const measure = useCallback<MeasureRef>(
-    (key) => (element) => {
+  const measure = useCallback<MeasureRef>((key) => {
+    const existing = callbacks.current.get(key);
+    if (existing) {
+      return existing;
+    }
+    const callback = (element: HTMLElement | null) => {
       if (typeof ResizeObserver === "undefined") {
         return;
       }
@@ -52,9 +59,10 @@ export function useMeasuredHeights(): [Record<string, number>, MeasureRef] {
         elements.current.set(key, element);
         observer.current.observe(element);
       }
-    },
-    [],
-  );
+    };
+    callbacks.current.set(key, callback);
+    return callback;
+  }, []);
 
   return [heights, measure];
 }

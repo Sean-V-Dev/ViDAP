@@ -5,8 +5,11 @@ import {
   displayNames,
   downstream,
   effectiveValue,
+  formatCompactMetrics,
+  formatMetrics,
   indexContracts,
   localEdges,
+  traceEdges,
   upstream,
   verticalNeighbour,
   visibleRegions,
@@ -101,5 +104,27 @@ describe("model", () => {
     const restored = withParameter(after, ID(4), "regularization", 1);
     expect(restored).toEqual(before);
     expect(before.nodes[3].parameters?.regularization).toBe(1);
+  });
+
+  it("formats recorded slice metrics and finds cross-region trace edges", () => {
+    const metrics = recorded.runSuccess.metrics!;
+    expect(formatMetrics(metrics)).toBe("Accuracy 0.9 (36 / 40 test rows)");
+    expect(formatCompactMetrics(metrics)).toBe("0.9 (36 / 40)");
+    const regularized = recorded.runRegularized.metrics!;
+    expect(formatMetrics(regularized)).toBe(
+      "Accuracy 0.55 (22 / 40 test rows)",
+    );
+
+    const traced = traceEdges(slice(), {
+      nodeId: ID(3),
+      portKey: "split",
+    });
+    expect(traced.map((edge) => edge.target.nodeId)).toEqual([ID(4), ID(5)]);
+    expect(
+      traceEdges(slice(), {
+        nodeId: ID(9),
+        portKey: "split",
+      }),
+    ).toEqual([]);
   });
 });

@@ -47,8 +47,10 @@ describe("Editor workspace", () => {
     expect(screen.getAllByText("Not run")).toHaveLength(5);
     expect(
       screen.getByRole("button", { name: "Run" }).hasAttribute("disabled"),
-    ).toBe(true);
-    expect(screen.getByText("Run arrives in the next step.")).toBeTruthy();
+    ).toBe(false);
+    expect(screen.getByLabelText("Primary result").textContent).toBe(
+      "Result —",
+    );
   });
 
   it("shows each boundary value once on Outputs and once per consuming port", async () => {
@@ -286,7 +288,13 @@ describe("Editor workspace", () => {
     const dialog = await screen.findByRole("dialog", {
       name: "Train/Test Split, focus mode",
     });
-    fireEvent.change(field(dialog), { target: { value: "0.4" } });
+    const dialogField = field(dialog);
+    act(() => dialogField.focus());
+    expect(document.activeElement).toBe(dialogField);
+    fireEvent.change(dialogField, { target: { value: "0" } });
+    expect(document.activeElement).toBe(dialogField);
+    fireEvent.change(dialogField, { target: { value: "0.4" } });
+    expect(document.activeElement).toBe(dialogField);
     fireEvent.keyDown(dialog, { key: "Escape" });
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     expect(field(node("Train/Test Split")).value).toBe("0.4");

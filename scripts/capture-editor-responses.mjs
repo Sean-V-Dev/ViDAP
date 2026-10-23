@@ -1,21 +1,24 @@
-// Capture the /api/slice/ responses the editor tests replay (P3-EP04B §5.7).
+// Capture the /api/slice/ responses the editor tests replay (P3-EP04B §5.7,
+// extended in P3-EP05 §5.8 for /api/slice/run).
 //
 // Run from the repository root while `npm.cmd run launch` is running:
 //   node scripts/capture-editor-responses.mjs [http://127.0.0.1:8000]
 //
-// It saves only `capture-*` workflows under .vidap-local/workflows/, restores
-// or removes everything it changed, and writes
+// It saves only `capture-*` workflows under .vidap-local/workflows/, removes
+// the attempt directories it created under .vidap-local/runs/, restores or
+// removes everything it changed, and writes
 // apps/web/src/editor/test-data/recorded.ts (formatted with the locked
 // Prettier), then prints that file's SHA-256 and size for the manifest.
 
 import { Buffer } from "node:buffer";
 import { createHash } from "node:crypto";
-import { readFile, rm, writeFile } from "node:fs/promises";
+import { readdir, readFile, rm, rmdir, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import * as prettier from "prettier";
 
 const root = fileURLToPath(new globalThis.URL("..", import.meta.url));
 const workflows = `${root}.vidap-local/workflows/`;
+const runs = `${root}.vidap-local/runs/`;
 const fixture = `${root}fixtures/p3-ep03b/slice-success-v1.json`;
 const output = `${root}apps/web/src/editor/test-data/recorded.ts`;
 const base = process.argv[2] ?? "http://127.0.0.1:8000";
@@ -88,6 +91,22 @@ async function removeCaptures(names) {
     for (const suffix of [".vidap.json", ".vidap-view.json"]) {
       await rm(`${workflows}${name}${suffix}`, { force: true });
     }
+  }
+}
+
+async function removeRuns(attemptIds) {
+  for (const attemptId of attemptIds) {
+    if (typeof attemptId === "string" && attemptId.length > 0) {
+      await rm(`${runs}${attemptId}`, { recursive: true, force: true });
+    }
+  }
+  try {
+    const remaining = await readdir(runs);
+    if (remaining.length === 0) {
+      await rmdir(runs);
+    }
+  } catch {
+    // `.vidap-local/runs` does not exist or is non-empty.
   }
 }
 
@@ -237,6 +256,52 @@ async function capture() {
     await writeFile(path, original);
   }
   out.compareUnchanged = await compare("capture-example", document, loaded);
+
+  // Slice execution: baseline success, regularized variant, declared runtime
+  // failure (with completed, failed, blocked, and unrelated node statuses),
+  // and refused non-slice workflow.
+  const createdAttempts = [];
+  try {
+    out.runSuccess = await call("POST", "/run", document, 200);
+    createdAttempts.push(out.runSuccess.attemptId);
+
+    const regularized = document.replace(
+      '"regularization": 1.0',
+      '"regularization": 0.0001',
+    );
+    if (regularized === document) {
+      throw new Error("fixture has no regularization 1.0 to replace");
+    }
+    out.runRegularized = await call("POST", "/run", regularized, 200);
+    createdAttempts.push(out.runRegularized.attemptId);
+
+    // Dataset (41..1) feeds both Train/Test Split (41..3) and an unconsumed
+    // Prepare Data (41..6), bypassing Prepare Data on the path to Model (41..4)
+    // and Evaluate (41..5). Schedule order is 41..1 (completed), 41..3
+    // (completed), 41..4 (failed: unencoded-category-input), 41..5 (blocked),
+    // and 41..6 (unrelated).
+    const unencoded = clone();
+    unencoded.nodes[1] = {
+      ...unencoded.nodes[1],
+      id: id("41", 6),
+    };
+    unencoded.edges[0] = {
+      ...unencoded.edges[0],
+      target: { nodeId: id("41", 6), portKey: "table" },
+    };
+    unencoded.edges[1] = {
+      ...unencoded.edges[1],
+      source: { nodeId: id("41", 1), portKey: "table" },
+      target: { nodeId: id("41", 3), portKey: "table" },
+    };
+    out.runFailed = await call("POST", "/run", unencoded, 200);
+    createdAttempts.push(out.runFailed.attemptId);
+
+    out.runRefused = await call("POST", "/run", empty, 422);
+  } finally {
+    await removeRuns(createdAttempts);
+  }
+
   return sortKeys(out);
 }
 
@@ -261,6 +326,10 @@ const KEYS = {
   saveConflict: "ErrorBody",
   compareChanged: "CompareResult",
   compareUnchanged: "CompareResult",
+  runSuccess: "RunResult",
+  runRegularized: "RunResult",
+  runFailed: "RunResult",
+  runRefused: "ErrorBody",
 };
 
 const result = await capture();
@@ -277,6 +346,7 @@ import type {
   Diagnostic,
   LoadedWorkflow,
   NodeContract,
+  RunResult,
   SaveResult,
   ValidateResult,
   WorkflowSummary,

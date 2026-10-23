@@ -4,8 +4,10 @@
 import type {
   ContractParameter,
   ContractPort,
+  Endpoint,
   JsonValue,
   NodeContract,
+  SliceMetrics,
   WorkflowDocument,
   WorkflowEdge,
   WorkflowNode,
@@ -288,4 +290,29 @@ export function formatValue(value: JsonValue | undefined): string {
     return "None";
   }
   return typeof value === "string" ? value : JSON.stringify(value);
+}
+
+/**
+ * Format the recorded slice metrics verbatim from `proof-output.bin` without
+ * recalculating accuracy in the browser (D3.7, P3-AC03).
+ */
+export function formatMetrics(metrics: SliceMetrics): string {
+  return `Accuracy ${formatValue(metrics.accuracy)} (${metrics.correct} / ${metrics.testRows} test rows)`;
+}
+
+export function formatCompactMetrics(metrics: SliceMetrics): string {
+  return `${formatValue(metrics.accuracy)} (${metrics.correct} / ${metrics.testRows})`;
+}
+
+/** Cross-region edges fed by a boundary value (DESIGN.md Section 4 trace). */
+export function traceEdges(
+  document: WorkflowDocument,
+  source: Endpoint,
+): WorkflowEdge[] {
+  return document.edges.filter(
+    (edge) =>
+      edge.source.nodeId === source.nodeId &&
+      edge.source.portKey === source.portKey &&
+      isCrossRegion(document, edge),
+  );
 }

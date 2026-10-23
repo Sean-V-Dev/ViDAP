@@ -118,4 +118,42 @@ describe("single sources (A3)", () => {
       expect(digest).toMatch(/^sha256:[0-9a-f]{64}$/);
     }
   });
+
+  it("records live /api/slice/run success, regularized, failure, and refused responses (P3-EP05)", () => {
+    expect(recorded.runSuccess.outcome).toBe("succeeded");
+    expect(recorded.runSuccess.metrics).toEqual({
+      accuracy: 0.9,
+      correct: 36,
+      format: "vidap.slice-metrics",
+      schemaVersion: "1.0",
+      testRows: 40,
+    });
+    expect(
+      recorded.runSuccess.nodes.every((node) => node.status === "completed"),
+    ).toBe(true);
+
+    expect(recorded.runRegularized.outcome).toBe("succeeded");
+    expect(recorded.runRegularized.metrics).toEqual({
+      accuracy: 0.55,
+      correct: 22,
+      format: "vidap.slice-metrics",
+      schemaVersion: "1.0",
+      testRows: 40,
+    });
+
+    expect(recorded.runFailed.outcome).toBe("failed");
+    expect(recorded.runFailed.metrics).toBeNull();
+    expect(recorded.runFailed.diagnostics[0].code).toBe(
+      "unencoded-category-input",
+    );
+    expect(recorded.runFailed.nodes.map((node) => node.status)).toEqual([
+      "completed",
+      "completed",
+      "failed",
+      "blocked",
+      "unrelated",
+    ]);
+
+    expect(recorded.runRefused.error.code).toBe("run-refused");
+  });
 });

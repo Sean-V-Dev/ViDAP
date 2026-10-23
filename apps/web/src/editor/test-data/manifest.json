@@ -2,27 +2,37 @@
   "fixtureManifestVersion": "1.0",
   "fixtures": [
     {
-      "id": "p3-ep04b-editor-recorded-responses-v2",
+      "id": "p3-ep05-editor-recorded-responses-v3",
       "schemaVersion": "1.0",
       "path": "apps/web/src/editor/test-data/recorded.ts",
-      "byteSize": 18496,
-      "sha256": "126D8C13301A5D616315F52182585FCA6935EB6E6FAA3D6541D264A5616391CD",
-      "provenance": "Responses captured from the real /api/slice/ backend on the user's Windows machine during P3-EP04B, using the synthetic P3-EP03B success fixture and variants the capture tool builds from it; no real-world source. Supersedes p3-ep04a-editor-recorded-responses-v1 (accepted with P3-EP04A on 2026-10-03), whose 12 responses are re-captured here unchanged except the outside-edit digest.",
+      "byteSize": 22686,
+      "sha256": "8095478DD9AA1D9F4E759BD916BFFF54D8881A16B3317B1C167A68D02CC4BACA",
+      "provenance": "Responses captured from the real /api/slice/ backend on the user's Windows machine during P3-EP05, using the synthetic P3-EP03B success fixture and variants the capture tool builds from it; no real-world source. Supersedes p3-ep04b-editor-recorded-responses-v2 (accepted with P3-EP04B on 2026-10-22), whose 20 responses are re-captured here unchanged alongside the 4 P3-EP05 /api/slice/run responses.",
       "terms": "MIT",
       "creationMethod": "node scripts/capture-editor-responses.mjs against the launched backend; the tool writes this file formatted with the locked Prettier and prints its SHA-256 and size.",
       "expectedResult": {
-        "responses": 20,
+        "responses": 24,
         "contracts": 5,
-        "workflowDigest": "sha256:db55a1637c426c7e5493a87a3891dad7d97fc90009ee217b79087f4a4492f0cb"
+        "workflowDigest": "sha256:db55a1637c426c7e5493a87a3891dad7d97fc90009ee217b79087f4a4492f0cb",
+        "baselineMetrics": {
+          "accuracy": 0.9,
+          "correct": 36,
+          "testRows": 40
+        },
+        "regularizedMetrics": {
+          "accuracy": 0.55,
+          "correct": 22,
+          "testRows": 40
+        }
       },
       "permittedConsumers": [
-        "P3-EP04A and P3-EP04B editor tests",
+        "P3-EP04A, P3-EP04B, and P3-EP05 editor tests",
         "later Phase 3 packets and their independent validation"
       ],
       "privacyClassification": "synthetic non-sensitive",
       "privacyAttestation": "Contains no personal, sensitive, credential, path, network, telemetry, proprietary, or real-world dataset content.",
       "centralReviewer": "pending",
-      "reviewDate": "2026-10-03",
+      "reviewDate": "2026-10-22",
       "byteReviewStatus": "pending independent validation and Central reconciliation"
     }
   ]

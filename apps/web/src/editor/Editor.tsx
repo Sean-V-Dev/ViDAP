@@ -1,6 +1,6 @@
-// The ViDAP editor workspace (P3-EP04A) with graph authoring (P3-EP04B). It
-// opens, builds, edits, validates, and saves slice workflows through the
-// `/api/slice/` channel only.
+// The ViDAP editor workspace (P3-EP04A), graph authoring (P3-EP04B), and run,
+// results, error presentation, and boundary trace (P3-EP05). It opens, builds,
+// edits, validates, saves, and runs slice workflows through `/api/slice/` only.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./editor.css";
@@ -10,7 +10,9 @@ import {
   type Diagnostic,
   type Endpoint,
   type JsonValue,
+  type RuntimeDiagnostic,
   type SliceClient,
+  type SliceMetrics,
   type WorkflowDocument,
   type WorkflowSummary,
 } from "./api";
@@ -39,8 +41,11 @@ import {
 } from "./layout";
 import { useMeasuredHeights } from "./measure";
 import {
+  boundaryEntries,
+  consumersOf,
   displayNames,
   downstream,
+  formatMetrics,
   indexContracts,
   nodeById,
   portOf,
@@ -51,8 +56,13 @@ import {
   withParameter,
   type ContractIndex,
 } from "./model";
-import { NodeView } from "./NodeView";
-import { regionLabel } from "./presentation";
+import { NodeView, type NodeStatus } from "./NodeView";
+import {
+  UNASSIGNED,
+  regionLabel,
+  regionShortLabel,
+  resultSummaryLabel,
+} from "./presentation";
 import { Workspace } from "./Workspace";
 
 const VALIDATE_DELAY_MS = 400;
@@ -178,11 +188,53 @@ export function Editor({ client }: { client: SliceClient }) {
   const [saveAsOpen, setSaveAsOpen] = useState(false);
   const [connecting, setConnecting] = useState<Endpoint | null>(null);
   const [connectMessage, setConnectMessage] = useState<string | null>(null);
+  const [validating, setValidating] = useState(false);
+  const [running, setRunning] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [nodeStatuses, setNodeStatuses] = useState<
+    ReadonlyMap<string, NodeStatus>
+  >(new Map());
+  const [runtimeDiagnostics, setRuntimeDiagnostics] = useState<
+    RuntimeDiagnostic[]
+  >([]);
+  const [lastMetrics, setLastMetrics] = useState<SliceMetrics | null>(null);
+  const [metricsStale, setMetricsStale] = useState(false);
+  const [lastOutcome, setLastOutcome] = useState<"succeeded" | "failed" | null>(
+    null,
+  );
+  const [tracing, setTracing] = useState<Endpoint | null>(null);
   const [nodeHeights, measureNode] = useMeasuredHeights();
   const nodeElements = useRef(new Map<string, HTMLDivElement>());
+  const nodeCallbacks = useRef(
+    new Map<string, (element: HTMLDivElement | null) => void>(),
+  );
+  const registerNode = useCallback(
+    (id: string) => {
+      const existing = nodeCallbacks.current.get(id);
+      if (existing) {
+        return existing;
+      }
+      const callback = (element: HTMLDivElement | null) => {
+        if (element) {
+          nodeElements.current.set(id, element);
+        } else {
+          nodeElements.current.delete(id);
+        }
+        measureNode(id)(element);
+      };
+      nodeCallbacks.current.set(id, callback);
+      return callback;
+    },
+    [measureNode],
+  );
+  const focusedNodeElement = useRef<HTMLDivElement | null>(null);
+  const registerFocusedNode = useCallback((element: HTMLDivElement | null) => {
+    focusedNodeElement.current = element;
+  }, []);
   const addButtons = useRef(new Map<string, HTMLButtonElement>());
   const validateTimer = useRef<number | undefined>(undefined);
   const validateSequence = useRef(0);
+  const runSequence = useRef(0);
   const navigation = useRef<{ source: string; index: number } | null>(null);
   const scrollArea = useRef<HTMLDivElement | null>(null);
   const scrollPosition = useRef({ x: 0, y: 0 });
@@ -220,6 +272,7 @@ export function Editor({ client }: { client: SliceClient }) {
     (document: WorkflowDocument, immediate = false, action = "") => {
       window.clearTimeout(validateTimer.current);
       const sequence = ++validateSequence.current;
+      setValidating(true);
       if (action) {
         announce(action);
       }
@@ -227,6 +280,7 @@ export function Editor({ client }: { client: SliceClient }) {
         client.validate(document).then(
           (result) => {
             if (sequence === validateSequence.current) {
+              setValidating(false);
               setDiagnostics(result.diagnostics);
               const verdict = result.valid
                 ? "Workflow is valid."
@@ -239,6 +293,7 @@ export function Editor({ client }: { client: SliceClient }) {
               sequence === validateSequence.current &&
               error instanceof ApiError
             ) {
+              setValidating(false);
               setDiagnostics(error.diagnostics);
               setNotice({
                 tone: "error",
@@ -257,6 +312,37 @@ export function Editor({ client }: { client: SliceClient }) {
     },
     [client, announce],
   );
+
+  const clearRunOnOpen = () => {
+    runSequence.current += 1;
+    setRunning(false);
+    setBusy(false);
+    setNodeStatuses(new Map());
+    setRuntimeDiagnostics([]);
+    setLastMetrics(null);
+    setMetricsStale(false);
+    setLastOutcome(null);
+    setTracing(null);
+  };
+
+  const markRunEdited = (document: WorkflowDocument) => {
+    runSequence.current += 1;
+    setRunning(false);
+    setBusy(false);
+    setNodeStatuses(new Map());
+    setRuntimeDiagnostics([]);
+    setLastOutcome(null);
+    setMetricsStale((current) => current || lastMetrics !== null);
+    if (
+      tracing &&
+      !boundaryEntries(document).outputs.some(
+        (entry) =>
+          entry.nodeId === tracing.nodeId && entry.portKey === tracing.portKey,
+      )
+    ) {
+      setTracing(null);
+    }
+  };
 
   const loadWorkflow = useCallback(
     (name: string) => {
@@ -283,6 +369,7 @@ export function Editor({ client }: { client: SliceClient }) {
           setConnecting(null);
           setConnectMessage(null);
           setSaveAsOpen(false);
+          clearRunOnOpen();
           setGeneration((value) => value + 1);
           setNotice(
             loaded.sidecarNotice
@@ -476,6 +563,7 @@ export function Editor({ client }: { client: SliceClient }) {
     setConnecting(null);
     setConnectMessage(null);
     setSaveAsOpen(false);
+    clearRunOnOpen();
     setGeneration((value) => value + 1);
     announce("Started a new workflow.");
     requestValidation(document, true);
@@ -520,6 +608,27 @@ export function Editor({ client }: { client: SliceClient }) {
   }, [dirty]);
 
   useEffect(() => {
+    if (!tracing || connecting || focusMode || moving || confirmation) {
+      return;
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setTracing(null);
+        announce("Trace closed.");
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [tracing, connecting, focusMode, moving, confirmation, announce]);
+
+  useEffect(() => {
+    if (focusMode) {
+      focusedNodeElement.current?.focus();
+    }
+  }, [focusMode]);
+
+  useEffect(() => {
     if (scrollArea.current && generation > 0) {
       scrollPosition.current = { x: layout.viewport.x, y: layout.viewport.y };
       scrollArea.current.scrollTo?.(layout.viewport.x, layout.viewport.y);
@@ -552,6 +661,31 @@ export function Editor({ client }: { client: SliceClient }) {
   const workspaceDiagnostics = open
     ? diagnostics.filter((item) => !nodeIdOf(open.document, item))
     : [];
+  const runtimeDiagnosticsByNode = useMemo(() => {
+    const result = new Map<string, RuntimeDiagnostic[]>();
+    if (!open) {
+      return result;
+    }
+    for (const item of runtimeDiagnostics) {
+      if (
+        item.nodeId &&
+        open.document.nodes.some((node) => node.id === item.nodeId)
+      ) {
+        result.set(item.nodeId, [...(result.get(item.nodeId) ?? []), item]);
+      }
+    }
+    return result;
+  }, [runtimeDiagnostics, open]);
+  const workspaceRuntimeDiagnostics = open
+    ? runtimeDiagnostics.filter(
+        (item) =>
+          !item.nodeId ||
+          !open.document.nodes.some((node) => node.id === item.nodeId),
+      )
+    : [];
+  const recordedResult = lastMetrics
+    ? { metrics: lastMetrics, stale: metricsStale }
+    : null;
   // Connections and input ports the backend found a problem with (DESIGN.md
   // Section 4): edge findings by edge ID; port findings, and the consumer end
   // of each problem edge, as `nodeId:port`.
@@ -857,6 +991,7 @@ export function Editor({ client }: { client: SliceClient }) {
     const document = withParameter(open.document, nodeId, key, value);
     setOpen({ ...open, document });
     setDirty(true);
+    markRunEdited(document);
     requestValidation(document);
   };
 
@@ -871,6 +1006,7 @@ export function Editor({ client }: { client: SliceClient }) {
     }
     setOpen({ ...open, document });
     setDirty(true);
+    markRunEdited(document);
     requestValidation(document, true, action);
   };
 
@@ -1078,6 +1214,145 @@ export function Editor({ client }: { client: SliceClient }) {
     }
   };
 
+  const describeEndpoint = (nodeId: string, portKey: string) => {
+    const target = open ? nodeById(open.document, nodeId) : undefined;
+    const region = target ? regionShortLabel(regionOf(target)) : UNASSIGNED.key;
+    return `${region} / ${names.get(nodeId) ?? nodeId} (${portKey})`;
+  };
+
+  const toggleTrace = (source: Endpoint) => {
+    if (!open) {
+      return;
+    }
+    if (
+      tracing &&
+      tracing.nodeId === source.nodeId &&
+      tracing.portKey === source.portKey
+    ) {
+      setTracing(null);
+      announce("Trace closed.");
+      return;
+    }
+    setTracing(source);
+    const consumers = consumersOf(open.document, source.nodeId, source.portKey);
+    const consumerText = consumers
+      .map((item) => describeEndpoint(item.nodeId, item.portKey))
+      .join(", ");
+    announce(
+      `Tracing ${valueLabel(source)}. From ${describeEndpoint(source.nodeId, source.portKey)} to ${consumers.length} ${consumers.length === 1 ? "consumer" : "consumers"}: ${consumerText}.`,
+    );
+  };
+
+  const exitTrace = () => {
+    setTracing(null);
+    announce("Trace closed.");
+  };
+
+  const runReason = !open
+    ? "Open or create a workflow to run."
+    : open.document.nodes.length === 0
+      ? "Add the slice nodes before running."
+      : diagnostics.length > 0
+        ? `${diagnostics.length} ${diagnostics.length === 1 ? "problem" : "problems"} to fix before running.`
+        : validating
+          ? "Checking workflow…"
+          : running
+            ? "Run in progress."
+            : null;
+  const canRun = runReason === null;
+
+  const runWorkflow = () => {
+    if (!open || !canRun) {
+      return;
+    }
+    const sequence = ++runSequence.current;
+    const doc = open.document;
+    setRunning(true);
+    setBusy(false);
+    setNotice(null);
+    setRuntimeDiagnostics([]);
+    setNodeStatuses(
+      new Map(doc.nodes.map((item) => [item.id, "running" as const])),
+    );
+    announce("Running workflow.");
+    client.run(doc).then(
+      (result) => {
+        if (sequence !== runSequence.current) {
+          return;
+        }
+        setRunning(false);
+        setNodeStatuses(
+          new Map(result.nodes.map((item) => [item.nodeId, item.status])),
+        );
+        setRuntimeDiagnostics(result.diagnostics);
+        setLastOutcome(result.outcome);
+        if (result.outcome === "succeeded" && result.metrics !== null) {
+          setLastMetrics(result.metrics);
+          setMetricsStale(false);
+          announce(`Run completed. ${formatMetrics(result.metrics)}.`);
+        } else {
+          setMetricsStale((current) => current || lastMetrics !== null);
+          const failedId =
+            result.diagnostics.find((item) => item.nodeId)?.nodeId ??
+            result.nodes.find((item) => item.status === "failed")?.nodeId;
+          const failedName = failedId
+            ? (names.get(failedId) ?? failedId)
+            : null;
+          announce(failedName ? `Run failed on ${failedName}.` : "Run failed.");
+        }
+      },
+      (error: unknown) => {
+        if (sequence !== runSequence.current) {
+          return;
+        }
+        setRunning(false);
+        setNodeStatuses(new Map());
+        if (error instanceof ApiError && error.code === "busy") {
+          setBusy(true);
+          announce("Another run is in progress.");
+        } else if (
+          error instanceof ApiError &&
+          error.code === "invalid-workflow"
+        ) {
+          setDiagnostics(error.diagnostics);
+          setNotice({
+            tone: "warn",
+            title: "Fix before running",
+            text: error.message,
+            diagnostics: error.diagnostics,
+          });
+          announce("Run refused: the workflow has problems to fix.");
+        } else {
+          const message =
+            error instanceof ApiError
+              ? error.attemptId
+                ? `${error.message} (Attempt ${error.attemptId})`
+                : error.message
+              : "The workflow could not be run.";
+          setNotice({
+            tone: "error",
+            title: "Run failed",
+            text: message,
+            diagnostics:
+              error instanceof ApiError ? error.diagnostics : undefined,
+          });
+          announce(message);
+        }
+      },
+    );
+  };
+
+  const failedNodeId =
+    runtimeDiagnostics.find((item) => item.nodeId)?.nodeId ??
+    [...nodeStatuses.entries()].find(([, status]) => status === "failed")?.[0];
+  const failedNodeName = failedNodeId
+    ? (names.get(failedNodeId) ?? failedNodeId)
+    : null;
+  const tracedConsumers =
+    tracing && open
+      ? consumersOf(open.document, tracing.nodeId, tracing.portKey)
+      : [];
+
   const focusedNode =
     open && focusMode
       ? open.document.nodes.find((node) => node.id === focusMode)
@@ -1097,6 +1372,16 @@ export function Editor({ client }: { client: SliceClient }) {
           event.preventDefault();
           event.stopPropagation();
           cancelConnecting();
+        } else if (
+          tracing &&
+          !focusMode &&
+          !moving &&
+          !confirmation &&
+          event.key === "Escape"
+        ) {
+          event.preventDefault();
+          event.stopPropagation();
+          exitTrace();
         }
       }}
     >
@@ -1168,25 +1453,93 @@ export function Editor({ client }: { client: SliceClient }) {
             ))}
           </div>
         </div>
-        <p className="primary-result">
-          <span className="result-label">Result</span> <span>—</span>
+        <p className="primary-result" aria-label="Primary result">
+          <span className="result-label">
+            {lastMetrics && metricsStale ? "Last run" : "Result"}
+          </span>{" "}
+          {lastMetrics ? (
+            <>
+              <span className="result-value">{formatMetrics(lastMetrics)}</span>
+              {running && <span className="result-note"> · Running…</span>}
+              {!running && lastOutcome === "failed" && (
+                <span className="result-failed">
+                  {" "}
+                  · Run failed{failedNodeName ? ` on ${failedNodeName}` : ""}
+                </span>
+              )}
+            </>
+          ) : running ? (
+            <span>Running…</span>
+          ) : lastOutcome === "failed" ? (
+            <span className="result-failed">
+              Run failed{failedNodeName ? ` on ${failedNodeName}` : ""}
+            </span>
+          ) : (
+            <span>—</span>
+          )}
         </p>
         <div className="run-area">
           <button
             type="button"
             className="button button-primary"
-            disabled
-            aria-describedby="run-reason"
+            disabled={!canRun}
+            aria-busy={running || undefined}
+            aria-describedby={runReason ? "run-reason" : undefined}
+            onClick={runWorkflow}
           >
-            Run
+            {running ? "Running…" : "Run"}
           </button>
-          <span id="run-reason" className="run-reason">
-            Run arrives in the next step.
-          </span>
+          {runReason && (
+            <span id="run-reason" className="run-reason">
+              {runReason}
+            </span>
+          )}
         </div>
       </header>
 
       <div className="banners">
+        {tracing && open && (
+          <section className="banner banner-info" aria-label="Trace">
+            <p className="banner-title">Tracing {valueLabel(tracing)}</p>
+            <p>
+              From {describeEndpoint(tracing.nodeId, tracing.portKey)} to{" "}
+              {tracedConsumers.length}{" "}
+              {tracedConsumers.length === 1 ? "consumer" : "consumers"}:{" "}
+              {tracedConsumers
+                .map((item) => describeEndpoint(item.nodeId, item.portKey))
+                .join(", ")}
+              . Dashed lines show the real connections temporarily.
+            </p>
+            <button type="button" className="button" onClick={exitTrace}>
+              Exit trace
+            </button>
+          </section>
+        )}
+        {busy && (
+          <section className="banner banner-info" aria-label="Run busy">
+            <p className="banner-title">Another run is in progress.</p>
+            <p>
+              ViDAP runs one workflow at a time. Try again when it finishes.
+            </p>
+            <div className="banner-actions">
+              <button
+                type="button"
+                className="button"
+                onClick={runWorkflow}
+                disabled={!canRun}
+              >
+                Retry
+              </button>
+              <button
+                type="button"
+                className="button"
+                onClick={() => setBusy(false)}
+              >
+                Dismiss
+              </button>
+            </div>
+          </section>
+        )}
         {connecting && (
           <section className="banner banner-info" aria-label="Connecting">
             <p className="banner-title">
@@ -1357,6 +1710,24 @@ export function Editor({ client }: { client: SliceClient }) {
             </button>
           </section>
         )}
+        {workspaceRuntimeDiagnostics.length > 0 && (
+          <section className="banner banner-error" aria-label="Run failed">
+            <p className="banner-title">Run failed</p>
+            {workspaceRuntimeDiagnostics.map((item, index) => (
+              <div key={`${item.code}-${item.attemptId}-${index}`}>
+                <p className="message-headline">{item.explanation}</p>
+                <p className="message-remedy">{item.remedy}</p>
+                <details className="message-details">
+                  <summary>Technical details</summary>
+                  <p>
+                    {item.code} · Attempt {item.attemptId}
+                  </p>
+                  <p>{item.technical.message}</p>
+                </details>
+              </div>
+            ))}
+          </section>
+        )}
         {workspaceDiagnostics.length > 0 && (
           <section
             className="banner banner-warn"
@@ -1396,13 +1767,7 @@ export function Editor({ client }: { client: SliceClient }) {
             focusMode={focusMode}
             moving={moving}
             diagnosticsByNode={diagnosticsByNode}
-            registerNode={(id) => (element) => {
-              if (element) {
-                nodeElements.current.set(id, element);
-              } else {
-                nodeElements.current.delete(id);
-              }
-            }}
+            registerNode={registerNode}
             onParameterChange={onParameterChange}
             onToggleExpanded={(id) =>
               setExpanded((current) => (current === id ? null : id))
@@ -1432,6 +1797,11 @@ export function Editor({ client }: { client: SliceClient }) {
             onPortPointerDown={onPortPointerDown}
             onDisconnect={disconnect}
             onRemoveNode={requestRemove}
+            nodeStatuses={nodeStatuses}
+            runtimeDiagnosticsByNode={runtimeDiagnosticsByNode}
+            recordedResult={recordedResult}
+            tracing={tracing}
+            onToggleTrace={toggleTrace}
           />
         </div>
       </div>
@@ -1485,7 +1855,14 @@ export function Editor({ client }: { client: SliceClient }) {
               focusMode
               moving={false}
               diagnostics={diagnosticsByNode.get(focusedNode.id) ?? []}
-              registerElement={(element) => element?.focus()}
+              status={nodeStatuses.get(focusedNode.id) ?? "not-run"}
+              runtimeDiagnostics={
+                runtimeDiagnosticsByNode.get(focusedNode.id) ?? []
+              }
+              recordedResult={
+                resultSummaryLabel(focusedNode.type) ? recordedResult : null
+              }
+              registerElement={registerFocusedNode}
               onParameterChange={(key, value) =>
                 onParameterChange(focusedNode.id, key, value)
               }

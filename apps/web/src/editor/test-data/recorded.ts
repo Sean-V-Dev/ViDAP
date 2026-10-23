@@ -7,6 +7,7 @@ import type {
   Diagnostic,
   LoadedWorkflow,
   NodeContract,
+  RunResult,
   SaveResult,
   ValidateResult,
   WorkflowSummary,
@@ -39,6 +40,10 @@ export interface Recorded {
   saveConflict: ErrorBody;
   compareChanged: CompareResult;
   compareUnchanged: CompareResult;
+  runSuccess: RunResult;
+  runRegularized: RunResult;
+  runFailed: RunResult;
+  runRefused: ErrorBody;
 }
 
 export const recorded: Recorded = {
@@ -536,6 +541,149 @@ export const recorded: Recorded = {
       code: "not-found",
       message: "No saved workflow has that name.",
     },
+  },
+  runFailed: {
+    attemptId: "3dd33bd9-1243-485b-89f9-476918d0900a",
+    diagnostics: [
+      {
+        attemptId: "3dd33bd9-1243-485b-89f9-476918d0900a",
+        category: "execution",
+        code: "unencoded-category-input",
+        explanation:
+          "The model received a category column that has not been converted to numbers.",
+        nodeId: "41000000-0000-4000-8000-000000000004",
+        operationKey: "vidap.slice.model",
+        outcome: "failed",
+        portKey: null,
+        remedy: "Route the data through Prepare Data before the model.",
+        technical: {
+          causes: [],
+          message:
+            "Exception text withheld because it may contain sensitive values.",
+          traceback: ["dispatch", "model", "_matrix"],
+          type: "DeclaredFailure",
+        },
+      },
+    ],
+    metrics: null,
+    nodes: [
+      {
+        nodeId: "41000000-0000-4000-8000-000000000001",
+        operationKey: "vidap.slice.dataset",
+        status: "completed",
+      },
+      {
+        nodeId: "41000000-0000-4000-8000-000000000003",
+        operationKey: "vidap.slice.split",
+        status: "completed",
+      },
+      {
+        nodeId: "41000000-0000-4000-8000-000000000004",
+        operationKey: "vidap.slice.model",
+        status: "failed",
+      },
+      {
+        nodeId: "41000000-0000-4000-8000-000000000005",
+        operationKey: "vidap.slice.evaluate",
+        status: "blocked",
+      },
+      {
+        nodeId: "41000000-0000-4000-8000-000000000006",
+        operationKey: "vidap.slice.prepare",
+        status: "unrelated",
+      },
+    ],
+    outcome: "failed",
+    semanticDigest:
+      "529d3eb5cb51477b4ecd4f9097cbbc35a46f8b64228a6aa6015e68c9a8a61e0e",
+  },
+  runRefused: {
+    error: {
+      code: "run-refused",
+      message: "This workflow cannot be run as the slice.",
+    },
+  },
+  runRegularized: {
+    attemptId: "9be9b899-f39f-4f14-8dd0-c00283be287e",
+    diagnostics: [],
+    metrics: {
+      accuracy: 0.55,
+      correct: 22,
+      format: "vidap.slice-metrics",
+      schemaVersion: "1.0",
+      testRows: 40,
+    },
+    nodes: [
+      {
+        nodeId: "41000000-0000-4000-8000-000000000001",
+        operationKey: "vidap.slice.dataset",
+        status: "completed",
+      },
+      {
+        nodeId: "41000000-0000-4000-8000-000000000002",
+        operationKey: "vidap.slice.prepare",
+        status: "completed",
+      },
+      {
+        nodeId: "41000000-0000-4000-8000-000000000003",
+        operationKey: "vidap.slice.split",
+        status: "completed",
+      },
+      {
+        nodeId: "41000000-0000-4000-8000-000000000004",
+        operationKey: "vidap.slice.model",
+        status: "completed",
+      },
+      {
+        nodeId: "41000000-0000-4000-8000-000000000005",
+        operationKey: "vidap.slice.evaluate",
+        status: "completed",
+      },
+    ],
+    outcome: "succeeded",
+    semanticDigest:
+      "58f64131e443d6eb6dbe62860b617f3b2c2be0452b943ee9bafc401bff8c6c96",
+  },
+  runSuccess: {
+    attemptId: "4ba2bd33-c474-481a-978c-0beb2d438235",
+    diagnostics: [],
+    metrics: {
+      accuracy: 0.9,
+      correct: 36,
+      format: "vidap.slice-metrics",
+      schemaVersion: "1.0",
+      testRows: 40,
+    },
+    nodes: [
+      {
+        nodeId: "41000000-0000-4000-8000-000000000001",
+        operationKey: "vidap.slice.dataset",
+        status: "completed",
+      },
+      {
+        nodeId: "41000000-0000-4000-8000-000000000002",
+        operationKey: "vidap.slice.prepare",
+        status: "completed",
+      },
+      {
+        nodeId: "41000000-0000-4000-8000-000000000003",
+        operationKey: "vidap.slice.split",
+        status: "completed",
+      },
+      {
+        nodeId: "41000000-0000-4000-8000-000000000004",
+        operationKey: "vidap.slice.model",
+        status: "completed",
+      },
+      {
+        nodeId: "41000000-0000-4000-8000-000000000005",
+        operationKey: "vidap.slice.evaluate",
+        status: "completed",
+      },
+    ],
+    outcome: "succeeded",
+    semanticDigest:
+      "b82b86b8ebf59e2099767f6d799e4c1fe15b73a5912a9aa5a6f3f925f34c41f3",
   },
   saveBadName: {
     error: {

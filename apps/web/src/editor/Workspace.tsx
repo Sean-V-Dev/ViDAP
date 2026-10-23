@@ -7,6 +7,7 @@ import type {
   Diagnostic,
   Endpoint,
   JsonValue,
+  RuntimeDiagnostic,
   WorkflowDocument,
   WorkflowNode,
 } from "./api";
@@ -19,11 +20,13 @@ import {
   localEdges,
   nodeById,
   regionOf,
+  traceEdges,
 } from "./model";
 import {
   DEFAULT_REGION_WIDTH,
   GUTTER_STEP,
   GUTTER_STEP_LARGE,
+  GUTTER_WIDTH,
   MAX_REGION_WIDTH,
   RAIL_WIDTH,
   REGION_HEADER,
@@ -37,8 +40,19 @@ import {
   type Layout,
 } from "./layout";
 import { useMeasuredHeights, type MeasureRef } from "./measure";
-import { NodeView, type InputConnections, type PortState } from "./NodeView";
-import { UNASSIGNED, regionLabel, regionShortLabel } from "./presentation";
+import {
+  NodeView,
+  type InputConnections,
+  type NodeStatus,
+  type PortState,
+  type RecordedNodeResult,
+} from "./NodeView";
+import {
+  UNASSIGNED,
+  regionLabel,
+  regionShortLabel,
+  resultSummaryLabel,
+} from "./presentation";
 
 export interface WorkspaceProps {
   document: WorkflowDocument | null;
@@ -92,6 +106,12 @@ export interface WorkspaceProps {
   ) => void;
   onDisconnect: (edgeId: string) => void;
   onRemoveNode: (nodeId: string) => void;
+  // Run, results, and trace (P3-EP05).
+  nodeStatuses?: ReadonlyMap<string, NodeStatus>;
+  runtimeDiagnosticsByNode?: ReadonlyMap<string, RuntimeDiagnostic[]>;
+  recordedResult?: RecordedNodeResult | null;
+  tracing?: Endpoint | null;
+  onToggleTrace?: (source: Endpoint) => void;
 }
 
 const ENTRY_HALF = 12;
@@ -133,6 +153,34 @@ export function Workspace(props: WorkspaceProps) {
     ? boundaryEntries(document)
     : { outputs: [] as OutputEntry[], inputs: [] as InputEntry[] };
   const contractList = [...contracts.values()];
+  const tracedValue = props.tracing
+    ? `${props.tracing.nodeId}:${props.tracing.portKey}`
+    : null;
+  const tracedNodes = new Set<string>(
+    props.tracing && document
+      ? [
+          props.tracing.nodeId,
+          ...consumersOf(
+            document,
+            props.tracing.nodeId,
+            props.tracing.portKey,
+          ).map((consumer) => consumer.nodeId),
+        ]
+      : [],
+  );
+  const regionLeft = new Map<string, number>();
+  let cursorX = 0;
+  for (const region of props.regions) {
+    regionLeft.set(region, cursorX);
+    cursorX += (layout.widths[region] ?? DEFAULT_REGION_WIDTH) + GUTTER_WIDTH;
+  }
+  const totalWidth = Math.max(0, cursorX - GUTTER_WIDTH);
+  const wireTraceClass = (sourceValue: string) =>
+    tracedValue === null
+      ? ""
+      : sourceValue === tracedValue
+        ? " wire-trace-hot"
+        : " wire-trace-dim";
   // Outputs whose value feeds a connection the backend found invalid.
   const invalidOutputs = new Set(
     (document?.edges ?? [])
@@ -299,6 +347,15 @@ export function Workspace(props: WorkspaceProps) {
                     const id = entry.edgeId;
                     const top = inputY.get(id) ?? REGION_HEADER;
                     const invalid = props.invalidEdges.has(id);
+                    const sourceKey = `${entry.source.nodeId}:${entry.source.portKey}`;
+                    const isLit =
+                      tracedValue !== null && sourceKey === tracedValue;
+                    const isDim = tracedValue !== null && !isLit;
+                    const traceClass = isLit
+                      ? " rail-entry-lit"
+                      : isDim
+                        ? " rail-entry-dim"
+                        : "";
                     return (
                       <div
                         role="listitem"
@@ -309,9 +366,29 @@ export function Workspace(props: WorkspaceProps) {
                       >
                         <button
                           type="button"
-                          className={`rail-entry type-${typeOf(entry.source.nodeId, entry.source.portKey, "output")}${invalid ? " rail-entry-invalid" : ""}`}
+                          className={`rail-entry type-${typeOf(entry.source.nodeId, entry.source.portKey, "output")}${invalid ? " rail-entry-invalid" : ""}${traceClass}`}
                           data-rail="input"
                           data-edge-id={entry.edgeId}
+                          data-value={sourceKey}
+                          data-trace-state={
+                            isLit ? "highlighted" : isDim ? "dimmed" : undefined
+                          }
+                          aria-pressed={isLit}
+                          onClick={() =>
+                            props.onToggleTrace?.({
+                              nodeId: entry.source.nodeId,
+                              portKey: entry.source.portKey,
+                            })
+                          }
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              props.onToggleTrace?.({
+                                nodeId: entry.source.nodeId,
+                                portKey: entry.source.portKey,
+                              });
+                            }
+                          }}
                           onMouseEnter={() =>
                             setCard({
                               id,
@@ -395,7 +472,7 @@ export function Workspace(props: WorkspaceProps) {
                         return (
                           <path
                             key={edge.id}
-                            className={`wire${props.invalidEdges.has(edge.id) ? " wire-invalid" : ""}`}
+                            className={`wire${props.invalidEdges.has(edge.id) ? " wire-invalid" : ""}${wireTraceClass(`${edge.source.nodeId}:${edge.source.portKey}`)}`}
                             data-edge-id={edge.id}
                             d={curve(
                               RAIL_WIDTH +
@@ -425,7 +502,7 @@ export function Workspace(props: WorkspaceProps) {
                     return (
                       <path
                         key={id}
-                        className={`wire wire-rail${invalidOutputs.has(id) ? " wire-invalid" : ""}`}
+                        className={`wire wire-rail${invalidOutputs.has(id) ? " wire-invalid" : ""}${wireTraceClass(id)}`}
                         data-value={id}
                         d={curve(
                           RAIL_WIDTH +
@@ -440,13 +517,14 @@ export function Workspace(props: WorkspaceProps) {
                   })}
                   {inputs.map((entry) => {
                     const to = layout.positions[entry.nodeId];
+                    const sourceKey = `${entry.source.nodeId}:${entry.source.portKey}`;
                     if (!to || lifted(entry.nodeId)) {
                       return null;
                     }
                     return (
                       <path
                         key={entry.edgeId}
-                        className={`wire wire-rail${props.invalidEdges.has(entry.edgeId) ? " wire-invalid" : ""}`}
+                        className={`wire wire-rail${props.invalidEdges.has(entry.edgeId) ? " wire-invalid" : ""}${wireTraceClass(sourceKey)}`}
                         data-edge-id={entry.edgeId}
                         d={curve(
                           RAIL_WIDTH,
@@ -484,6 +562,22 @@ export function Workspace(props: WorkspaceProps) {
                         focusMode={false}
                         moving={node.id === props.moving}
                         diagnostics={props.diagnosticsByNode.get(node.id) ?? []}
+                        status={props.nodeStatuses?.get(node.id) ?? "not-run"}
+                        runtimeDiagnostics={
+                          props.runtimeDiagnosticsByNode?.get(node.id) ?? []
+                        }
+                        recordedResult={
+                          resultSummaryLabel(node.type)
+                            ? (props.recordedResult ?? null)
+                            : null
+                        }
+                        traceState={
+                          tracedValue === null
+                            ? null
+                            : tracedNodes.has(node.id)
+                              ? "highlighted"
+                              : "dimmed"
+                        }
                         style={{
                           left: RAIL_WIDTH + nodeX(node.id),
                           top:
@@ -493,10 +587,7 @@ export function Workspace(props: WorkspaceProps) {
                           visibility:
                             props.focusMode === node.id ? "hidden" : undefined,
                         }}
-                        registerElement={(element) => {
-                          props.registerNode(node.id)(element);
-                          props.measureNode(node.id)(element);
-                        }}
+                        registerElement={props.registerNode(node.id)}
                         ports={{
                           state: (direction, key) =>
                             portState(node.id, direction, key),
@@ -547,6 +638,13 @@ export function Workspace(props: WorkspaceProps) {
                     const top = outputY.get(id) ?? REGION_HEADER;
                     const count = new Set(entry.consumers.map((c) => c.nodeId))
                       .size;
+                    const isLit = tracedValue !== null && id === tracedValue;
+                    const isDim = tracedValue !== null && !isLit;
+                    const traceClass = isLit
+                      ? " rail-entry-lit"
+                      : isDim
+                        ? " rail-entry-dim"
+                        : "";
                     return (
                       <div
                         role="listitem"
@@ -557,9 +655,28 @@ export function Workspace(props: WorkspaceProps) {
                       >
                         <button
                           type="button"
-                          className={`rail-entry type-${typeOf(entry.nodeId, entry.portKey, "output")}${invalidOutputs.has(id) ? " rail-entry-invalid" : ""}`}
+                          className={`rail-entry type-${typeOf(entry.nodeId, entry.portKey, "output")}${invalidOutputs.has(id) ? " rail-entry-invalid" : ""}${traceClass}`}
                           data-rail="output"
                           data-value={id}
+                          data-trace-state={
+                            isLit ? "highlighted" : isDim ? "dimmed" : undefined
+                          }
+                          aria-pressed={isLit}
+                          onClick={() =>
+                            props.onToggleTrace?.({
+                              nodeId: entry.nodeId,
+                              portKey: entry.portKey,
+                            })
+                          }
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              props.onToggleTrace?.({
+                                nodeId: entry.nodeId,
+                                portKey: entry.portKey,
+                              });
+                            }
+                          }}
                           onMouseEnter={() =>
                             setCard({ id, lines: cardFor(entry) })
                           }
@@ -647,6 +764,46 @@ export function Workspace(props: WorkspaceProps) {
             </Fragment>
           );
         })}
+        {props.tracing && document && (
+          <svg
+            className="trace-wires"
+            width={totalWidth}
+            height={height}
+            aria-hidden="true"
+            focusable="false"
+          >
+            {traceEdges(document, props.tracing)
+              .filter(
+                (edge) =>
+                  !lifted(edge.source.nodeId) && !lifted(edge.target.nodeId),
+              )
+              .map((edge) => {
+                const sourceNode = nodeById(document, edge.source.nodeId);
+                const targetNode = nodeById(document, edge.target.nodeId);
+                if (!sourceNode || !targetNode) {
+                  return null;
+                }
+                const sourceLeft = regionLeft.get(regionOf(sourceNode)) ?? 0;
+                const targetLeft = regionLeft.get(regionOf(targetNode)) ?? 0;
+                return (
+                  <path
+                    key={edge.id}
+                    className="wire wire-trace"
+                    data-trace-edge-id={edge.id}
+                    d={curve(
+                      sourceLeft +
+                        RAIL_WIDTH +
+                        nodeX(edge.source.nodeId) +
+                        nodeWidth(edge.source.nodeId === expanded),
+                      portY(edge.source.nodeId, edge.source.portKey, "output"),
+                      targetLeft + RAIL_WIDTH + nodeX(edge.target.nodeId),
+                      portY(edge.target.nodeId, edge.target.portKey, "input"),
+                    )}
+                  />
+                );
+              })}
+          </svg>
+        )}
       </div>
       <div className="results-band" aria-hidden="true" />
     </div>

@@ -9,8 +9,8 @@ conventional Python or Jupyter artifacts.
 > **Phases 0, 1, and 2 are accepted.** Phase 3, the first visual end-to-end
 > slice, is in progress: its five slice operations, the local `/api/slice/`
 > channel, and workflow save/load exist, and the editor builds, opens, edits,
-> validates, and saves slice workflows; running them from the editor comes
-> next.
+> validates, runs, traces boundary values across regions, and saves slice
+> workflows; Phase 3 closeout comes next.
 
 ## Intended architecture and prerequisites
 
@@ -130,9 +130,11 @@ contracts, validates and runs workflows, and saves and loads them under
 (`npm.cmd run launch`, then the printed URL) builds a slice workflow from an
 empty canvas (adding nodes per region and connecting typed ports by mouse or
 keyboard) or opens a saved one in its five regions, edits settings from the
-backend contracts, shows backend validation on the node, and saves layout and
-settings without silent overwrites. There is still no run control in the editor,
-user data loading, model choice, export, authentication,
+backend contracts, shows backend validation on the node, runs the slice
+through `/api/slice/run` to display recorded accuracy and per-node execution
+status or plain-English runtime error explanations, traces boundary values
+across regions, and saves layout and settings without silent overwrites. There
+is still no user data loading, model choice, export, authentication,
 telemetry, hosted service, deployment, or desktop-wrapper capability.
 `/api/status` remains the foundation status response;
 automatic OpenAPI and documentation endpoints are disabled. Windows remains

@@ -77,6 +77,51 @@ export interface ValidateResult {
   diagnostics: Diagnostic[];
 }
 
+export type NodeRunStatus = "completed" | "failed" | "blocked" | "unrelated";
+
+export interface RunNodeRecord {
+  nodeId: string;
+  operationKey: string;
+  status: NodeRunStatus;
+}
+
+export interface RuntimeTechnical {
+  type: string | null;
+  message: string;
+  traceback: string[];
+  causes: string[];
+}
+
+export interface RuntimeDiagnostic {
+  category: string;
+  code: string;
+  attemptId: string;
+  operationKey: string | null;
+  nodeId: string | null;
+  portKey: string | null;
+  outcome: string;
+  explanation: string;
+  remedy: string;
+  technical: RuntimeTechnical;
+}
+
+export interface SliceMetrics {
+  accuracy: number;
+  correct: number;
+  format: string;
+  schemaVersion: string;
+  testRows: number;
+}
+
+export interface RunResult {
+  attemptId: string;
+  outcome: "succeeded" | "failed";
+  semanticDigest: string;
+  nodes: RunNodeRecord[];
+  diagnostics: RuntimeDiagnostic[];
+  metrics: SliceMetrics | null;
+}
+
 export interface SidecarRegion {
   key: string;
   width: number;
@@ -150,6 +195,7 @@ export class ApiError extends Error {
   readonly sidecarDigest: string | null;
   readonly missing: boolean;
   readonly summary: ChangeSummary | null;
+  readonly attemptId: string | null;
 
   constructor(status: number, body: unknown) {
     const envelope = readEnvelope(status, body);
@@ -168,6 +214,8 @@ export class ApiError extends Error {
     this.missing = extra.missing === true;
     const summary: unknown = extra.summary;
     this.summary = isRecord(summary) ? summary : null;
+    this.attemptId =
+      typeof extra.attemptId === "string" ? extra.attemptId : null;
   }
 }
 
@@ -203,6 +251,7 @@ function readEnvelope(
 export interface SliceClient {
   contracts(): Promise<NodeContract[]>;
   validate(document: WorkflowDocument): Promise<ValidateResult>;
+  run(document: WorkflowDocument): Promise<RunResult>;
   list(): Promise<WorkflowSummary[]>;
   load(name: string): Promise<LoadedWorkflow>;
   save(
@@ -431,6 +480,15 @@ export function createSliceClient(
         fetcher,
         "POST",
         "/validate",
+        writeJson(document, within(spellingsOf(document), "")),
+      );
+      return result.value;
+    },
+    async run(document) {
+      const result = await call<RunResult>(
+        fetcher,
+        "POST",
+        "/run",
         writeJson(document, within(spellingsOf(document), "")),
       );
       return result.value;
